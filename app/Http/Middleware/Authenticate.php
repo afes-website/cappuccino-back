@@ -5,8 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
-class Authenticate
-{
+class Authenticate {
+
     /**
      * The authentication guard factory instance.
      *
@@ -20,8 +20,7 @@ class Authenticate
      * @param  \Illuminate\Contracts\Auth\Factory  $auth
      * @return void
      */
-    public function __construct(Auth $auth)
-    {
+    public function __construct(Auth $auth) {
         $this->auth = $auth;
     }
 
@@ -33,8 +32,7 @@ class Authenticate
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
-    {
+    public function handle($request, Closure $next, $guard = null) {
         if ($this->auth->guard($guard)->guest()) {
             return response('Unauthorized.', 401);
         }
