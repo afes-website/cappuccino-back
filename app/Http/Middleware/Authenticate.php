@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Authenticate {
 
@@ -30,13 +31,30 @@ class Authenticate {
      *
      * @param  Request  $request
      * @param Closure $next
-     * @param  string|null  $guard
+     * @param  string  ...$perms
      * @return mixed
+     * @throws Symfony\Component\HttpKernel\Exception\HttpException
      */
-    public function handle($request, Closure $next, $guard = null) {
-        if ($this->auth->guard($guard)->guest()) {
-            return response('Unauthorized.', 401);
+    public function handle($request, Closure $next, ...$perms) {
+        if ($this->auth->guard()->guest()) {
+            throw new HttpException(401, 'Unauthorized.');
         }
+
+        $user = $request->user();
+        $passed = false;
+        if (count($perms) !== 0) {
+            foreach ($perms as $val) {
+                if ($user->hasPermission(trim($val))) {
+                    $passed = true;
+                    break;
+                }
+            }
+        } else {
+            $passed = true;
+        }
+
+        if (!$passed)
+            throw new HttpException(403, 'Forbidden.');
 
         return $next($request);
     }
