@@ -32,24 +32,43 @@ class Handler extends ExceptionHandler {
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param Throwable $exception
+     * @param Throwable $e
      * @return void
      *
      * @throws Exception
      */
-    public function report(Throwable $exception) {
-        parent::report($exception);
+    public function report(Throwable $e) {
+        parent::report($e);
     }
 
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  Request  $request
-     * @param Throwable $exception
+     * @param Request  $request
+     * @param Throwable $e
      * @return Response|JsonResponse
      *
      * @throws Throwable
      */
-        return parent::render($request, $exception);
+    public function render($request, Throwable $e) {
+        $request->headers->set('Accept', 'application/json');
+        if ($e instanceof HttpExceptionWithErrorCode) {
+            return response([
+                'code'=>$e->getStatusCode(),
+                'error_code'=>$e->getErrorCode()
+            ], $e->getStatusCode());
+        }
+        if ($e instanceof HttpException) {
+            return response([
+                'code'=>$e->getStatusCode(),
+                'message'=>$e->getMessage()
+            ], $e->getStatusCode());
+        }
+        if ($e instanceof ValidationException) {
+            return response(['code'=>400, 'message'=> $e->getMessage()], 400);
+        }
+        if (env('APP_DEBUG'))
+            return response(['message'=>$e->getMessage(), 'code'=>500], 500);
+        else return response(['message'=>'Internal Server Error', 'code'=>500], 500);
     }
 }
