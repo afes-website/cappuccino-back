@@ -18,3 +18,11 @@ use Laravel\Lumen\Routing\Router;
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->post(
+    '/auth/login',
+    ['uses'=>'AuthController@authenticate','middleware'=>'throttle:5,1']
+); // throttled 5 requests/1 min
+
+$router->get('/auth/user', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
+$router->post('/auth/change_password', ['uses'=>'AuthController@changePassword', 'middleware'=>'auth']);
