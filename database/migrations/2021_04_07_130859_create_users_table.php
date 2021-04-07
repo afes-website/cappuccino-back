@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration {
             $table->boolean("perm_exhibition");
             $table->boolean("perm_general");
             $table->boolean("perm_reservation");
+            $table->boolean("perm_teacher");
         });
     }
 
