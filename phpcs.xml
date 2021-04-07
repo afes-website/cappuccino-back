@@ -8,7 +8,8 @@
     <file>resources</file>
     <file>routes</file>
     <file>tests</file>
-    <file>database/migrations</file>
+    <file>bootstrap</file>
+    <file>database</file>
 
     <!-- 除外したいファイル、ディレクトリ -->
     <exclude-pattern>*/cache/*</exclude-pattern>

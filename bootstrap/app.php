@@ -76,10 +76,10 @@ $app->configure('app');
      App\Http\Middleware\CorsMiddleware::class
  ]);
 
-$app->routeMiddleware([
+ $app->routeMiddleware([
 //    'auth' => App\Http\Middleware\Authenticate::class,
-    'throttle' => App\Http\Middleware\ThrottleRequests::class,
-]);
+     'throttle' => App\Http\Middleware\ThrottleRequests::class,
+ ]);
 
 /*
 |--------------------------------------------------------------------------
@@ -107,10 +107,10 @@ $app->routeMiddleware([
 |
 */
 
-$app->router->group([
-    'namespace' => 'App\Http\Controllers',
-], function ($router) {
+ $app->router->group([
+     'namespace' => 'App\Http\Controllers',
+ ], function ($router) {
     require __DIR__.'/../routes/web.php';
-});
+ });
 
-return $app;
+ return $app;
