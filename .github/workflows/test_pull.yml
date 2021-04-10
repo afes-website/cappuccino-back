@@ -1,0 +1,56 @@
+name: Test pull request
+
+on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: laravel
+          MYSQL_ROOT_PASSWORD: password
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nanasess/setup-php@master
+        with:
+          php-version: 7.4
+      - name: Cache composer packages
+        uses: actions/cache@v1
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-vendor-
+      - name: install packages
+        run: composer install
+      - name: setup .env file
+        run: |
+          cp .env.example .env
+          sed -i .env \
+            -e 's/^\(APP_KEY=\).*$/\1hkauMHOsNK82WMcuL9jQXr0n1pQ7Ndy3/' \
+            -e '/^DB_/d'
+          cat >> .env << EOF
+          DB_CONNECTION=mysql
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_DATABASE=laravel
+          DB_USERNAME=root
+          DB_PASSWORD=password
+          TEST_FRESH_DB=true
+          EOF
+      - name: run migration test
+        run: |
+          php artisan migrate:fresh
+          php artisan migrate:rollback
+      - name: run test
+        run: vendor/bin/phpunit
+      - name: run linter
+        run: vendor/bin/phpcs
