@@ -2,6 +2,7 @@
 namespace Tests;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Hash;
 use \Carbon\Carbon;
 use \Illuminate\Support\Str;
@@ -153,12 +154,13 @@ class AuthJwtTest extends TestCase {
     public function testExpiredToken() {
         // login and get token
         $user = $this->getToken($this);
-
-        Carbon::setTestNow(Carbon::now()->addSeconds(env('JWT_EXPIRE')+1));
+        $cbi = CarbonImmutable::now();
+        CarbonImmutable::setTestNow((new \DateTimeImmutable())->modify(env('JWT_EXPIRE'))->modify('+1 seconds'));
         // now token must be expired
 
         $response = $this->get('/auth/user', $user['auth_hdr']);
         $response->assertResponseStatus(401);
+        CarbonImmutable::setTestNow($cbi);
     }
 
     /**
@@ -202,20 +204,18 @@ class AuthJwtTest extends TestCase {
         $jwc_token = json_decode($response->response->getContent())->token;
 
         // weak password must be rejected
-        $response = $this->json(
+        $response = $this->actingAs($user)->json(
             'POST',
             '/auth/change_password',
-            ['password'=>$new_weak_password],
-            ['Authorization'=>'bearer '.$jwc_token]
+            ['password'=>$new_weak_password]
         );
         $response->assertResponseStatus(400);
 
         // strong password must be accepted
-        $response = $this->json(
+        $response = $this->actingAs($user)->json(
             'POST',
             '/auth/change_password',
-            ['password'=>$new_strong_password],
-            ['Authorization'=>'bearer '.$jwc_token]
+            ['password'=>$new_strong_password]
         );
         $response->assertResponseStatus(204);
     }
@@ -227,28 +227,17 @@ class AuthJwtTest extends TestCase {
     public function testChangePassword() {
         // create user
         $new_password = Str::random(16);
+        $old_password = Str::random(16);
+        $user = User::factory()->create([
+            'password' => Hash::make($old_password)
+        ]);
 
-        $user = $this->getToken($this);
-        $id = $user['user']->id;
-        $old_password = $user['password'];
+        $id = $user->id;
 
-        // login first
-        $response = $this->json(
-            'POST',
-            '/auth/login',
-            ['id'=>$id, 'password'=>$old_password]
-        );
-        $response->assertResponseOk();
-        $response->seeJsonStructure(['token']);
-
-        $jwc_token = json_decode($response->response->getContent())->token;
-
-        // change password
-        $response = $this->json(
+        $response = $this->actingAs($user)->json(
             'POST',
             '/auth/change_password',
             ['password' => $new_password],
-            ['Authorization'=>'bearer '.$jwc_token]
         );
         $response->assertResponseStatus(204);
 
