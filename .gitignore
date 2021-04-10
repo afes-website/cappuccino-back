@@ -3,4 +3,7 @@
 Homestead.json
 Homestead.yaml
 .env
+.env.*
+!.env.example
 .phpunit.result.cache
+
