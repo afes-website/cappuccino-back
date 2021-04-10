@@ -1,4 +1,5 @@
 <?php
+use Laravel\Lumen\Routing\Router;
 
 /** @var Router $router */
 
@@ -12,8 +13,6 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-
-use Laravel\Lumen\Routing\Router;
 
 $router->get('/', function () use ($router) {
     return $router->app->version();
