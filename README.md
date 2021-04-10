@@ -1,4 +1,4 @@
-# 74th Afes App "CAPPUCCINO" back-end
+# CAPPUCCINO back-end
 
 ![version](https://img.shields.io/badge/dynamic/json?color=007ec6&label=version&style=for-the-badge&query=version&url=https://raw.githubusercontent.com/afes-website/cappuccino-back/develop/composer.json)
 
