@@ -111,7 +111,6 @@ class AuthJwtTest extends TestCase {
         $perms = [];
         foreach ([
             'admin',
-            'blogWriter',
             'exhibition',
             'general',
             'reservation',
