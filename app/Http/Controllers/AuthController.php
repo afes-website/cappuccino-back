@@ -5,24 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Carbon\Carbon;
 use App\Resources\UserResource;
 
 class AuthController extends Controller {
     private function jwt(User $user) {
-        $signer = new Sha256();
-        $token = (new Builder())->setIssuer(env('APP_URL'))
-            ->setAudience(env('APP_URL'))
-            ->setId(uniqid(), true)
-            ->setIssuedAt(Carbon::now()->getTimestamp())
-            ->setNotBefore(Carbon::now()->getTimestamp())
-            ->setExpiration(Carbon::now()->getTimestamp() + env('JWT_EXPIRE'))
-            ->set('user_id', $user->id)
-            ->sign($signer, env('APP_KEY'))
-            ->getToken();
+        $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText(env('APP_KEY')));
+        $now = new \DateTimeImmutable();
+        $token = $config->builder()
+            ->issuedBy(env('APP_URL'))
+            ->permittedFor(env('APP_URL'))
+            ->identifiedBy(uniqid())
+            ->issuedAt($now)
+            ->canOnlyBeUsedAfter($now)
+            ->expiresAt($now->modify('+'.env('JWT_EXPIRE')))
+            ->withClaim('user_id', $user->id)
+            ->getToken($config->signer(), $config->signingKey());
 
         return $token;
     }
@@ -39,7 +40,7 @@ class AuthController extends Controller {
             throw new HttpException(401);
 
         if (Hash::check($request->input('password'), $user->password))
-            return ['token' => $this->jwt($user)->__toString()];
+            return ['token' => $this->jwt($user)->toString()];
         else throw new HttpException(401);
     }
 

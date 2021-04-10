@@ -3,13 +3,15 @@
 namespace App\Providers;
 
 use App\Models\User;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\ValidationData;
+use Lcobucci\Clock\FrozenClock;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Validation\Constraint;
 
 class AuthServiceProvider extends ServiceProvider {
     /**
@@ -40,22 +42,19 @@ class AuthServiceProvider extends ServiceProvider {
             if (! Str::startsWith($token, 'bearer ')) return;
             $token = substr($token, 7);
 
-            $signer = new Sha256();
-            $data = new ValidationData();
-            $data->setIssuer(env('APP_URL'));
-            $data->setAudience(env('APP_URL'));
-            $data->setCurrentTime(Carbon::now()->getTimestamp());
+            $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText(env('APP_KEY')));
 
             try {
-                $token = (new Parser())->parse((string) $token);
-
-                if (!$token->validate($data))
+                $token = $config->parser()->parse($token);
+                if (! $config->validator()->validate(
+                    $token,
+                    new Constraint\IssuedBy(env('APP_URL')),
+                    new Constraint\PermittedFor(env('APP_URL')),
+                    new Constraint\LooseValidAt(new FrozenClock(CarbonImmutable::now()))
+                ))
                     return;
 
-                if (!$token->verify($signer, env('APP_KEY')))
-                    return;
-
-                $user = User::findOrFail($token->getClaim('user_id'));
+                $user = User::findOrFail($token->claims()->get('user_id'));
             } catch (Exception $e) {
                 return;
             }
