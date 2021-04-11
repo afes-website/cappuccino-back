@@ -1,9 +1,12 @@
 {
-    "name": "laravel/lumen",
-    "description": "The Laravel Lumen Framework.",
-    "keywords": ["framework", "laravel", "lumen"],
+    "name": "afes-website/cappuccino-back",
+    "description": "Control APPlication for United Contactless Check-IN Operation",
+    "keywords": ["festival", "lumen"],
     "license": "MIT",
     "type": "project",
+    "version": "0.0.1",
+    "homepage": "https://afes.info/",
+    "time": "2021-04-11",
     "require": {
         "php": "^7.3|^8.0",
         "ext-json": "*",
