@@ -6,7 +6,6 @@
     "type": "project",
     "version": "0.0.1",
     "homepage": "https://afes.info/",
-    "time": "2021-04-11",
     "require": {
         "php": "^7.4|^8.0",
         "ext-json": "*",
