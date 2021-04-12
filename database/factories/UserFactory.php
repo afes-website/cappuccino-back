@@ -27,7 +27,7 @@ class UserFactory extends Factory {
             'password' => Hash::make($this->faker->password),
             "perm_admin" => false,
             "perm_exhibition" => false,
-            "perm_general" => false,
+            "perm_executive" => false,
             "perm_reservation" => false,
             'perm_teacher' => false,
         ];
@@ -37,7 +37,7 @@ class UserFactory extends Factory {
         $roles = [
             'admin' => 'perm_admin',
             'exhibition' => 'perm_exhibition',
-            'general' => 'perm_general',
+            'executive' => 'perm_executive',
             'reservation' => 'perm_reservation',
             'teacher' => 'perm_teacher'
         ];

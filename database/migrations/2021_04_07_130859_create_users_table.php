@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration {
             $table->string('password');
             $table->boolean("perm_admin");
             $table->boolean("perm_exhibition");
-            $table->boolean("perm_general");
+            $table->boolean("perm_executive");
             $table->boolean("perm_reservation");
             $table->boolean("perm_teacher");
         });
