@@ -112,9 +112,9 @@ class AuthJwtTest extends TestCase {
         $perms = [];
         foreach ([
             'admin',
-            'exhibition',
-            'executive',
             'reservation',
+            'executive',
+            'exhibition',
         ] as $name) {
             if (rand(0, 1) === 1) $perms[] = $name;
         }
@@ -127,9 +127,9 @@ class AuthJwtTest extends TestCase {
             'name' => $user['user']->name,
             'permissions' => [
                 'admin' => $user['user']->perm_admin,
-                'exhibition' => $user['user']->perm_exhibition,
-                'executive' => $user['user']->perm_executive,
                 'reservation' => $user['user']->perm_reservation,
+                'executive' => $user['user']->perm_executive,
+                'exhibition' => $user['user']->perm_exhibition,
                 'teacher' => $user['user']->perm_teacher,
             ],
         ]);
