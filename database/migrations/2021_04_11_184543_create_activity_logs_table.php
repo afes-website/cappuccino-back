@@ -19,6 +19,12 @@ class CreateActivityLogsTable extends Migration {
             $table->string('guest_id');
             $table->string('log_type');
         });
+        Schema::table('activity_logs', function (Blueprint $table) {
+            $table->foreign('guest_id')->references('id')->on('guests')
+                ->onUpdate('restrict')->onDelete('restrict');
+            $table->foreign('exhibition_id')->references('id')->on('exhibitions')
+                ->onUpdate('restrict')->onDelete('restrict');
+        });
     }
 
     /**

@@ -24,6 +24,11 @@ class CreateImagesTable extends Migration {
 
         if (env('DB_CONNECTION') == 'mysql')
             DB::statement('ALTER TABLE images MODIFY content LONGBLOB NOT NULL');
+
+        Schema::table('images', function (Blueprint $table) {
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('restrict')->onDelete('restrict');
+        });
     }
 
     /**
