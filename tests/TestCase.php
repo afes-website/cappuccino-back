@@ -3,11 +3,9 @@ namespace Tests;
 
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Lumen\Application;
-use Laravel\Lumen\Testing\DatabaseTransactions;
+use \DB;
 
 abstract class TestCase extends \Laravel\Lumen\Testing\TestCase {
-
-    use DatabaseTransactions;
 
     private static $initialized = false;
 
@@ -36,5 +34,11 @@ abstract class TestCase extends \Laravel\Lumen\Testing\TestCase {
                 '--force' => true,
             ]);
         }
+        DB::connection(null)->beginTransaction();
+    }
+
+    public function tearDown(): void {
+        DB::connection(null)->rollBack();
+        parent::tearDown();
     }
 }
