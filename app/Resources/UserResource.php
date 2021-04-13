@@ -18,9 +18,9 @@ class UserResource extends JsonResource {
             'name' => $this->name,
             'permissions' => [
                 'admin'       => $this->perm_admin       == 1,
-                'exhibition'  => $this->perm_exhibition  == 1,
-                'general'     => $this->perm_general     == 1,
                 'reservation' => $this->perm_reservation == 1,
+                'executive'   => $this->perm_executive   == 1,
+                'exhibition'  => $this->perm_exhibition  == 1,
                 'teacher'     => $this->perm_teacher     == 1,
             ],
         ];
