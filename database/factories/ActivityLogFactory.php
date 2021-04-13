@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\ActivityLog;
+use App\Models\Exhibition;
+use App\Models\Guest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,14 +24,10 @@ class ActivityLogFactory extends Factory {
      */
     public function definition() {
         return [
-            'id' => $this->faker->realText(16),
-            'name' => $this->faker->name,
-            'password' => Hash::make($this->faker->password),
-            "perm_admin" => false,
-            "perm_exhibition" => false,
-            "perm_general" => false,
-            "perm_reservation" => false,
-            'perm_teacher' => false,
+            'timestamp'=>$this->faker->dateTime,
+            'guest_id'=>Guest::factory(),
+            'exh_id'=>Exhibition::factory(),
+            'log_type'=>$this->faker->randomElement(['exit','enter'])
         ];
     }
 }
