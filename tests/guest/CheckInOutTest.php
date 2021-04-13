@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 /*
  * guests/check-in, guests/$id/check-out:post
  */
-class CheckInOut extends TestCase {
+class CheckInOutTest extends TestCase {
 
     private function createGuestId(string $guest_type): string {
         return config('cappuccino.guest_types')[$guest_type]['prefix'] . "-" . Str::random(5);
