@@ -17,11 +17,11 @@ class CreateUsersTable extends Migration {
             $table->primary('id');
             $table->string('name');
             $table->string('password');
-            $table->boolean("perm_admin");
-            $table->boolean("perm_exhibition");
-            $table->boolean("perm_general");
-            $table->boolean("perm_reservation");
-            $table->boolean("perm_teacher");
+            $table->boolean("perm_admin")->default(false);
+            $table->boolean("perm_reservation")->default(false);
+            $table->boolean("perm_executive")->default(false);
+            $table->boolean("perm_exhibition")->default(false);
+            $table->boolean("perm_teacher")->default(false);
         });
     }
 

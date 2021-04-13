@@ -23,9 +23,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'name',
         'password',
         'perm_admin',
-        'perm_exhibition',
-        'perm_general',
         'perm_reservation',
+        'perm_executive',
+        'perm_exhibition',
         'perm_teacher',
     ];
 
@@ -48,9 +48,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     const VALID_PERMISSION_NAMES = [
         "admin",
-        "exhibition",
-        "general",
         "reservation",
+        "executive",
+        "exhibition",
         "teacher",
     ];
 
