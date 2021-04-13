@@ -21,7 +21,6 @@ class CreateReservationsTable extends Migration {
             $table->string('name');
             $table->string('address');
             $table->string('cellphone');
-            $table->string('guest_id')->nullable();
         });
     }
 
