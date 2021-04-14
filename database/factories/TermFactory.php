@@ -21,7 +21,7 @@ class TermFactory extends Factory {
      */
     public function definition() {
         return [
-            'id' => $this->faker->realText(16),
+            'id' => $this->faker->unique()->realText(16),
             'enter_scheduled_time' => $this->faker->dateTimeBetween('-1year', '-1hour'),
             'exit_scheduled_time' => $this->faker->dateTimeBetween('+1hour', '+1year'),
             'guest_type' => array_rand(config('cappuccino.guest_types'))
