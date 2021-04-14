@@ -44,4 +44,66 @@ class ExhibitionTest extends TestCase {
             'count' => [],
         ]);
     }
+
+    public function testShowCount() {
+        $guest_count = 10;
+        $term_count = 3;
+        $term = Term::factory()->count(3)->create();
+        $exhibition = Exhibition::factory()
+            ->has(
+                Guest::factory()
+                    ->count($guest_count * $term_count)
+                    ->state(new Sequence(
+                        ['term_id' => $term[0]->id],
+                        ['term_id' => $term[1]->id],
+                        ['term_id' => $term[2]->id]
+                    ))
+            )->create();
+        $user = User::find($exhibition->id);
+
+        $this->actingAs($user)->get("/exhibitions/$exhibition->id");
+        $this->assertResponseOk();
+        $this->receiveJson();
+
+        $this->seeJsonContains([
+            'count' => [
+                $term[0]->id => $guest_count,
+                $term[1]->id => $guest_count,
+                $term[2]->id => $guest_count,
+            ]
+        ]);
+    }
+
+    public function testCountExited() {
+        $guest_count = 10;
+        $exhibition = Exhibition::factory()
+            ->has(
+                Guest::factory()
+                    ->count($guest_count*2)
+                    ->state(new Sequence([], ['exited_at' => Carbon::now()]))
+            )->create();
+        $user = User::find($exhibition->id);
+
+        $this->actingAs($user)->get("/exhibitions/$exhibition->id");
+        $this->assertResponseOk();
+        $this->receiveJson();
+
+        $this->assertCount($guest_count, json_decode($this->response->getContent()));
+    }
+
+    public function testDontShowEmptyTerm() {
+        $guest_count = 10;
+        $exhibition = Exhibition::factory()->create(
+            Guest::factory()->count($guest_count*2)
+        );
+        $user = User::find($exhibition->id);
+        $term = Term::factory()->create();
+
+        $this->actingAs($user)->get("/exhibitions/$exhibition->id");
+        $this->assertResponseOk();
+
+        $this->seeJsonDoesntContains([
+            $term->id => 0
+        ]);
+    }
 }
