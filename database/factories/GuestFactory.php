@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Exhibition;
 use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Term;
@@ -39,7 +40,7 @@ class GuestFactory extends Factory {
             },
             'entered_at'=>$this->faker->dateTime,
             'exited_at'=>null,
-            'exhibition_id'=>null,
+            'exhibition_id'=>Exhibition::factory(),
         ];
     }
 }
