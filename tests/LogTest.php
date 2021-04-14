@@ -38,4 +38,34 @@ class LogTest extends TestCase {
         $this->receiveJson();
         $this->assertCount($count, json_decode($this->response->getContent()));
     }
+
+    public function testListFilter() {
+        $count = 5;
+
+        $user = User::factory()->permission('reservation')->create();
+
+        $log = ActivityLog::factory()->count($count)->create();
+        foreach ([
+            'id',
+            'timestamp',
+            'guest_id',
+            'log_type',
+            'reservation_id',
+            'exh_id',
+        ] as $key) {
+            if ($key === 'exh_id') {
+                $item = $log[0]->{'exhibition_id'};
+            } else {
+                $item = $log[0]->{$key};
+            }
+            $this->call('GET', '/log', [$key => $item]);
+            $this->assertResponseOk();
+
+            $this->receiveJson();
+            $ret_articles = json_decode($this->response->getContent());
+            foreach ($ret_articles as $ret_article) {
+                $this->assertEquals($ret_article->{$key}, $item);
+            }
+        }
+    }
 }
