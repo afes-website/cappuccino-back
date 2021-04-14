@@ -68,4 +68,40 @@ class LogTest extends TestCase {
             }
         }
     }
+
+    public function testGetPermission() {
+        foreach (['executive', 'exhibition', 'reservation'] as $perm) {
+            $user = User::factory()->permission($perm)->create();
+
+            $this->actingAs($user)->get('/log');
+            $this->assertResponseOk();
+        }
+
+        foreach (['admin', 'teacher'] as $perm) {
+            $user = User::factory()->permission($perm)->create();
+            $this->actingAs($user)->get('/log');
+            $this->assertResponseStatus(403);
+        }
+    }
+
+    public function testFilterPermission() {
+        foreach (['executive', 'exhibition', 'reservation'] as $perm) {
+            $user = User::factory()->permission($perm)->create();
+            $log = ActivityLog::factory()->create();
+            foreach ([
+                'id',
+                'timestamp',
+                'guest_id',
+                'log_type',
+                'reservation_id',
+            ] as $key) {
+                $this->actingAs($user)->get('/log', [$key => $log->{$key}]);
+                $this->assertResponseOk();
+            }
+
+            $this->actingAs($user)->get('/log', ['exh_id' => $log->exhibition_id]);
+            if ($perm === 'reservation') $this->assertResponseOk();
+            else $this->assertResponseStatus(403);
+        }
+    }
 }
