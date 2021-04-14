@@ -106,4 +106,13 @@ class ExhibitionTest extends TestCase {
             $term->id => 0
         ]);
     }
+
+    public function testNotFound() {
+        $user = User::factory()->permission('exhibition')->create();
+        $id = Str::random(8);
+        Guest::factory()->create();
+        $this->actingAs($user)->get("/exhibitions/$id");
+
+        $this->assertResponseStatus(404);
+    }
 }
