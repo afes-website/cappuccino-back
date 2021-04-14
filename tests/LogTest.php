@@ -27,4 +27,15 @@ class LogTest extends TestCase {
             ],
         ]);
     }
+
+    public function testCount() {
+        $count = 5;
+        ActivityLog::factory()->count($count)->create();
+        $user = User::factory()->permission('executive')->create();
+
+        $this->actingAs($user)->get('/log');
+        $this->assertResponseOk();
+        $this->receiveJson();
+        $this->assertCount($count, json_decode($this->response->getContent()));
+    }
 }
