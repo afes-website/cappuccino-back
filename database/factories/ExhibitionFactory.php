@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Exhibition;
+use App\Models\Term;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ExhibitionFactory extends Factory {
@@ -21,7 +23,10 @@ class ExhibitionFactory extends Factory {
      */
     public function definition() {
         return [
-            'id'=>$this->faker->userName,
+            'id'=>User::factory(),
+            'name'=>function (array $attributes) {
+                return User::find($attributes['id'])->name;
+            },
             'room_id'=>$this->faker->userName,
             'capacity'=> $this->faker->numberBetween(1),
             'updated_at'=>$this->faker->dateTime,
