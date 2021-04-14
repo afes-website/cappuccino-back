@@ -9,12 +9,12 @@ class Exhibition extends Model {
 
     use HasFactory;
 
-    protected $table = 'exh_rooms';
-
     protected $primaryKey = 'id';
 
     protected $keyType = 'string';
 
+    public $incrementing = false;
+    
     public $timestamps = true;
 
     const CREATED_AT = null;
@@ -22,7 +22,11 @@ class Exhibition extends Model {
     const UPDATED_AT = 'updated_at';
 
     public function guests() {
-        return $this->hasMany('\App\Models\Guest', 'exh_id');
+        return $this->hasMany('\App\Models\Guest');
+    }
+
+    public function logs() {
+        return $this->hasMany('\App\Models\ActivityLog', 'exhibition_id');
     }
 
     public function countGuest() {
