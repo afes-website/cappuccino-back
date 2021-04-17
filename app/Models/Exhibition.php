@@ -14,7 +14,7 @@ class Exhibition extends Model {
     protected $keyType = 'string';
 
     public $incrementing = false;
-    
+
     public $timestamps = true;
 
     const CREATED_AT = null;
@@ -27,6 +27,10 @@ class Exhibition extends Model {
 
     public function logs() {
         return $this->hasMany('\App\Models\ActivityLog', 'exhibition_id');
+    }
+
+    public function user() {
+        return $this->hasMany('\App\Models\User', 'id');
     }
 
     public function countGuest() {
