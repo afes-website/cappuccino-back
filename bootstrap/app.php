@@ -7,11 +7,11 @@ $files = [];
 $files[] = '.env';
 if (env('APP_ENV')) $files[] = '.env.' . env('APP_ENV');
 if (php_sapi_name() == 'cli') {
-   $input = new \Symfony\Component\Console\Input\ArgvInput();
-   $envParameterOption = $input->getParameterOption('--env');
-   if ($input->hasParameterOption('--env')) {
-       $files[] = '.env.' . $envParameterOption;
-   }
+    $input = new \Symfony\Component\Console\Input\ArgvInput();
+    $envParameterOption = $input->getParameterOption('--env');
+    if ($input->hasParameterOption('--env')) {
+        $files[] = '.env.' . $envParameterOption;
+    }
 }
 
 \Dotenv\Dotenv::create(
