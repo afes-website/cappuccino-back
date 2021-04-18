@@ -77,9 +77,11 @@ class ExhibitionTest extends TestCase {
     public function testCountExited() {
         $guest_count = 10;
         $user = User::factory()->permission('exhibition')->create();
+        $term = Term::factory()->create();
         $exhibition = Exhibition::factory()
             ->has(
                 Guest::factory()
+                    ->for($term)
                     ->count($guest_count*2)
                     ->state(new Sequence([], ['exited_at' => Carbon::now()]))
             )
@@ -90,7 +92,7 @@ class ExhibitionTest extends TestCase {
         $this->assertResponseOk();
         $this->receiveJson();
 
-        $this->assertCount($guest_count, json_decode($this->response->getContent()));
+        $this->assertEquals($guest_count, json_decode($this->response->getContent())->count->{$term->id});
     }
 
     public function testDontShowEmptyTerm() {
