@@ -30,7 +30,7 @@ class Exhibition extends Model {
     }
 
     public function user() {
-        return $this->hasMany('\App\Models\User', 'id');
+        return $this->belongsTo('\App\Models\User', 'id');
     }
 
     public function countGuest() {
