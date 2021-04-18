@@ -2,16 +2,24 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$env = env('APP_ENV');
-$file = '.env.'.$env;
-if (!file_exists(dirname(__DIR__).'/'.$file)) {
-    $file = null;
+$files = [];
+
+$files[] = '.env';
+if (env('APP_ENV')) $files[] = '.env.' . env('APP_ENV');
+if (php_sapi_name() == 'cli') {
+    $input = new \Symfony\Component\Console\Input\ArgvInput();
+    $envParameterOption = $input->getParameterOption('--env');
+    if ($input->hasParameterOption('--env')) {
+        $files[] = '.env.' . $envParameterOption;
+    }
 }
 
-(new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
+\Dotenv\Dotenv::create(
+    \Illuminate\Support\Env::getRepository(),
     dirname(__DIR__),
-    $file
-))->bootstrap();
+    $files,
+    false
+)->safeLoad();
 
 date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
 
