@@ -23,7 +23,7 @@ class ExhibitionTest extends TestCase {
         $this->assertResponseOk();
         $this->receiveJson();
         $res = json_decode($this->response->getContent());
-        $this->assertCount($count, $res);
+        $this->assertCount($count, get_object_vars($res->exh));
     }
 
     public function testShowInfo() {
