@@ -49,6 +49,7 @@ class ExhibitionTest extends TestCase {
         $guest_count = 10;
         $term_count = 3;
         $term = Term::factory()->count(3)->create();
+        $user = User::factory()->permission('exhibition')->create();
         $exhibition = Exhibition::factory()
             ->has(
                 Guest::factory()
@@ -58,8 +59,7 @@ class ExhibitionTest extends TestCase {
                         ['term_id' => $term[1]->id],
                         ['term_id' => $term[2]->id]
                     ))
-            )->create();
-        $user = User::find($exhibition->id);
+            )->for($user)->create();
 
         $this->actingAs($user)->get("/exhibitions/$exhibition->id");
         $this->assertResponseOk();
@@ -76,13 +76,15 @@ class ExhibitionTest extends TestCase {
 
     public function testCountExited() {
         $guest_count = 10;
+        $user = User::factory()->permission('exhibition')->create();
         $exhibition = Exhibition::factory()
             ->has(
                 Guest::factory()
                     ->count($guest_count*2)
                     ->state(new Sequence([], ['exited_at' => Carbon::now()]))
-            )->create();
-        $user = User::find($exhibition->id);
+            )
+            ->for($user)
+            ->create();
 
         $this->actingAs($user)->get("/exhibitions/$exhibition->id");
         $this->assertResponseOk();
@@ -93,10 +95,11 @@ class ExhibitionTest extends TestCase {
 
     public function testDontShowEmptyTerm() {
         $guest_count = 10;
-        $exhibition = Exhibition::factory()->create(
-            Guest::factory()->count($guest_count*2)
-        );
-        $user = User::find($exhibition->id);
+        $user = User::factory()->permission('exhibition')->create();
+        $exhibition = Exhibition::factory()
+            ->for($user)
+            ->has(Guest::factory()->count($guest_count*2))
+            ->create();
         $term = Term::factory()->create();
 
         $this->actingAs($user)->get("/exhibitions/$exhibition->id");
