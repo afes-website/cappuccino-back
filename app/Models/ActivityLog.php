@@ -11,7 +11,7 @@ class ActivityLog extends Model {
 
     protected $primaryKey = 'id';
 
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     public $incrementing = true;
 
