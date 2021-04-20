@@ -26,6 +26,9 @@ class Reservation extends Model {
         return $this->belongsTo('\App\Models\Term');
     }
 
+    /**
+     * @return string|null ErrorCode (If there are problem to check-in)
+     */
     public function getErrorCode() {
         $term = $this->term;
         $current = Carbon::now();
