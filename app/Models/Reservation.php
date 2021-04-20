@@ -33,9 +33,7 @@ class Reservation extends Model {
         $term = $this->term;
         $current = Carbon::now();
 
-        if (new Carbon($term->enter_scheduled_time) >= $current
-            || new Carbon($term->exit_scheduled_time) < $current
-        ) {
+        if ($term->enter_scheduled_time >= $current || $term->exit_scheduled_time < $current) {
             return 'OUT_OF_RESERVATION_TIME';
         }
 
