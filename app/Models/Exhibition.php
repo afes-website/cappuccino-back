@@ -37,12 +37,11 @@ class Exhibition extends Model {
         $terms = Term::all();
         $res = [];
         foreach ($terms as $term) {
-            $guest = $this
+            $count = $this
                 ->guests()
                 ->where('term_id', $term->id)
                 ->whereNull('exited_at')
-                ->get();
-            $count = $guest->count();
+                ->count();
             if ($count==0) continue;
             $res[$term->id] = $count;
         }
