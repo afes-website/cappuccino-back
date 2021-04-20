@@ -40,7 +40,7 @@ class Exhibition extends Model {
             $guest = $this
                 ->guests()
                 ->where('term_id', $term->id)
-                ->where('exited_at', '!=', null)
+                ->whereNull('exited_at')
                 ->get();
             $count = $guest->count();
             if ($count==0) continue;
