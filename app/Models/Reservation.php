@@ -37,7 +37,7 @@ class Reservation extends Model {
             return 'OUT_OF_RESERVATION_TIME';
         }
 
-        if ($this->guest_id !== null) {
+        if (!$this->guest()->exists()) {
             return 'ALREADY_ENTERED_RESERVATION';
         }
 
