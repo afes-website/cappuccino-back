@@ -14,11 +14,15 @@ class CreateExhibitionsTable extends Migration {
     public function up() {
         Schema::create('exhibitions', function (Blueprint $table) {
             $table->string('id');
+            $table->foreign('id')->references('id')->on('users')
+                ->onUpdate('restrict')->onDelete('restrict');
             $table->primary('id');
             $table->string('name');
             $table->unsignedInteger('capacity');
             $table->string('room_id');
             $table->string('thumbnail_image_id')->nullable();
+            $table->foreign('thumbnail_image_id')->references('id')->on('images')
+                ->onUpdate('restrict')->onDelete('restrict');
             $table->timestamp('updated_at')->useCurrent();
         });
     }
