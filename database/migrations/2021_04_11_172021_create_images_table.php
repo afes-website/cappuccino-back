@@ -18,17 +18,14 @@ class CreateImagesTable extends Migration {
             $table->primary('id');
             $table->binary('content');
             $table->string('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('restrict')->onDelete('restrict');
             $table->string('mime_type');
             $table->timestamp('created_at')->useCurrent();
         });
 
         if (env('DB_CONNECTION') == 'mysql')
             DB::statement('ALTER TABLE images MODIFY content LONGBLOB NOT NULL');
-
-        Schema::table('images', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users')
-                ->onUpdate('restrict')->onDelete('restrict');
-        });
     }
 
     /**

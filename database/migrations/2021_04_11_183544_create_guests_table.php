@@ -18,16 +18,13 @@ class CreateGuestsTable extends Migration {
             $table->timestamp('entered_at')->useCurrent();
             $table->timestamp('exited_at')->nullable();
             $table->string('reservation_id');
-            $table->string('exhibition_id')->nullable();
-            $table->string('term_id');
-        });
-
-        Schema::table('guests', function (Blueprint $table) {
             $table->foreign('reservation_id')->references('id')->on('reservations')
                 ->onUpdate('restrict')->onDelete('restrict');
-            $table->foreign('term_id')->references('id')->on('terms')
-                ->onUpdate('restrict')->onDelete('restrict');
+            $table->string('exhibition_id')->nullable();
             $table->foreign('exhibition_id')->references('id')->on('exhibitions')
+                ->onUpdate('restrict')->onDelete('restrict');
+            $table->string('term_id');
+            $table->foreign('term_id')->references('id')->on('terms')
                 ->onUpdate('restrict')->onDelete('restrict');
         });
     }
