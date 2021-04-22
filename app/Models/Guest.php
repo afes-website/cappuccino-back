@@ -22,14 +22,14 @@ class Guest extends Model {
     const UPDATED_AT = null;
 
     public function reservation() {
-        return $this->belongsTo('\App\Models\Reservation');
+        return $this->belongsTo(Reservation::class);
     }
 
     public function logs() {
-        return $this->hasMany('\App\Models\ActivityLog');
+        return $this->hasMany(ActivityLog::class);
     }
 
     public function term() {
-        return $this->belongsTo('\App\Models\Term');
+        return $this->belongsTo(Term::class);
     }
 }

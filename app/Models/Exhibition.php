@@ -23,15 +23,15 @@ class Exhibition extends Model {
     const UPDATED_AT = 'updated_at';
 
     public function guests() {
-        return $this->hasMany('\App\Models\Guest');
+        return $this->hasMany(Guest::class);
     }
 
     public function logs() {
-        return $this->hasMany('\App\Models\ActivityLog', 'exhibition_id');
+        return $this->hasMany(ActivityLog::class, 'exhibition_id');
     }
 
     public function user() {
-        return $this->belongsTo('\App\Models\User', 'id');
+        return $this->belongsTo(User::class, 'id');
     }
 
     public function countGuest() {

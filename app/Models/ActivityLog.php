@@ -22,10 +22,10 @@ class ActivityLog extends Model {
     const UPDATED_AT = null;
 
     public function guest() {
-        return $this->belongsTo('\App\Models\Guest');
+        return $this->belongsTo(Guest::class);
     }
 
     public function exhibition() {
-        return $this->belongsTo('\App\Models\Exhibition');
+        return $this->belongsTo(Exhibition::class);
     }
 }

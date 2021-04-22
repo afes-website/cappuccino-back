@@ -19,11 +19,11 @@ class Reservation extends Model {
     public $timestamps = false;
 
     public function guest() {
-        return $this->hasOne('\App\Models\Guest');
+        return $this->hasOne(Guest::class);
     }
 
     public function term() {
-        return $this->belongsTo('\App\Models\Term');
+        return $this->belongsTo(Term::class);
     }
 
     /**

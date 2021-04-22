@@ -62,6 +62,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     public function exhibition() {
-        return $this->hasOne('\App\Models\Exhibition', 'id');
+        return $this->hasOne(Exhibition::class, 'id');
     }
 }
