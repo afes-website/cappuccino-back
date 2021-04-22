@@ -27,7 +27,7 @@ class Reservation extends Model {
     }
 
     /**
-     * @return string|null ErrorCode (If there are problem to check-in)
+     * @return string|null ErrorCode (null if there is no problem)
      */
     public function getErrorCode() {
         $term = $this->term;
