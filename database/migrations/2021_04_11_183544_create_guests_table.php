@@ -17,10 +17,10 @@ class CreateGuestsTable extends Migration {
             $table->primary('id');
             $table->timestamp('entered_at')->useCurrent();
             $table->timestamp('exited_at')->nullable();
-            $table->string('reservation_id');
+            $table->string('reservation_id')->index();
             $table->foreign('reservation_id')->references('id')->on('reservations')
                 ->onUpdate('restrict')->onDelete('restrict');
-            $table->string('exhibition_id')->nullable();
+            $table->string('exhibition_id')->nullable()->index();
             $table->foreign('exhibition_id')->references('id')->on('exhibitions')
                 ->onUpdate('restrict')->onDelete('restrict');
             $table->string('term_id');

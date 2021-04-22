@@ -15,10 +15,10 @@ class CreateActivityLogsTable extends Migration {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamp('timestamp')->useCurrent();
-            $table->string('exhibition_id');
+            $table->string('exhibition_id')->index();
             $table->foreign('exhibition_id')->references('id')->on('exhibitions')
                 ->onUpdate('restrict')->onDelete('restrict');
-            $table->string('guest_id');
+            $table->string('guest_id')->index();
             $table->foreign('guest_id')->references('id')->on('guests')
                 ->onUpdate('restrict')->onDelete('restrict');
             $table->string('log_type');
