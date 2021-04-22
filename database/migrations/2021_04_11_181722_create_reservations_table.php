@@ -18,7 +18,7 @@ class CreateReservationsTable extends Migration {
             $table->string('email');
             $table->integer('people_count');
             $table->string('term_id');
-            $table->foreign('term_id')->references('id')->on('users')
+            $table->foreign('term_id')->references('id')->on('terms')
                 ->onUpdate('restrict')->onDelete('restrict');
             $table->string('name');
             $table->string('address');
