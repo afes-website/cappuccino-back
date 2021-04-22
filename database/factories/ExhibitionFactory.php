@@ -28,7 +28,7 @@ class ExhibitionFactory extends Factory {
                 return User::find($attributes['id'])->name;
             },
             'room_id'=>$this->faker->userName,
-            'capacity'=> $this->faker->numberBetween(1),
+            'capacity'=> $this->faker->numberBetween(1, 100),
             'updated_at'=>$this->faker->dateTime,
         ];
     }
