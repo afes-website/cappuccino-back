@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Exhibition extends Model {
 
@@ -34,17 +35,10 @@ class Exhibition extends Model {
     }
 
     public function countGuest() {
-        $terms = Term::all();
-        $res = [];
-        foreach ($terms as $term) {
-            $count = $this
-                ->guests()
-                ->where('term_id', $term->id)
-                ->whereNull('exited_at')
-                ->count();
-            if ($count==0) continue;
-            $res[$term->id] = $count;
-        }
-        return $res;
+        return $this
+            ->guests()
+            ->select('term_id', DB::raw('count(1) as cnt'))
+            ->groupBy('term_id')
+            ->pluck('cnt', 'term_id');
     }
 }
