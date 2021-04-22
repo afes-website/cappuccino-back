@@ -20,7 +20,7 @@ class ExhibitionResource extends JsonResource {
                 'thumbnail_image_id' => $this->thumbnail_image_id,
             ],
             'count' => $this->countGuest(),
-            'limit' => $this->capacity,
+            'capacity' => $this->capacity,
         ];
     }
 }
