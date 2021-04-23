@@ -23,7 +23,7 @@ class CreateExhibitionsTable extends Migration {
             $table->string('thumbnail_image_id')->nullable();
             $table->foreign('thumbnail_image_id')->references('id')->on('images')
                 ->onUpdate('restrict')->onDelete('restrict');
-            $table->timestamp('updated_at')->useCurrent();
+            $table->timestamp('updated_at')->default('2000-01-01 00:00:00');
         });
     }
 

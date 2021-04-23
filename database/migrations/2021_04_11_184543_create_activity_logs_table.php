@@ -14,7 +14,7 @@ class CreateActivityLogsTable extends Migration {
     public function up() {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->timestamp('timestamp')->useCurrent();
+            $table->timestamp('timestamp')->default('2000-01-01 00:00:00');
             $table->string('exhibition_id')->index();
             $table->foreign('exhibition_id')->references('id')->on('exhibitions')
                 ->onUpdate('restrict')->onDelete('restrict');

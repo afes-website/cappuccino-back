@@ -21,7 +21,7 @@ class CreateImagesTable extends Migration {
             $table->foreign('user_id')->references('id')->on('users')
                 ->onUpdate('restrict')->onDelete('restrict');
             $table->string('mime_type');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('created_at')->default('2000-01-01 00:00:00');
         });
 
         if (env('DB_CONNECTION') == 'mysql')

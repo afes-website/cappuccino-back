@@ -15,8 +15,8 @@ class CreateGuestsTable extends Migration {
         Schema::create('guests', function (Blueprint $table) {
             $table->string('id');
             $table->primary('id');
-            $table->timestamp('entered_at')->useCurrent();
-            $table->timestamp('exited_at')->nullable();
+            $table->timestamp('entered_at')->default('2000-01-01 00:00:00');
+            $table->timestamp('exited_at')->nullable()->default(null);
             $table->string('reservation_id')->index();
             $table->foreign('reservation_id')->references('id')->on('reservations')
                 ->onUpdate('restrict')->onDelete('restrict');
