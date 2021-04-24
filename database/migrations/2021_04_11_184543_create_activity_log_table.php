@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActivityLogsTable extends Migration {
+class CreateActivityLogTable extends Migration {
 
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class CreateActivityLogsTable extends Migration {
      * @return void
      */
     public function up() {
-        Schema::create('activity_logs', function (Blueprint $table) {
+        Schema::create('activity_log', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamp('timestamp')->default('2000-01-01 00:00:00');
             $table->string('exhibition_id')->index();
@@ -31,6 +31,6 @@ class CreateActivityLogsTable extends Migration {
      * @return void
      */
     public function down() {
-        Schema::dropIfExists('activity_logs');
+        Schema::dropIfExists('activity_log');
     }
 }

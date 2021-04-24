@@ -9,7 +9,7 @@ class ActivityLogEntry extends Model {
 
     use HasFactory;
 
-    protected $table = 'activity_logs';
+    protected $table = 'activity_log';
 
     protected $primaryKey = 'id';
 
