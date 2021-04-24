@@ -27,7 +27,7 @@ class Exhibition extends Model {
     }
 
     public function logs() {
-        return $this->hasMany(ActivityLog::class, 'exhibition_id');
+        return $this->hasMany(ActivityLogEntry::class, 'exhibition_id');
     }
 
     public function user() {

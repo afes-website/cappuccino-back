@@ -26,7 +26,7 @@ class Guest extends Model {
     }
 
     public function logs() {
-        return $this->hasMany(ActivityLog::class);
+        return $this->hasMany(ActivityLogEntry::class);
     }
 
     public function term() {

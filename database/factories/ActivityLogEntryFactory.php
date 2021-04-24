@@ -2,19 +2,19 @@
 
 namespace Database\Factories;
 
-use App\Models\ActivityLog;
+use App\Models\ActivityLogEntry;
 use App\Models\Exhibition;
 use App\Models\Guest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ActivityLogFactory extends Factory {
+class ActivityLogEntryFactory extends Factory {
 
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = ActivityLog::class;
+    protected $model = ActivityLogEntry::class;
 
     /**
      * Define the model's default state.

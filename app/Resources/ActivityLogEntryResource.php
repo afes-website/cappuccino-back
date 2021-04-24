@@ -4,7 +4,7 @@ namespace App\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ActivityLogResource extends JsonResource {
+class ActivityLogEntryResource extends JsonResource {
 
     /**
      * リソースを配列へ変換する
