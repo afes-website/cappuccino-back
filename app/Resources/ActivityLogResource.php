@@ -15,7 +15,7 @@ class ActivityLogResource extends JsonResource {
     public function toArray($request) {
         return [
             'id' => $this->id,
-            'timestamp' => $this->timestamp->toIso8601ZuluString(),
+            'timestamp' => $this->timestamp->toIso8601String(),
             'guest' => new GuestResource($this->guest),
             'exh_id' => $this->exh_id,
             'log_type' => $this->log_type
