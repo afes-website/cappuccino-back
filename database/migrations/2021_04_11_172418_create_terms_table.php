@@ -15,8 +15,8 @@ class CreateTermsTable extends Migration {
         Schema::create('terms', function (Blueprint $table) {
             $table->string('id');
             $table->primary('id');
-            $table->dateTimeTz('enter_scheduled_time');
-            $table->dateTimeTz('exit_scheduled_time');
+            $table->timestamp('enter_scheduled_time')->default('2000-01-01 00:00:00');
+            $table->timestamp('exit_scheduled_time')->default('2000-01-01 00:00:00');
             $table->string('guest_type');
         });
     }
