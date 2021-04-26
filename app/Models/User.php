@@ -60,4 +60,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
         return ($this->{'perm_' . $perm_name} == 1); // weak comparison because of string
     }
+
+    public function exhibition() {
+        return $this->hasOne(Exhibition::class, 'id');
+    }
 }
