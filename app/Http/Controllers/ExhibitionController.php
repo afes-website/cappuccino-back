@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\HttpExceptionWithErrorCode;
-use App\Resources\ActivityLogResource;
+use App\Resources\ActivityLogEntryResource;
 use App\Resources\ExhibitionResource;
 use App\Resources\GuestResource;
 use App\Models\Exhibition;
 use App\Models\Guest;
 use App\Models\Term;
+use App\Models\ActivityLogEntry;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\ActivityLog;
 
 class ExhibitionController extends Controller {
     public function index() {
@@ -73,7 +73,7 @@ class ExhibitionController extends Controller {
 
         $guest->update(['exh_id' => $exh->id]);
 
-        ActivityLog::create([
+        ActivityLogEntry::create([
             'exh_id' => $exh->id,
             'log_type' => 'enter',
             'guest_id' => $guest->id
@@ -99,7 +99,7 @@ class ExhibitionController extends Controller {
 
         $guest->update(['exh_id' => null]);
 
-        ActivityLog::create([
+        ActivityLogEntry::create([
             'exh_id' => $exh->id,
             'log_type' => 'exit',
             'guest_id' => $guest->id
@@ -114,7 +114,7 @@ class ExhibitionController extends Controller {
         if (!$guest) {
             abort(500, 'ExhibitionRoom Not found');
         }
-        $logs = ActivityLog::query()->where('exh_id', $id)->get();
-        return response()->json(ActivityLogResource::collection($logs));
+        $logs = ActivityLogEntry::query()->where('exh_id', $id)->get();
+        return response()->json(ActivityLogEntryResource::collection($logs));
     }
 }

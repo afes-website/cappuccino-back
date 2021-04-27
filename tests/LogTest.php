@@ -6,13 +6,13 @@ namespace Tests;
  */
 
 use App\Resources\GuestResource;
-use App\Models\ActivityLog;
+use App\Models\ActivityLogEntry;
 use App\Models\User;
 
 class LogTest extends TestCase {
     public function testData() {
         $user = User::factory()->permission('executive')->create();
-        $log = ActivityLog::factory()->create();
+        $log = ActivityLogEntry::factory()->create();
 
         $this->actingAs($user)->get('/log');
         $this->assertResponseOk();
@@ -30,7 +30,7 @@ class LogTest extends TestCase {
 
     public function testCount() {
         $count = 5;
-        ActivityLog::factory()->count($count)->create();
+        ActivityLogEntry::factory()->count($count)->create();
         $user = User::factory()->permission('executive')->create();
 
         $this->actingAs($user)->get('/log');
@@ -44,7 +44,7 @@ class LogTest extends TestCase {
 
         $user = User::factory()->permission('reservation')->create();
 
-        $log = ActivityLog::factory()->count($count)->create();
+        $log = ActivityLogEntry::factory()->count($count)->create();
         foreach ([
             'id',
             'timestamp',
@@ -87,7 +87,7 @@ class LogTest extends TestCase {
     public function testFilterPermission() {
         foreach (['executive', 'exhibition', 'reservation'] as $perm) {
             $user = User::factory()->permission($perm)->create();
-            $log = ActivityLog::factory()->create();
+            $log = ActivityLogEntry::factory()->create();
             foreach ([
                 'id',
                 'timestamp',
