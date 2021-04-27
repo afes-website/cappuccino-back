@@ -37,6 +37,7 @@ class Exhibition extends Model {
     public function countGuest() {
         return $this
             ->guests()
+            ->whereNull('exited_at')
             ->select('term_id', DB::raw('count(1) as cnt'))
             ->groupBy('term_id')
             ->pluck('cnt', 'term_id');
