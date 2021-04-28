@@ -44,8 +44,8 @@ class GuestTest extends TestCase {
             'exh_id' => $guest->exh_id,
             'term' => [
                 'id' => $guest->term->id,
-                'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601ZuluString(),
-                'exit_scheduled_time' => $guest->term->exit_scheduled_time->toIso8601ZuluString(),
+                'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601String(),
+                'exit_scheduled_time' => $guest->term->exit_scheduled_time->toIso8601String(),
                 'guest_type' => $guest->term->guest_type
             ]
         ]);
