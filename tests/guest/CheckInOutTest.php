@@ -1,6 +1,7 @@
 <?php
 namespace Tests\guest;
 
+use Database\Factories\GuestFactory;
 use Tests\TestCase;
 use App\Models\Guest;
 use App\Models\Reservation;
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
 class CheckInOutTest extends TestCase {
 
     private function createGuestId(string $guest_type): string {
-        return config('cappuccino.guest_types')[$guest_type]['prefix'] . "-" . Str::random(5);
+        return GuestFactory::createGuestId($guest_type);
     }
 
     public function testEnter() {
