@@ -104,7 +104,7 @@ class ExhibitionTest extends TestCase {
             ->create();
         $term = Term::factory()->create();
 
-        $this->actingAs($user)->get("/exhibitions/$exhibition->id");
+        $this->actingAs($user)->get("/exhibitions/$user->id");
         $this->assertResponseOk();
 
         $this->seeJsonDoesntContains([
