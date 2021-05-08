@@ -12,6 +12,10 @@ class Reservation extends Model {
 
     protected $primaryKey = 'id';
 
+    protected $fillable = [
+        'term_id', 'people_count', 'name', 'address', 'cellphone',
+    ];
+
     protected $keyType = 'string';
 
     public $incrementing = false;
