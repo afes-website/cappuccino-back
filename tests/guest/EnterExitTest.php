@@ -101,12 +101,9 @@ class EnterExitTest extends TestCase {
     }
 
     public function testExitTimeExceeded() {
-        $term = Term::factory()->state([
-            'enter_scheduled_time' => DateTime::dateTimeBetween('-1 year', '-1 day'),
-            'exit_scheduled_time' => DateTime::dateTimeBetween('-1 year', '-1 day')
-        ]);
+        $term = Term::factory()->afterPeriod();
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
-        $guest = Guest::factory()->has($term)->create();
+        $guest = Guest::factory()->for($term)->create();
 
         $this->actingAs($user)->post(
             "/guests/$guest->id/enter",
