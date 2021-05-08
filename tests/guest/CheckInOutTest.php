@@ -19,7 +19,7 @@ class CheckInOutTest extends TestCase {
         return GuestFactory::createGuestId($guest_type);
     }
 
-    public function testEnter() {
+    public function testCheckIn() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
         $guest_id = $this->createGuestId($reservation->term->guest_type);
@@ -187,7 +187,7 @@ class CheckInOutTest extends TestCase {
         $this->assertEquals('WRONG_WRISTBAND_COLOR', $code);
     }
 
-    public function testExit() {
+    public function testCheckOut() {
         $user = User::factory()->permission('executive')->create();
         $guest = Guest::factory()->create();
 
@@ -197,7 +197,7 @@ class CheckInOutTest extends TestCase {
         $this->assertResponseOk();
     }
 
-    public function testExitGuestNotFound() {
+    public function testCheckOutGuestNotFound() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->create();
         $guest_id = $this->createGuestId($term->guest_type);
