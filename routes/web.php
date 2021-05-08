@@ -34,27 +34,25 @@ $router->group(['prefix' => 'reservations'], function () use ($router) {
     $router->get('{id}/check', ['uses' => 'ReservationController@check', 'middleware' => 'auth:reservation,executive']);
 });
 
-$router->group(['middleware' => 'auth:executive, exhibition'], function () use ($router) {
-    $router->group(['prefix' => 'guests'], function () use ($router) {
-        $router->post('check-in', ['uses' => 'GuestController@enter']);
-        $router->get('{id}', ['uses' => 'GuestController@show']);
-        $router->post('{id}/check-out', ['uses' => 'GuestController@exit']);
-        $router->post('{id}/enter', ['uses' => 'ExhibitionController@enter', 'middleware' => 'auth:exhibition']);
-        $router->post('{id}/exit', ['uses' => 'ExhibitionController@exit', 'middleware' => 'auth:exhibition']);
-    });
+$router->group(['prefix' => 'guests'], function () use ($router) {
+    $router->post('check-in', ['uses' => 'GuestController@enter', 'middleware' => 'auth:executive']);
+    $router->get('{id}', ['uses' => 'GuestController@show', 'middleware' => 'auth:executive']);
+    $router->post('{id}/check-out', ['uses' => 'GuestController@exit', 'middleware' => 'auth:executive']);
+    $router->post('{id}/enter', ['uses' => 'ExhibitionController@enter', 'middleware' => 'auth:exhibition, admin']);
+    $router->post('{id}/exit', ['uses' => 'ExhibitionController@exit', 'middleware' => 'auth:exhibition, admin']);
+});
 
-    $router->get('terms', ['uses' => 'TermController@index', 'middleware' => 'auth:executive,exhibition']);
+$router->get('terms', ['uses' => 'TermController@index', 'middleware' => 'auth:executive,exhibition']);
 
-    $router->get(
-        'logs',
-        ['uses' => 'ActivityLogController@index', 'middleware' => 'auth:executive,exhibition,reservation']
-    );
+$router->get(
+    'log',
+    ['uses' => 'ActivityLogController@index', 'middleware' => 'auth:executive,exhibition,reservation']
+);
 
 
-    $router->group(['prefix' => 'exhibitions'], function () use ($router) {
-        $router->get('{id}', ['uses' => 'ExhibitionController@show', 'middleware' => 'auth:exhibition']);
-        $router->get('/', ['uses' => 'ExhibitionController@index', 'middleware' => 'auth:exhibition,executive']);
-    });
+$router->group(['prefix' => 'exhibitions'], function () use ($router) {
+    $router->get('{id}', ['uses' => 'ExhibitionController@show', 'middleware' => 'auth:exhibition']);
+    $router->get('/', ['uses' => 'ExhibitionController@index', 'middleware' => 'auth:exhibition,executive']);
 });
 
 $router->options('{path:.*}', function () {
