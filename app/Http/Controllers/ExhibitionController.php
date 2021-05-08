@@ -64,7 +64,7 @@ class ExhibitionController extends Controller {
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
         if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
 
-        if ($guest->exh_id === $user_id)
+        if ($guest->exhibition_id === $exhibition->id)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_ENTERED');
 
         if ($exhibition->capacity === $exhibition->guest_count)
