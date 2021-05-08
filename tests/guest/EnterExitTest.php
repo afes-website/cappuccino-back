@@ -156,10 +156,11 @@ class EnterExitTest extends TestCase {
     }
     public function testExitAlreadyExited() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
+        $executive_user = User::factory()->permission('executive')->create();
         $guest = Guest::factory()->create();
 
-        $this->actingAs($user)->post(
-            "/guests/$guest->id/exit",
+        $this->actingAs($executive_user)->post(
+            "/guests/$guest->id/check-out"
         );
 
         $this->assertResponseOk();
