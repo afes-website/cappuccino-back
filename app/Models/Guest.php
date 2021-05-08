@@ -13,6 +13,8 @@ class Guest extends Model {
 
     protected $keyType = 'string';
 
+    protected $guarded = [];
+
     public $incrementing = false;
 
     public $timestamps = true;
