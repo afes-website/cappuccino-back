@@ -45,13 +45,19 @@ class ExhibitionController extends Controller {
         return response()->json(new ExhibitionResource($exhibition));
     }
 
-    public function enter(Request $request) {
+    public function enter(Request $request, $id) {
         $this->validate($request, [
-            'guest_id' => ['string', 'required']
+            'exhibition_id' => ['string', 'required']
         ]);
 
+        $exhibition_id = $request->exhibition_id;
+
         $user_id = $request->user()->id;
-        $guest = Guest::find($request->guest_id);
+        $guest = Guest::find($id);
+
+        if (!$request->user()->hasPermission('reservation') && $exhibition_id !== $user_id)
+            abort(403);
+
         $exhibition = Exhibition::find($exhibition_id);
         $current = Carbon::now();
 
@@ -82,14 +88,18 @@ class ExhibitionController extends Controller {
         return response()->json(new GuestResource($guest));
     }
 
-    public function exit(Request $request) {
+    public function exit(Request $request, $id) {
         $this->validate($request, [
-            'guest_id' => ['string', 'required']
+            'exhibition_id' => ['string', 'required']
         ]);
 
+        $exhibition_id = $request->exhibition_id;
         $user_id = $request->user()->id;
         $guest = Guest::find($request->guest_id);
         $exhibition = Exhibition::find($exhibition_id);
+
+        if (!$request->user()->hasPermission('reservation') && $exhibition_id !== $user_id)
+            abort(403);
 
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
         if (!$guest) throw new HttpExceptionWithErrorCode(400, 'GUEST_NOT_FOUND');
@@ -114,7 +124,7 @@ class ExhibitionController extends Controller {
         if (!$guest) {
             abort(500, 'ExhibitionRoom Not found');
         }
-        $logs = ActivityLogEntry::query()->where('exh_id', $id)->get();
+        $logs = ActivityLogEntry::query()->where('exhibition_id', $id)->get();
         return response()->json(ActivityLogEntryResource::collection($logs));
     }
 }
