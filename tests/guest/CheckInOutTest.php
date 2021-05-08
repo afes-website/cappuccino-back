@@ -61,7 +61,7 @@ class CheckInOutTest extends TestCase {
         $count = 5;
 
         $user = User::factory()->permission('executive')->create();
-        $term = Term::factory()->create();
+        $term = Term::factory()->inPeriod()->create();
         $used_id = [];
         for ($i = 0; $i < $count; ++$i) {
             $reservation_1 = Reservation::factory()->for($term)->create();
@@ -92,7 +92,7 @@ class CheckInOutTest extends TestCase {
 
     public function testReservationNotFound() {
         $user = User::factory()->permission('executive')->create();
-        $term = Term::factory()->create();
+        $term = Term::factory()->inPeriod()->create();
         $guest_id = $this->createGuestId($term->guest_type);
         $this->actingAs($user)->post(
             '/guests/check-in',
@@ -111,7 +111,7 @@ class CheckInOutTest extends TestCase {
         $count = 5;
 
         $user = User::factory()->permission('executive')->create();
-        $term = Term::factory()->create();
+        $term = Term::factory()->inPeriod()->create();
         $used_id = [];
         for ($i = 0; $i < $count; ++$i) {
             $reservation = Reservation::factory()->for($term)->create();
@@ -147,15 +147,9 @@ class CheckInOutTest extends TestCase {
 
     public function testOutOfReservationTime() {
         $user = User::factory()->permission('executive')->create();
-        $term[0] = Term::factory()->create([
-            'enter_scheduled_time' => DateTime::dateTimeBetween('-1 year', '-1 day'),
-            'exit_scheduled_time' => DateTime::dateTimeBetween('-1 year', '-1 day')
-        ]);
+        $term[0] = Term::factory()->afterPeriod()->create();
 
-        $term[1] = Term::factory()->create([
-            'enter_scheduled_time' => DateTime::dateTimeBetween('+1 day', '+1 year'),
-            'exit_scheduled_time' => DateTime::dateTimeBetween('+1 day', '+1 year')
-        ]);
+        $term[1] = Term::factory()->beforePeriod()->create();
 
         for ($i = 0; $i < 2; $i++) {
             $reservation = Reservation::factory()->for($term[$i])->create();
@@ -174,7 +168,7 @@ class CheckInOutTest extends TestCase {
 
     public function testWrongWristbandColor() {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Term::factory()->create();
+        $reservation = Term::factory()->inPeriod()->create();
         $guest_id = "XX" . "-" . Str::random(5); // 存在しないリストバンド prefix
         $this->actingAs($user)->post(
             '/guests/check-in',
@@ -199,7 +193,7 @@ class CheckInOutTest extends TestCase {
 
     public function testCheckOutGuestNotFound() {
         $user = User::factory()->permission('executive')->create();
-        $term = Term::factory()->create();
+        $term = Term::factory()->inPeriod()->create();
         $guest_id = $this->createGuestId($term->guest_type);
 
         $this->actingAs($user)->post(
