@@ -17,7 +17,7 @@ class ActivityLogEntryResource extends JsonResource {
             'id' => $this->id,
             'timestamp' => $this->timestamp->toIso8601String(),
             'guest' => new GuestResource($this->guest),
-            'exh_id' => $this->exh_id,
+            'exhibition_id' => $this->exhibition_id,
             'log_type' => $this->log_type
         ];
     }

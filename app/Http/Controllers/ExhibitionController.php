@@ -52,16 +52,16 @@ class ExhibitionController extends Controller {
 
         $user_id = $request->user()->id;
         $guest = Guest::find($request->guest_id);
-        $exh = Exhibition::find($user_id);
+        $exhibition = Exhibition::find($exhibition_id);
         $current = Carbon::now();
 
-        if (!$exh) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
+        if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
         if (!$guest) throw new HttpExceptionWithErrorCode(400, 'GUEST_NOT_FOUND');
 
         if ($guest->exh_id === $user_id)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_ENTERED');
 
-        if ($exh->capacity === $exh->guest_count)
+        if ($exhibition->capacity === $exhibition->guest_count)
             throw new HttpExceptionWithErrorCode(400, 'PEOPLE_LIMIT_EXCEEDED');
 
         if ($guest->exited_at !== null)
@@ -71,10 +71,10 @@ class ExhibitionController extends Controller {
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
 
-        $guest->update(['exh_id' => $exh->id]);
+        $guest->update(['exhibition_id' => $exhibition->id]);
 
         ActivityLogEntry::create([
-            'exh_id' => $exh->id,
+            'exhibition_id' => $exhibition->id,
             'log_type' => 'enter',
             'guest_id' => $guest->id
         ]);
@@ -89,18 +89,18 @@ class ExhibitionController extends Controller {
 
         $user_id = $request->user()->id;
         $guest = Guest::find($request->guest_id);
-        $exh = Exhibition::find($user_id);
+        $exhibition = Exhibition::find($exhibition_id);
 
-        if (!$exh) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
+        if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
         if (!$guest) throw new HttpExceptionWithErrorCode(400, 'GUEST_NOT_FOUND');
 
         if ($guest->exited_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
-        $guest->update(['exh_id' => null]);
+        $guest->update(['exhibition_id' => null]);
 
         ActivityLogEntry::create([
-            'exh_id' => $exh->id,
+            'exhibition_id' => $exhibition->id,
             'log_type' => 'exit',
             'guest_id' => $guest->id
         ]);
