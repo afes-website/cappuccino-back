@@ -62,7 +62,7 @@ class ExhibitionController extends Controller {
         $current = Carbon::now();
 
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
-        if (!$guest) throw new HttpExceptionWithErrorCode(400, 'GUEST_NOT_FOUND');
+        if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
 
         if ($guest->exh_id === $user_id)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_ENTERED');
@@ -102,7 +102,7 @@ class ExhibitionController extends Controller {
             abort(403);
 
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
-        if (!$guest) throw new HttpExceptionWithErrorCode(400, 'GUEST_NOT_FOUND');
+        if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
 
         if ($guest->exited_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
