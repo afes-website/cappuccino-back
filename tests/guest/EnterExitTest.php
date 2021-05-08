@@ -65,7 +65,7 @@ class EnterExitTest extends TestCase {
         $guest_count = 5;
         $exhibition = Exhibition::factory()
             ->has(Guest::factory()->count($guest_count))
-            ->state(['limit' => $guest_count]);
+            ->state(['capacity' => $guest_count]);
         $user = User::factory()->permission('exhibition')->has($exhibition)->create();
         $guest = Guest::factory()->create();
         $this->actingAs($user)->post(
