@@ -67,7 +67,7 @@ class ExhibitionController extends Controller {
         if ($guest->exhibition_id === $exhibition->id)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_ENTERED');
 
-        if ($exhibition->capacity === $exhibition->guest_count)
+        if ($exhibition->capacity === $exhibition->guests->count())
             throw new HttpExceptionWithErrorCode(400, 'PEOPLE_LIMIT_EXCEEDED');
 
         if ($guest->exited_at !== null)
