@@ -136,6 +136,7 @@ class EnterExitTest extends TestCase {
 
         $this->actingAs($user)->post(
             "/guests/$guest->id/exit",
+            ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
     }
@@ -145,6 +146,7 @@ class EnterExitTest extends TestCase {
         Guest::factory()->create();
         $this->actingAs($user)->post(
             "/guests/GB-00000/exit",
+            ['exhibition_id' => $user->id]
         );
 
         $this->assertResponseStatus(404);
@@ -164,6 +166,7 @@ class EnterExitTest extends TestCase {
 
         $this->actingAs($user)->post(
             "/guests/$guest->id/exit",
+            ['exhibition_id' => $user->id]
         );
 
         $this->assertResponseStatus(400);
@@ -178,6 +181,7 @@ class EnterExitTest extends TestCase {
 
         $this->actingAs($user)->post(
             "/guests/$guest->id/exit",
+            ['exhibition_id' => $user->id]
         );
     }
 
