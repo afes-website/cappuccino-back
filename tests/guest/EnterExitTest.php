@@ -111,17 +111,18 @@ class EnterExitTest extends TestCase {
     }
 
     public function testExhibitionNotFound() {
-    $user = User::factory()->permission('exhibition')->create();
-    $guest = Guest::factory()->create();
+        $user = User::factory()->permission('exhibition')->create();
+        $guest = Guest::factory()->create();
 
-    $this->actingAs($user)->post(
-        "/guests/$guest->id/enter",
-    );
+        $this->actingAs($user)->post(
+            "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
+        );
 
-    $this->assertResponseStatus(400);
-    $this->receiveJson();
-    $code = json_decode($this->response->getContent())->error_code;
-    $this->assertEquals('EXHIBITION_NOT_FOUND', $code);
+        $this->assertResponseStatus(400);
+        $this->receiveJson();
+        $code = json_decode($this->response->getContent())->error_code;
+        $this->assertEquals('EXHIBITION_NOT_FOUND', $code);
     }
 
     public function testExit() {
