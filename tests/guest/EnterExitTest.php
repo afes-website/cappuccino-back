@@ -184,7 +184,7 @@ class EnterExitTest extends TestCase {
     }
 
     public function testForbidden() {
-        $users[] = User::factory()->permission('general')->create();
+        $users[] = User::factory()->permission('executive')->create();
         $users[] =  User::factory()->permission('admin')->create(); // ADMIN perm doesnt mean all perm
         $users[] = User::factory()->create();
 

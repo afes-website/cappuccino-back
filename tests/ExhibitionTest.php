@@ -40,7 +40,7 @@ class ExhibitionTest extends TestCase {
                 'name' => $exhibition->name,
                 'thumbnail_image_id' => $exhibition->thumbnail_image_id,
             ],
-            'limit' => $exhibition->capacity,
+            'capacity' => $exhibition->capacity,
             'count' => [],
         ]);
     }
