@@ -18,6 +18,7 @@ class EnterExitTest extends TestCase {
         $guest = Guest::factory()->create();
         $this->actingAs($user)->post(
             "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
     }
@@ -27,6 +28,7 @@ class EnterExitTest extends TestCase {
         Guest::factory()->create();
         $this->actingAs($user)->post(
             "/guests/GB-00000/enter",
+            ['exhibition_id' => $user->id]
         );
 
         $this->assertResponseStatus(404);
@@ -44,11 +46,13 @@ class EnterExitTest extends TestCase {
         $guest = Guest::factory()->create();
         $this->actingAs($user)->post(
             "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
 
         $this->actingAs($user)->post(
             "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
         );
 
         $this->assertResponseStatus(400);
@@ -66,6 +70,7 @@ class EnterExitTest extends TestCase {
         $guest = Guest::factory()->create();
         $this->actingAs($user)->post(
             "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
         );
         $this->assertResponseStatus(400);
         $this->receiveJson();
@@ -85,6 +90,7 @@ class EnterExitTest extends TestCase {
 
         $this->actingAs($user)->post(
             "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
         );
 
         $this->assertResponseStatus(400);
@@ -103,6 +109,7 @@ class EnterExitTest extends TestCase {
 
         $this->actingAs($user)->post(
             "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
         );
         $this->assertResponseStatus(400);
         $this->receiveJson();
