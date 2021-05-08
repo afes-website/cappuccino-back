@@ -35,9 +35,9 @@ $router->group(['prefix' => 'reservations'], function () use ($router) {
 });
 
 $router->group(['prefix' => 'guests'], function () use ($router) {
-    $router->post('check-in', ['uses' => 'GuestController@enter', 'middleware' => 'auth:executive']);
+    $router->post('check-in', ['uses' => 'GuestController@checkIn', 'middleware' => 'auth:executive']);
     $router->get('{id}', ['uses' => 'GuestController@show', 'middleware' => 'auth:executive']);
-    $router->post('{id}/check-out', ['uses' => 'GuestController@exit', 'middleware' => 'auth:executive']);
+    $router->post('{id}/check-out', ['uses' => 'GuestController@checkOut', 'middleware' => 'auth:executive']);
     $router->post('{id}/enter', ['uses' => 'ExhibitionController@enter', 'middleware' => 'auth:exhibition, admin']);
     $router->post('{id}/exit', ['uses' => 'ExhibitionController@exit', 'middleware' => 'auth:exhibition, admin']);
 });
