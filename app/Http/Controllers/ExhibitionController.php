@@ -95,7 +95,7 @@ class ExhibitionController extends Controller {
 
         $exhibition_id = $request->exhibition_id;
         $user_id = $request->user()->id;
-        $guest = Guest::find($request->guest_id);
+        $guest = Guest::find($id);
         $exhibition = Exhibition::find($exhibition_id);
 
         if (!$request->user()->hasPermission('reservation') && $exhibition_id !== $user_id)
