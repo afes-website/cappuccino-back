@@ -168,8 +168,16 @@ class CheckInOutTest extends TestCase {
 
     public function testWrongWristbandColor() {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Term::factory()->inPeriod()->create();
-        $guest_id = "XX" . "-" . Str::random(5); // 存在しないリストバンド prefix
+        $reservation = Reservation::factory()->create();
+        $id_len = 5;
+        $valid_character = '234578acdefghijkmnprstuvwxyz';
+        $character_count = strlen($valid_character);
+        $id = '';
+        for ($i = 0; $i < $id_len; $i++) {
+            $id .= $valid_character[rand(0, $character_count - 1)];
+        }
+        $guest_id = "XX" . "-" . $id; //存在しない Prefix
+
         $this->actingAs($user)->post(
             '/guests/check-in',
             ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
