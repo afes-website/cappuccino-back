@@ -41,7 +41,7 @@ class GuestTest extends TestCase {
             'id' => $guest->id,
             'entered_at' => $guest->entered_at,
             'exited_at' => $guest->exited_at,
-            'exh_id' => $guest->exh_id,
+            'exhibition_id' => $guest->exhibition_id,
             'term' => [
                 'id' => $guest->term->id,
                 'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601String(),

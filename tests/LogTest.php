@@ -20,9 +20,9 @@ class LogTest extends TestCase {
         $this->seeJsonEquals([
             [
                 'id' => $log->id,
-                'exh_id' => $log->exhihibion->id,
                 'guest' => new GuestResource($user),
                 'timestamp' => $log->timestamp->toIso8601String(),
+                'exhibition_id' => $log->exhibition->id,
                 'log_type' => $log->log_type,
             ],
         ]);
@@ -51,13 +51,9 @@ class LogTest extends TestCase {
             'guest_id',
             'log_type',
             'reservation_id',
-            'exh_id',
+            'exhibition_id',
         ] as $key) {
-            if ($key === 'exh_id') {
-                $item = $log[0]->{'exhibition_id'};
-            } else {
-                $item = $log[0]->{$key};
-            }
+            $item = $log[0]->{$key};
             $this->call('GET', '/log', [$key => $item]);
             $this->assertResponseOk();
 
@@ -99,7 +95,7 @@ class LogTest extends TestCase {
                 $this->assertResponseOk();
             }
 
-            $this->actingAs($user)->get('/log', ['exh_id' => $log->exhibition_id]);
+            $this->actingAs($user)->get('/log', ['exhibition_id' => $log->exhibition_id]);
             if ($perm === 'reservation') $this->assertResponseOk();
             else $this->assertResponseStatus(403);
         }
