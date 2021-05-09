@@ -18,7 +18,10 @@ class GuestFactory extends Factory {
      */
     protected $model = Guest::class;
 
-    public static function createGuestId(string $guest_type): string {
+    public static function createGuestId(string $guest_type = null): string {
+        if ($guest_type === null) {
+            $guest_type = array_rand(config('cappuccino.guest_types'));
+        }
         do {
             $id_len = 5;
             $valid_character = '234578acdefghijkmnprstuvwxyz';
