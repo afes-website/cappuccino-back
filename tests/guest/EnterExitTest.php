@@ -211,7 +211,7 @@ class EnterExitTest extends TestCase {
         $users[] = User::factory()->create();
 
         $paths = [
-            "/guests/GB_00000000/enter", "/guests/GB_00000000/exit"
+            "/guests/GB_00000000/enter", "/guests/GB_00000000/exit",
         ];
 
         foreach ($users as $user) {
@@ -225,7 +225,7 @@ class EnterExitTest extends TestCase {
     public function testGuest() {
         $guest_id = Guest::factory()->create()->id;
         $paths = [
-            "/guests/$guest_id/enter", "/guests/$guest_id/exit"
+            "/guests/$guest_id/enter", "/guests/$guest_id/exit",
         ];
 
         foreach ($paths as $path) {
