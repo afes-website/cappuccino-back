@@ -2,6 +2,8 @@
 namespace Tests\guest;
 
 use App\Models\Exhibition;
+use Database\Factories\GuestFactory;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 use App\Models\Guest;
 use App\Models\Term;
@@ -26,8 +28,22 @@ class EnterExitTest extends TestCase {
     public function testGuestNotFound() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
         Guest::factory()->create();
+        do {
+            $guest_id = GuestFactory::createGuestId();
+        } while (Guest::find($guest_id));
         $this->actingAs($user)->post(
-            "/guests/GB-00000/enter",
+            "/guests/{$guest_id}/enter",
+            ['exhibition_id' => $user->id]
+        );
+
+        $this->assertResponseStatus(404);
+        $this->receiveJson();
+        $code = json_decode($this->response->getContent())->error_code;
+        $this->assertEquals('GUEST_NOT_FOUND', $code);
+
+        $guest_id = Str::random(8);
+        $this->actingAs($user)->post(
+            "/guests/{$guest_id}/enter",
             ['exhibition_id' => $user->id]
         );
 
