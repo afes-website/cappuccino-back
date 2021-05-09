@@ -16,7 +16,7 @@ class LogTest extends TestCase {
 
         $this->actingAs($user)->get('/log');
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $this->seeJsonEquals([
             [
                 'id' => $log->id,
@@ -35,7 +35,7 @@ class LogTest extends TestCase {
 
         $this->actingAs($user)->get('/log');
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $this->assertCount($count, json_decode($this->response->getContent()));
     }
 
@@ -57,7 +57,7 @@ class LogTest extends TestCase {
             $this->call('GET', '/log', [$key => $item]);
             $this->assertResponseOk();
 
-            $this->receiveJson();
+            $this->assertJson($this->response->getContent());
             $ret_articles = json_decode($this->response->getContent());
             foreach ($ret_articles as $ret_article) {
                 $this->assertEquals($ret_article->{$key}, $item);

@@ -24,7 +24,7 @@ class GuestTest extends TestCase {
 
         $this->actingAs($user)->get('/guests');
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $res = json_decode($this->response->getContent());
         $this->assertCount($term_count * $guest_count, $res);
     }
@@ -35,7 +35,7 @@ class GuestTest extends TestCase {
 
         $this->actingAs($user)->get("/guests/$guest->id");
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
 
         $this->seeJsonEquals([
             'id' => $guest->id,

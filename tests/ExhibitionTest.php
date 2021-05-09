@@ -21,7 +21,7 @@ class ExhibitionTest extends TestCase {
 
         $this->actingAs($user)->get('/exhibitions');
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $res = json_decode($this->response->getContent());
         $this->assertCount($count, get_object_vars($res->exh));
     }
@@ -32,7 +32,7 @@ class ExhibitionTest extends TestCase {
 
         $this->actingAs($user)->get("/exhibitions/$exhibition->id");
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
 
         $this->seeJsonContains([
             'info' => [
@@ -63,7 +63,7 @@ class ExhibitionTest extends TestCase {
 
         $this->actingAs($user)->get("/exhibitions/$exhibition->id");
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
 
         $this->seeJsonContains([
             'count' => [
@@ -90,7 +90,7 @@ class ExhibitionTest extends TestCase {
 
         $this->actingAs($user)->get("/exhibitions/$exhibition->id");
         $this->assertResponseOk();
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
 
         $this->assertEquals($guest_count, json_decode($this->response->getContent())->count->{$term->id});
     }

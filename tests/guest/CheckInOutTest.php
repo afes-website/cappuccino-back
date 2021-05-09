@@ -51,7 +51,7 @@ class CheckInOutTest extends TestCase {
                 ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
             );
             $this->assertResponseStatus(400);
-            $this->receiveJson();
+            $this->assertJson($this->response->getContent());
             $code = json_decode($this->response->getContent())->error_code;
             $this->assertEquals('INVALID_WRISTBAND_CODE', $code);
         }
@@ -84,7 +84,7 @@ class CheckInOutTest extends TestCase {
             );
 
             $this->assertResponseStatus(400);
-            $this->receiveJson();
+            $this->assertJson($this->response->getContent());
             $code = json_decode($this->response->getContent())->error_code;
             $this->assertEquals('ALREADY_USED_WRISTBAND', $code);
         }
@@ -100,7 +100,7 @@ class CheckInOutTest extends TestCase {
         );
 
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('RESERVATION_NOT_FOUND', $code);
     }
@@ -139,7 +139,7 @@ class CheckInOutTest extends TestCase {
             );
 
             $this->assertResponseStatus(400);
-            $this->receiveJson();
+            $this->assertJson($this->response->getContent());
             $code = json_decode($this->response->getContent())->error_code;
             $this->assertEquals('ALREADY_ENTERED_RESERVATION', $code);
         }
@@ -160,7 +160,7 @@ class CheckInOutTest extends TestCase {
             );
 
             $this->assertResponseStatus(400);
-            $this->receiveJson();
+            $this->assertJson($this->response->getContent());
             $code = json_decode($this->response->getContent())->error_code;
             $this->assertEquals('OUT_OF_RESERVATION_TIME', $code);
         }
@@ -184,7 +184,7 @@ class CheckInOutTest extends TestCase {
         );
 
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('WRONG_WRISTBAND_COLOR', $code);
     }
@@ -209,7 +209,7 @@ class CheckInOutTest extends TestCase {
             ['guest_id' => $guest_id]
         );
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_NOT_FOUND', $code);
     }
@@ -225,7 +225,7 @@ class CheckInOutTest extends TestCase {
             "/guests/$guest->id/check-out",
         );
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_ALREADY_EXITED', $code);
     }

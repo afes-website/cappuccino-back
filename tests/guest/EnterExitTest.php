@@ -37,7 +37,7 @@ class EnterExitTest extends TestCase {
         );
 
         $this->assertResponseStatus(404);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_NOT_FOUND', $code);
 
@@ -48,7 +48,7 @@ class EnterExitTest extends TestCase {
         );
 
         $this->assertResponseStatus(404);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_NOT_FOUND', $code);
     }
@@ -72,7 +72,7 @@ class EnterExitTest extends TestCase {
         );
 
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_ALREADY_ENTERED', $code);
     }
@@ -89,7 +89,7 @@ class EnterExitTest extends TestCase {
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('PEOPLE_LIMIT_EXCEEDED', $code);
     }
@@ -111,7 +111,7 @@ class EnterExitTest extends TestCase {
         );
 
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_ALREADY_EXITED', $code);
     }
@@ -126,7 +126,7 @@ class EnterExitTest extends TestCase {
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('EXIT_TIME_EXCEEDED', $code);
     }
@@ -141,7 +141,7 @@ class EnterExitTest extends TestCase {
         );
 
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('EXHIBITION_NOT_FOUND', $code);
     }
@@ -166,7 +166,7 @@ class EnterExitTest extends TestCase {
         );
 
         $this->assertResponseStatus(404);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_NOT_FOUND', $code);
     }
@@ -187,7 +187,7 @@ class EnterExitTest extends TestCase {
         );
 
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('GUEST_ALREADY_EXITED', $code);
     }
@@ -201,7 +201,7 @@ class EnterExitTest extends TestCase {
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseStatus(400);
-        $this->receiveJson();
+        $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('EXHIBITION_NOT_FOUND', $code);
     }
