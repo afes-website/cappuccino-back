@@ -20,9 +20,9 @@ class LogTest extends TestCase {
         $this->seeJsonEquals([
             [
                 'id' => $log->id,
-                'guest' => new GuestResource($user),
                 'timestamp' => $log->timestamp->toIso8601String(),
                 'exhibition_id' => $log->exhibition->id,
+                'guest' => new GuestResource($log->guest),
                 'log_type' => $log->log_type,
             ],
         ]);
