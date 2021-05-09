@@ -35,6 +35,7 @@ $router->group(['prefix' => 'reservations'], function () use ($router) {
 });
 
 $router->group(['prefix' => 'guests'], function () use ($router) {
+    $router->get('/', ['uses' => 'GuestController@index', 'middleware' => 'auth:executive']);
     $router->post('check-in', ['uses' => 'GuestController@checkIn', 'middleware' => 'auth:executive']);
     $router->get('{id}', ['uses' => 'GuestController@show', 'middleware' => 'auth:executive']);
     $router->post('{id}/check-out', ['uses' => 'GuestController@checkOut', 'middleware' => 'auth:executive']);
