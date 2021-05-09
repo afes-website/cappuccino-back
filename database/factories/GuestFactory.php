@@ -42,7 +42,7 @@ class GuestFactory extends Factory {
      */
     public function definition() {
         return [
-            'term_id'=>Term::factory(),
+            'term_id'=>Term::factory()->inPeriod(),
             'reservation_id'=>Reservation::factory(),
             'id'=> function (array $attributes) {
                 $guest_type = Term::find($attributes['term_id'])->guest_type;
