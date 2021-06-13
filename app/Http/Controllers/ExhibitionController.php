@@ -73,7 +73,7 @@ class ExhibitionController extends Controller {
         if ($guest->exited_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
-        if (new Carbon($guest->term->exit_scheduled_time) < $current)
+        if ($guest->term->exit_scheduled_time < $current)
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
 
