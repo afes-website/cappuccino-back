@@ -59,18 +59,51 @@ class EnterTest extends TestCase {
 
     /**
      * 権限チェック
-     * executive, 権限なし のユーザーの実行時に 403 が返ってきている
+     * - executive, 権限なし の場合は指定できない
+     * - admin 権限があれば任意の展示を指定できる
+     * - exhibition 権限のみのときは自分の展示のみ指定できる
+     * 上記のルールに違反したときに 403 が、そうでない場合は正しく処理がされている事を確認する
      */
     public function testPermission() {
-        $users[] = User::factory()->permission('executive')->create();
-        $users[] = User::factory()->create();
+        $not_permitted_users[] = User::factory()->permission('executive')->create();
+        $not_permitted_users[] = User::factory()->create();
 
-        foreach ($users as $user) {
+        foreach ($not_permitted_users as $user) {
             $this->actingAs($user)->post("/guests/GB_00000000/enter");
             $this->assertResponseStatus(403);
         }
-        
-        //TODO: Admin の時は任意の展示を触れて、Exhibitionは自分のしか触れない
+
+        $admin_users[] = User::factory()->permission('admin')->has(Exhibition::factory())->create();
+        $admin_users[] = User::factory()->permission('admin', 'exhibition')->has(Exhibition::factory())->create();
+        $other_exhibition = Exhibition::factory()->create();
+
+        foreach ($admin_users as $user) {
+            foreach ([true, false] as $mode) {
+                $guest = Guest::factory()->create();
+                $exh_id = $mode === true ? $user->id : $other_exhibition->id;
+                $this->actingAs($user)->post(
+                    "/guests/$guest->id/enter",
+                    ['exhibition_id' => $exh_id]
+                );
+                $this->assertResponseOk();
+            }
+        }
+
+        $exhibition_user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
+
+        $guest = Guest::factory()->create();
+        $this->actingAs($exhibition_user)->post(
+            "/guests/$guest->id/enter",
+            ['exhibition_id' => $exhibition_user->id]
+        );
+        $this->assertResponseOk();
+
+        $guest = Guest::factory()->create();
+        $this->actingAs($exhibition_user)->post(
+            "/guests/$guest->id/enter",
+            ['exhibition_id' => $other_exhibition->id]
+        );
+        $this->assertResponseStatus(403);
     }
 
     /**
