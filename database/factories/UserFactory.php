@@ -33,7 +33,7 @@ class UserFactory extends Factory {
         ];
     }
 
-    public function permission($perm) {
+    public function permission(...$permissions) {
         $roles = [
             'admin' => 'perm_admin',
             'reservation' => 'perm_reservation',
@@ -42,10 +42,12 @@ class UserFactory extends Factory {
             'teacher' => 'perm_teacher'
         ];
 
-        return $this->state(function () use ($roles, $perm) {
-            return [
-                $roles[$perm] => true,
-            ];
-        });
+        $states = [];
+
+        foreach ($permissions as $permission) {
+            $states[$roles[$permission]] = true;
+        }
+
+        return $this->state($states);
     }
 }
