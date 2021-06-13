@@ -28,7 +28,7 @@ class ExhibitionController extends Controller {
             if ($cnt !== 0) $all_counts[$term->id] = $cnt;
         }
         return response()->json([
-            'exh' => $exh_status,
+            'exhibition' => $exh_status,
             'all' => [
                 'count' => $all_counts,
                 'limit' => $all_limit
