@@ -59,7 +59,6 @@ class ExhibitionController extends Controller {
             abort(403);
 
         $exhibition = Exhibition::find($exhibition_id);
-        $current = Carbon::now();
 
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
         if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
@@ -73,7 +72,7 @@ class ExhibitionController extends Controller {
         if ($guest->exited_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
-        if ($guest->term->exit_scheduled_time < $current)
+        if ($guest->term->exit_scheduled_time < Carbon::now())
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
 
