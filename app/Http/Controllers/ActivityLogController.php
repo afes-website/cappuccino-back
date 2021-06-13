@@ -17,20 +17,11 @@ class ActivityLogController extends BaseController {
             'guest_id' => ['string'],
             'exhibition_id' => ['string'],
             'log_type' => ['string'],
-            'reservation_id' => ['string'],
         ]);
         $log = ActivityLogEntry::query();
 
 
         foreach ($query as $i => $value) {
-            if ($i == 'reservation_id') {
-                if (!$request->user()->hasPermission('reservation')) {
-                    abort(403);
-                }
-                if ($reservation = Reservation::find($value)) {
-                    $log->where('guest_id', $reservation->guest->id);
-                } else return response([]);
-            }
             $log->where($i, $value);
         }
 
