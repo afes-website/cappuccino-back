@@ -34,6 +34,7 @@ class GuestTest extends TestCase {
         $guest = Guest::factory()->create();
 
         $this->actingAs($user)->get("/guests/$guest->id");
+        $this->actingAs($user)->get("/guests/{$guest->id}");
         $this->assertResponseOk();
         $this->assertJson($this->response->getContent());
 
