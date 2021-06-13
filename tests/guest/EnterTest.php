@@ -1,6 +1,7 @@
 <?php
 namespace Tests\guest;
 
+use App\Models\ActivityLogEntry;
 use App\Models\Exhibition;
 use Database\Factories\GuestFactory;
 use Illuminate\Support\Str;
@@ -16,7 +17,8 @@ class EnterTest extends TestCase {
 
     /**
      * 展示入室のテスト
-     * Guest オブジェクトが返ってきている
+     * Guest の滞在中の展示が更新されている
+     * ActivityLog が生成されている
      */
     public function testEnter() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
@@ -26,7 +28,14 @@ class EnterTest extends TestCase {
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
-        // TODO: Guest が返ってくるか
+        $raw_guest = json_decode($this->response->getContent());
+        $this->assertEquals($user->exhibition->id, $raw_guest->exhibition_id);
+        $this->assertTrue(
+            ActivityLogEntry::query()
+                ->where('guest_id', $guest->id)
+                ->where('exhibition_id', $user->exhibition->id)
+                ->exists()
+        );
     }
 
     /**
