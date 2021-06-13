@@ -25,41 +25,6 @@ class ExitTest extends TestCase {
         $this->assertResponseOk();
     }
 
-    public function testGuestNotFound() {
-        $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
-        Guest::factory()->create();
-        $this->actingAs($user)->post(
-            "/guests/GB-00000/exit",
-            ['exhibition_id' => $user->id]
-        );
-
-        $this->assertResponseStatus(404);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('GUEST_NOT_FOUND', $code);
-    }
-    public function testAlreadyExited() {
-        $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
-        $executive_user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
-
-        $this->actingAs($executive_user)->post(
-            "/guests/$guest->id/check-out"
-        );
-
-        $this->assertResponseOk();
-
-        $this->actingAs($user)->post(
-            "/guests/$guest->id/exit",
-            ['exhibition_id' => $user->id]
-        );
-
-        $this->assertResponseStatus(400);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('GUEST_ALREADY_EXITED', $code);
-    }
-
     public function testExhibitionNotFound() {
         $user = User::factory()->permission('exhibition')->create();
         $guest = Guest::factory()->create();
@@ -82,6 +47,45 @@ class ExitTest extends TestCase {
             $this->actingAs($user)->post("/guests/GB_00000000/exit");
             $this->assertResponseStatus(403);
         }
+    }
+
+    public function testGuestNotFound() {
+        $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
+        Guest::factory()->create();
+        $this->actingAs($user)->post(
+            "/guests/GB-00000/exit",
+            ['exhibition_id' => $user->id]
+        );
+
+        $this->assertResponseStatus(404);
+        $this->assertJson($this->response->getContent());
+        $code = json_decode($this->response->getContent())->error_code;
+        $this->assertEquals('GUEST_NOT_FOUND', $code);
+    }
+
+    public function testAlreadyExited() {
+        $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
+        $executive_user = User::factory()->permission('executive')->create();
+        $guest = Guest::factory()->create();
+
+        $this->actingAs($executive_user)->post(
+            "/guests/$guest->id/check-out"
+        );
+
+        $this->assertResponseOk();
+
+        $this->actingAs($user)->post(
+            "/guests/$guest->id/exit",
+            ['exhibition_id' => $user->id]
+        );
+
+        $this->assertResponseStatus(400);
+        $this->assertJson($this->response->getContent());
+        $code = json_decode($this->response->getContent())->error_code;
+        $this->assertEquals('GUEST_ALREADY_EXITED', $code);
+    }
+
+    public function testNoMatterWhereGuestIsIn() {
     }
 
     public function testGuest() {
