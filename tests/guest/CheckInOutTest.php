@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  */
 class CheckInOutTest extends TestCase {
 
-    private function createGuestId(string $guest_type): string {
+    private static function createGuestId(string $guest_type): string {
         return GuestFactory::createGuestId($guest_type);
     }
 
