@@ -1,6 +1,7 @@
 <?php
 namespace Tests\guest;
 
+use App\Models\ActivityLogEntry;
 use App\Models\Exhibition;
 use Database\Factories\GuestFactory;
 use Illuminate\Support\Str;
@@ -23,6 +24,15 @@ class ExitTest extends TestCase {
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
+
+        $raw_guest = json_decode($this->response->getContent());
+        $this->assertNull($raw_guest->exhibition_id);
+        $this->assertTrue(
+            ActivityLogEntry::query()
+                ->where('guest_id', $guest->id)
+                ->where('exhibition_id', $user->exhibition->id)
+                ->exists()
+        );
     }
 
     public function testExhibitionNotFound() {
