@@ -116,10 +116,11 @@ class CheckInOutTest extends TestCase {
         $reservation = Reservation::factory()->create();
 
         for ($i = 0; $i < $count; ++$i) {
+            // $prefix !== 2 && $id !== 5 となるように変数の値を決定する
             do {
                 $prefix = rand(1, 10);
                 $id = rand(1, 10);
-            } while ($prefix == 2 && $id == 5);
+            } while ($prefix === 2 && $id === 5);
             $invalid_codes[] = Str::random($prefix) . '-' . Str::random($id);
         }
 
