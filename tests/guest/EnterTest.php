@@ -137,28 +137,22 @@ class EnterTest extends TestCase {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
         Guest::factory()->create();
         do {
-            $guest_id = GuestFactory::createGuestId();
-        } while (Guest::find($guest_id));
-        $this->actingAs($user)->post(
-            "/guests/{$guest_id}/enter",
-            ['exhibition_id' => $user->id]
-        );
+            $id = GuestFactory::createGuestId();
+        } while (Guest::find($id));
+        $guests_id[] = $id;
+        $guests_id[] = Str::random(8);
 
-        $this->assertResponseStatus(404);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('GUEST_NOT_FOUND', $code);
+        foreach ($guests_id as $guest_id) {
+            $this->actingAs($user)->post(
+                "/guests/{$guest_id}/enter",
+                ['exhibition_id' => $user->id]
+            );
 
-        $guest_id = Str::random(8);
-        $this->actingAs($user)->post(
-            "/guests/{$guest_id}/enter",
-            ['exhibition_id' => $user->id]
-        );
-
-        $this->assertResponseStatus(404);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('GUEST_NOT_FOUND', $code);
+            $this->assertResponseStatus(404);
+            $this->assertJson($this->response->getContent());
+            $code = json_decode($this->response->getContent())->error_code;
+            $this->assertEquals('GUEST_NOT_FOUND', $code);
+        }
     }
 
     /**
