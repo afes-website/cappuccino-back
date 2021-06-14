@@ -75,7 +75,7 @@ class GuestController extends Controller {
 
         $guest = Guest::find($id);
         if (!$guest) {
-            throw new HttpExceptionWithErrorCode(400, 'GUEST_NOT_FOUND');
+            throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
         }
 
         if ($guest->exited_at !== null) {
