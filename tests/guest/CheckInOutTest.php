@@ -212,10 +212,7 @@ class CheckInOutTest extends TestCase {
             "/guests/$guest_id/check-out",
             ['guest_id' => $guest_id]
         );
-        $this->assertResponseStatus(400);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('GUEST_NOT_FOUND', $code);
+        $this->assertResponseStatus(404);
     }
 
     public function testAlreadyExited() {
