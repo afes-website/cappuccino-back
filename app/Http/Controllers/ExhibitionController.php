@@ -47,15 +47,12 @@ class ExhibitionController extends Controller {
             'exhibition_id' => ['string', 'required']
         ]);
 
-        $exhibition_id = $request->exhibition_id;
-
-        $user_id = $request->user()->id;
         $guest = Guest::find($id);
 
-        if (!$request->user()->hasPermission('admin') && $exhibition_id !== $user_id)
+        if (!$request->user()->hasPermission('admin') && $request->exhibition_id !== $request->user()->id)
             abort(403);
 
-        $exhibition = Exhibition::find($exhibition_id);
+        $exhibition = Exhibition::find($request->exhibition_id);
 
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
         if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
