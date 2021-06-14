@@ -41,9 +41,7 @@ class GuestController extends Controller {
 
         if (!$reservation) throw new HttpExceptionWithErrorCode(400, 'RESERVATION_NOT_FOUND');
 
-        $reservation_error_code = $reservation->getErrorCode();
-
-        if ($reservation_error_code !== null) {
+        if (($reservation_error_code = $reservation->getErrorCode()) !== null) {
             throw new HttpExceptionWithErrorCode(400, $reservation_error_code);
         }
 
