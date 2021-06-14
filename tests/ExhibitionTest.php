@@ -1,10 +1,6 @@
 <?php
 namespace Tests;
 
-/*
- * guest/:get guest/$id:get
- */
-
 use App\Models\Exhibition;
 use App\Models\Guest;
 use App\Models\Term;
@@ -12,6 +8,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Support\Str;
+
+/**
+ * - guest/:get
+ * - guest/$id:get
+ */
 
 class ExhibitionTest extends TestCase {
     public function testGetAll() {

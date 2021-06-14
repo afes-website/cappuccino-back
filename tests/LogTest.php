@@ -1,13 +1,13 @@
 <?php
 namespace Tests;
 
-/*
- * log/
- */
-
 use App\Resources\GuestResource;
 use App\Models\ActivityLogEntry;
 use App\Models\User;
+
+/**
+ * - log/
+ */
 
 class LogTest extends TestCase {
     public function testData() {

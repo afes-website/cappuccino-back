@@ -12,8 +12,9 @@ use App\Models\User;
 use Faker\Provider\DateTime;
 
 /**
- * guests/$id/exit:post
+ * - guests/$id/exit:post
  */
+
 class ExitTest extends TestCase {
     public function testExit() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();

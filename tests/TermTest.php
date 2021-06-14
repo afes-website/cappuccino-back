@@ -1,12 +1,12 @@
 <?php
 namespace Tests;
 
-/*
- * terms/
- */
-
 use App\Models\Term;
 use App\Models\User;
+
+/**
+ * - terms/
+ */
 
 class TermTest extends TestCase {
     public function testData() {

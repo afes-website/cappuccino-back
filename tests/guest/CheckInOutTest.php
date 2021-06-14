@@ -10,9 +10,11 @@ use App\Models\User;
 use Faker\Provider\DateTime;
 use Illuminate\Support\Str;
 
-/*
- * guests/check-in, guests/$id/check-out:post
+/**
+ * - guests/check-in
+ * - guests/$id/check-out:post
  */
+
 class CheckInOutTest extends TestCase {
 
     private static function createGuestId(string $guest_type): string {

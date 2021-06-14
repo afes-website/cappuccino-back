@@ -2,15 +2,15 @@
 namespace Tests\guest;
 
 use Tests\TestCase;
-
-/*
- * guest/:get guest/$id:get
- */
-
 use App\Models\Guest;
 use App\Models\Term;
 use App\Models\User;
 use Illuminate\Support\Str;
+
+/**
+ * - guest:get
+ * - guest/$id:get
+ */
 
 class GuestTest extends TestCase {
     public function testGetAll() {

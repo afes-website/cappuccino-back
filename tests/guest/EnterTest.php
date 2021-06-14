@@ -11,8 +11,9 @@ use App\Models\Term;
 use App\Models\User;
 
 /**
- * guests/$id/enter:post
+ * - guests/$id/enter:post
  */
+
 class EnterTest extends TestCase {
 
     /**
