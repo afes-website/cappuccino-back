@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\ActivityLogEntry;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class GuestController extends Controller {
     public function show(Request $request, $id) {
@@ -57,18 +58,22 @@ class GuestController extends Controller {
         }
 
 
-        $guest = Guest::create(
-            [
-                'id' => $request->guest_id,
-                'term_id' => $term->id,
-                'reservation_id' => $request->reservation_id
-            ]
-        );
+        DB::transaction(function () use ($request, $reservation, $term) {
+            $guest = Guest::create(
+                [
+                    'id' => $request->guest_id,
+                    'term_id' => $term->id,
+                    'reservation_id' => $request->reservation_id
+                ]
+            );
+
+            $reservation->update(['guest_id' => $guest->id]);
+        });
+
 
         // TODO: 複数人で処理するときの扱いを考える (docsの編集待ち)
-        $reservation->update(['guest_id' => $guest->id]);
 
-        return response()->json(new GuestResource($guest));
+        return response()->json(new GuestResource(Guest::find($request->guest_id)));
     }
 
     public function checkOut($id) {
@@ -114,14 +119,15 @@ class GuestController extends Controller {
         if ($guest->term->exit_scheduled_time < Carbon::now())
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
+        DB::transaction(function () use ($guest, $exhibition) {
+            $guest->update(['exhibition_id' => $exhibition->id]);
 
-        $guest->update(['exhibition_id' => $exhibition->id]);
-
-        ActivityLogEntry::create([
-            'exhibition_id' => $exhibition->id,
-            'log_type' => 'enter',
-            'guest_id' => $guest->id
-        ]);
+            ActivityLogEntry::create([
+                'exhibition_id' => $exhibition->id,
+                'log_type' => 'enter',
+                'guest_id' => $guest->id
+            ]);
+        });
 
         return response()->json(new GuestResource($guest));
     }
@@ -145,13 +151,15 @@ class GuestController extends Controller {
         if ($guest->exited_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
-        $guest->update(['exhibition_id' => null]);
+        DB::transaction(function () use ($guest, $exhibition) {
+            $guest->update(['exhibition_id' => null]);
 
-        ActivityLogEntry::create([
-            'exhibition_id' => $exhibition->id,
-            'log_type' => 'exit',
-            'guest_id' => $guest->id
-        ]);
+            ActivityLogEntry::create([
+                'exhibition_id' => $exhibition->id,
+                'log_type' => 'exit',
+                'guest_id' => $guest->id
+            ]);
+        });
 
         return response()->json(new GuestResource($guest));
     }
