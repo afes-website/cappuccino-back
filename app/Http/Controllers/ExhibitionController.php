@@ -12,6 +12,7 @@ use App\Models\Term;
 use App\Models\ActivityLogEntry;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ExhibitionController extends Controller {
     public function index() {
@@ -22,17 +23,13 @@ class ExhibitionController extends Controller {
             $exh_status[$exh->id] = new ExhibitionResource($exh);
         }
 
-        $all_counts = [];
-        foreach (Term::all() as $term) {
-            $cnt = Guest::query()->whereNull('exited_at')->where('term_id', $term->id)->count();
-            if ($cnt !== 0) $all_counts[$term->id] = $cnt;
-        }
         return response()->json([
             'exhibition' => $exh_status,
-            'all' => [
-                'count' => $all_counts,
-                'limit' => $all_limit
-            ]
+            'all' => Guest::query()
+                ->whereNull('exited_at')
+                ->select('term_id', DB::raw('count(1) as cnt'))
+                ->groupBy('term_id')
+                ->pluck('cnt', 'term_id')
         ]);
     }
 
