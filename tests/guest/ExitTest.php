@@ -96,6 +96,32 @@ class ExitTest extends TestCase {
     }
 
     public function testNoMatterWhereGuestIsIn() {
+        $user = User::factory()
+            ->permission('admin')
+            ->has(Exhibition::factory())
+            ->create();
+        $exhibition_id = Exhibition::factory()->create()->id;
+
+        $guests[] = Guest::factory()->state(['exhibition_id' => $exhibition_id])->create();
+        $guests[] = Guest::factory()->state(['exhibition_id' => $user->id])->create();
+        $guests[] = Guest::factory()->state(['exhibition_id' => null])->create();
+
+        foreach ($guests as $guest) {
+            $this->actingAs($user)->post(
+                "/guests/$guest->id/exit",
+                ['exhibition_id' => $user->id]
+            );
+            $this->assertResponseOk();
+
+            // Exit の log が生成されている
+            $this->assertTrue(
+                ActivityLogEntry::query()
+                    ->where('guest_id', $guest->id)
+                    ->where('exhibition_id', $user->id)
+                    ->where('log_type', 'exit')
+                    ->exists()
+            );
+        }
     }
 
     public function testGuest() {
