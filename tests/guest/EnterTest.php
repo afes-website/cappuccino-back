@@ -214,6 +214,51 @@ class EnterTest extends TestCase {
     }
 
     /**
+     * Guest が他展示に入室しているとき
+     * 正しく実行される
+     * ActivityLog は 前にいた展示の Exit は生成されず、新しい展示の Enter だけ生成されている
+     */
+    public function testGuestInOtherExhibition() {
+        $user = User::factory()
+            ->permission('admin')
+            ->has(Exhibition::factory())
+            ->create();
+        $exhibition_id = Exhibition::factory()->create()->id;
+
+        $guest = Guest::factory()->create();
+        $this->actingAs($user)->post(
+            "/guests/$guest->id/enter",
+            ['exhibition_id' => $exhibition_id]
+        );
+        $this->assertResponseOk();
+
+        $this->actingAs($user)->post(
+            "/guests/$guest->id/enter",
+            ['exhibition_id' => $user->id]
+        );
+
+        $this->assertResponseOk();
+
+        // 前に居た展示の Exit log が勝手に生成されていない
+        $this->assertFalse(
+            ActivityLogEntry::query()
+                ->where('guest_id', $guest->id)
+                ->where('exhibition_id', $exhibition_id)
+                ->where('log_type', 'exit')
+                ->exists()
+        );
+
+        // Enter の log は生成されている
+        $this->assertTrue(
+            ActivityLogEntry::query()
+                ->where('guest_id', $guest->id)
+                ->where('exhibition_id', $user->exhibition->id)
+                ->where('log_type', 'enter')
+                ->exists()
+        );
+    }
+
+    /**
      * Guest が退場予定時間を過ぎている
      * EXIT_TIME_EXCEEDED が返ってきている
      */
