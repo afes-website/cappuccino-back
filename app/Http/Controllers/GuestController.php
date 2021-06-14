@@ -86,13 +86,4 @@ class GuestController extends Controller {
 
         return response()->json(new GuestResource($guest));
     }
-
-    public function showLog(Request $request, $id) {
-        $guest = Guest::find($id);
-        if (!$guest) {
-            abort(404);
-        }
-        $logs = ActivityLogEntry::query()->where('guest_id', $id)->get();
-        return response()->json(ActivityLogEntryResource::collection($logs));
-    }
 }
