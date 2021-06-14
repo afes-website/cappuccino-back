@@ -26,6 +26,47 @@ class ExhibitionTest extends TestCase {
         $this->assertCount($count, get_object_vars($res->exhibition));
     }
 
+    public function testAllCounts() {
+        $guest_count = 10;
+        $term_count = 3;
+        $exh_count = 2;
+        $term = Term::factory()->count(3)->create();
+        $user = User::factory()->permission('exhibition')->create();
+        Exhibition::factory()
+            ->has(
+                Guest::factory()
+                    ->count($guest_count * $term_count)
+                    ->state(new Sequence(
+                        ['term_id' => $term[0]->id],
+                        ['term_id' => $term[1]->id],
+                        ['term_id' => $term[2]->id]
+                    ))
+            )->for($user)->create();
+
+        Exhibition::factory()
+            ->has(
+                Guest::factory()
+                    ->count($guest_count * $term_count)
+                    ->state(new Sequence(
+                        ['term_id' => $term[0]->id],
+                        ['term_id' => $term[1]->id],
+                        ['term_id' => $term[2]->id]
+                    ))
+            )->count($exh_count - 1)->create();
+
+        $this->actingAs($user)->get("/exhibitions");
+        $this->assertResponseOk();
+        $this->assertJson($this->response->getContent());
+
+        $this->seeJsonContains([
+            'all' => [
+                $term[0]->id => $guest_count * $exh_count,
+                $term[1]->id => $guest_count * $exh_count,
+                $term[2]->id => $guest_count * $exh_count,
+            ]
+        ]);
+    }
+
     public function testShowInfo() {
         $user = User::factory()->permission('exhibition')->create();
         $exhibition = Exhibition::factory()->create();
