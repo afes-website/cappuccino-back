@@ -18,7 +18,7 @@ class ExhibitionController extends Controller {
     public function index() {
         $exh_status = [];
         $all_limit = 0;
-        foreach (Exhibition::all() as $exh) {
+        foreach (Exhibition::with('guests')->get() as $exh) {
             $all_limit += $exh->capacity;
             $exh_status[$exh->id] = new ExhibitionResource($exh);
         }
