@@ -16,6 +16,9 @@ use Illuminate\Support\Str;
  */
 
 class CheckInOutTest extends TestCase {
+    const ID_CHARACTER = '234578acdefghijkmnprstuvwxyz';
+    const PREFIX_LENGTH = 2;
+    const ID_LENGTH = 5;
 
     private static function createGuestId(string $guest_type): string {
         return GuestFactory::createGuestId($guest_type);
@@ -123,8 +126,14 @@ class CheckInOutTest extends TestCase {
                 $prefix = rand(1, 10);
                 $id = rand(1, 10);
             } while ($prefix === 2 && $id === 5);
-            $invalid_codes[] = Str::random($prefix) . '-' . Str::random($id);
+            $code = '';
+            $character_count = strlen(self::ID_CHARACTER);
+            for ($i = 0; $i < 5; $i++) {
+                $code .= self::ID_CHARACTER[rand(0, $character_count - 1)];
+            }
+            $invalid_codes[] = Str::random($prefix) . '-' . $code;
         }
+        $invalid_codes[] = Str::random(self::PREFIX_LENGTH) . '-' . Str::random(self::ID_LENGTH);
 
         foreach ($invalid_codes as $invalid_code) {
             $this->actingAs($user)->post(
@@ -141,12 +150,10 @@ class CheckInOutTest extends TestCase {
     public function testWrongWristbandColor() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
-        $id_len = 5;
-        $valid_character = '234578acdefghijkmnprstuvwxyz';
-        $character_count = strlen($valid_character);
+        $character_count = strlen(self::ID_CHARACTER);
         $id = '';
-        for ($i = 0; $i < $id_len; $i++) {
-            $id .= $valid_character[rand(0, $character_count - 1)];
+        for ($i = 0; $i < self::ID_LENGTH; $i++) {
+            $id .= self::ID_CHARACTER[rand(0, $character_count - 1)];
         }
         $guest_id = "XX" . "-" . $id; //存在しない Prefix
 
