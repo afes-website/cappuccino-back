@@ -108,25 +108,27 @@ class EnterTest extends TestCase {
     }
 
     /**
-     * PEOPLE_CAPACITY_EXCEEDED
      * 展示の滞在者数制限に達している
-     * 定員ぴったりのときと定員を超えている
+     * PEOPLE_CAPACITY_EXCEEDED
+     * 定員ぴったりのときと定員を超えているときでチェック
      */
     public function testPeopleLimitExceeded() {
         $guest_count = 5;
-        $exhibition = Exhibition::factory()
-            ->has(Guest::factory()->count($guest_count))
-            ->state(['capacity' => $guest_count]);
-        $user = User::factory()->permission('exhibition')->has($exhibition)->create();
-        $guest = Guest::factory()->create();
-        $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
-            ['exhibition_id' => $user->id]
-        );
-        $this->assertResponseStatus(400);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('PEOPLE_LIMIT_EXCEEDED', $code);
+        foreach ([0, 1] as $i) {
+            $exhibition = Exhibition::factory()
+                ->has(Guest::factory()->count($guest_count + $i))
+                ->state(['capacity' => $guest_count]);
+            $user = User::factory()->permission('exhibition')->has($exhibition)->create();
+            $guest = Guest::factory()->create();
+            $this->actingAs($user)->post(
+                "/guests/$guest->id/enter",
+                ['exhibition_id' => $user->id]
+            );
+            $this->assertResponseStatus(400);
+            $this->assertJson($this->response->getContent());
+            $code = json_decode($this->response->getContent())->error_code;
+            $this->assertEquals('PEOPLE_LIMIT_EXCEEDED', $code);
+        }
     }
 
     /**
