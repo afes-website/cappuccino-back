@@ -5,7 +5,7 @@ use App\Models\Term;
 use App\Models\User;
 
 /**
- * - terms/
+ * - /terms:get
  */
 
 class TermTest extends TestCase {

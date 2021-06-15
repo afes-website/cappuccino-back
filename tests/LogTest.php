@@ -6,7 +6,7 @@ use App\Models\ActivityLogEntry;
 use App\Models\User;
 
 /**
- * - log/
+ * - /log:get
  */
 
 class LogTest extends TestCase {

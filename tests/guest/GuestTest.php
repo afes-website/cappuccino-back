@@ -8,8 +8,8 @@ use App\Models\User;
 use Illuminate\Support\Str;
 
 /**
- * - guest:get
- * - guest/$id:get
+ * - /guest:get
+ * - /guest/$id:get
  */
 
 class GuestTest extends TestCase {

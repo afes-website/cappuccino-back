@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Support\Str;
 
 /**
- * - guest/:get
- * - guest/$id:get
+ * - /guest/:get
+ * - /guest/$id:get
  */
 
 class ExhibitionTest extends TestCase {

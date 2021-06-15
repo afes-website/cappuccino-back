@@ -11,8 +11,8 @@ use Faker\Provider\DateTime;
 use Illuminate\Support\Str;
 
 /**
- * - guests/check-in
- * - guests/$id/check-out:post
+ * - /guests/check-in:post
+ * - /guests/$id/check-out:post
  */
 
 class CheckInOutTest extends TestCase {
