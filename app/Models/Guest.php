@@ -23,6 +23,10 @@ class Guest extends Model {
 
     const UPDATED_AT = null;
 
+    const VALID_CHARACTER = '234578acdefghijkmnprstuvwxyz';
+    const ID_LENGTH = 5;
+    const VALID_FORMAT = '/\A[A-Z]{2,3}-[2-578ac-kmnpr-z]{5}\Z/';
+
     public function reservation() {
         return $this->belongsTo(Reservation::class);
     }
