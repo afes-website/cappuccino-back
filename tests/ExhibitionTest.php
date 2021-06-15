@@ -15,6 +15,9 @@ use Illuminate\Support\Str;
  */
 
 class ExhibitionTest extends TestCase {
+    /**
+     * 全展示の情報が返ってきている
+     */
     public function testGetAll() {
         $count = 3;
         $user = User::factory()->permission('exhibition')->create();
@@ -27,6 +30,9 @@ class ExhibitionTest extends TestCase {
         $this->assertCount($count, get_object_vars($res->exhibition));
     }
 
+    /**
+     * Guest の人数状況が Term 別に正しく集計されている
+     */
     public function testAllCounts() {
         $guest_count = 10;
         $term_count = 3;
@@ -68,6 +74,9 @@ class ExhibitionTest extends TestCase {
         ]);
     }
 
+    /**
+     * 各展示について叩いたときに Document 通りの内容のものが返ってきている
+     */
     public function testShowInfo() {
         $user = User::factory()->permission('exhibition')->create();
         $exhibition = Exhibition::factory()->create();
@@ -87,6 +96,9 @@ class ExhibitionTest extends TestCase {
         ]);
     }
 
+    /**
+     * 展示内にいる Guest がターム別に正しく集計されている
+     */
     public function testShowCount() {
         $guest_count = 10;
         $term_count = 3;
@@ -116,6 +128,9 @@ class ExhibitionTest extends TestCase {
         ]);
     }
 
+    /**
+     * 退場済みの Guest はカウントされていない
+     */
     public function testCountExited() {
         $guest_count = 10;
         $user = User::factory()->permission('exhibition')->create();
@@ -137,6 +152,9 @@ class ExhibitionTest extends TestCase {
         $this->assertEquals($guest_count, json_decode($this->response->getContent())->count->{$term->id});
     }
 
+    /**
+     * Guest が 1人もいない Term は表示されない
+     */
     public function testDontShowEmptyTerm() {
         $guest_count = 10;
         $user = User::factory()->permission('exhibition')->create();
@@ -154,6 +172,10 @@ class ExhibitionTest extends TestCase {
         ]);
     }
 
+    /**
+     * 存在しない展示を選んだとき
+     * 404
+     */
     public function testNotFound() {
         $user = User::factory()->permission('exhibition')->create();
         $id = Str::random(8);

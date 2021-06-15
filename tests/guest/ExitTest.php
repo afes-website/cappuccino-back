@@ -16,6 +16,11 @@ use Faker\Provider\DateTime;
  */
 
 class ExitTest extends TestCase {
+    /**
+     * 展示退室のテスト
+     * Guest の滞在中の展示が更新されている
+     * ActivityLog が生成されている
+     */
     public function testExit() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
         $guest = Guest::factory()->state(['exhibition_id'=>$user->id])->create();
@@ -36,6 +41,10 @@ class ExitTest extends TestCase {
         );
     }
 
+    /**
+     * Exhibition が存在しない
+     * EXHIBITION_NOT_FOUND
+     */
     public function testExhibitionNotFound() {
         $user = User::factory()->permission('exhibition')->create();
         $guest = Guest::factory()->create();
@@ -50,6 +59,13 @@ class ExitTest extends TestCase {
         $this->assertEquals('EXHIBITION_NOT_FOUND', $code);
     }
 
+    /**
+     * 権限チェック
+     * - executive, 権限なし の場合は指定できない
+     * - admin 権限があれば任意の展示を指定できる
+     * - exhibition 権限のみのときは自分の展示のみ指定できる
+     * 上記のルールに違反したときに 403 が、そうでない場合は正しく処理がされている事を確認する
+     */
     public function testPermission() {
         $not_permitted_users[] = User::factory()->permission('executive')->create();
         $not_permitted_users[] = User::factory()->create();
@@ -92,6 +108,10 @@ class ExitTest extends TestCase {
         $this->assertResponseStatus(403);
     }
 
+    /**
+     * Guest が存在しない
+     * GUEST_NOT_FOUND
+     */
     public function testGuestNotFound() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
         Guest::factory()->create();
@@ -106,6 +126,10 @@ class ExitTest extends TestCase {
         $this->assertEquals('GUEST_NOT_FOUND', $code);
     }
 
+    /**
+     * Guest が既に退場処理をしているとき
+     * GUEST_ALREADY_EXITED
+     */
     public function testAlreadyExited() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
         $executive_user = User::factory()->permission('executive')->create();
@@ -128,6 +152,10 @@ class ExitTest extends TestCase {
         $this->assertEquals('GUEST_ALREADY_EXITED', $code);
     }
 
+    /**
+     * Guest がどこに居ても正しく実行される
+     * 新しい展示の Exit だけ生成されている
+     */
     public function testNoMatterWhereGuestIsIn() {
         $user = User::factory()
             ->permission('admin')
@@ -157,6 +185,10 @@ class ExitTest extends TestCase {
         }
     }
 
+    /**
+     * ログインチェック
+     * ログインしていないときに 401 が返ってきている
+     */
     public function testGuest() {
         $guest_id = Guest::factory()->create()->id;
 

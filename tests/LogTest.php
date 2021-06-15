@@ -10,6 +10,10 @@ use App\Models\User;
  */
 
 class LogTest extends TestCase {
+    /**
+     * Data が正しい形になっている
+     * Guest については GuestTest で別途チェック
+     */
     public function testData() {
         $user = User::factory()->permission('executive')->create();
         $log = ActivityLogEntry::factory()->create();
@@ -28,6 +32,9 @@ class LogTest extends TestCase {
         ]);
     }
 
+    /**
+     * 存在する全部のログが返ってきている
+     */
     public function testCount() {
         $count = 5;
         ActivityLogEntry::factory()->count($count)->create();
@@ -39,6 +46,9 @@ class LogTest extends TestCase {
         $this->assertCount($count, json_decode($this->response->getContent()));
     }
 
+    /**
+     * フィルターが正しく動作している
+     */
     public function testListFilter() {
         $count = 5;
 
@@ -65,6 +75,11 @@ class LogTest extends TestCase {
         }
     }
 
+    /**
+     * 権限チェック
+     * - Executive Exhibition Reservation: 叩ける
+     * - Admin Teacher: 叩けない
+     */
     public function testGetPermission() {
         foreach (['executive', 'exhibition', 'reservation'] as $perm) {
             $user = User::factory()->permission($perm)->create();

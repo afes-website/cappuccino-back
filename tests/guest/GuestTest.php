@@ -13,6 +13,10 @@ use Illuminate\Support\Str;
  */
 
 class GuestTest extends TestCase {
+    /**
+     * Guest の一覧取得
+     * 返ってくる Guest の個数が DB 上の個数と一致する
+    */
     public function testGetAll() {
         $term_count = 3;
         $guest_count = 3;
@@ -29,6 +33,10 @@ class GuestTest extends TestCase {
         $this->assertCount($term_count * $guest_count, $res);
     }
 
+    /**
+     * Guest の個別取得
+     * json 形式が document に指定されたものと同じである
+     */
     public function testShow() {
         $user = User::factory()->permission('executive')->create();
         $guest = Guest::factory()->create();
@@ -51,6 +59,10 @@ class GuestTest extends TestCase {
         ]);
     }
 
+    /**
+     * Guest が存在しないとき
+     * 404 が返ってきている
+     */
     public function testNotFound() {
         $user = User::factory()->permission('executive')->create();
         $id = Str::random(8);

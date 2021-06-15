@@ -26,6 +26,11 @@ class CheckInOutTest extends TestCase {
 
     /* Check-In */
 
+    /**
+     * CheckIn
+     * Guestオブジェクトが返ってきている
+     * @todo 返ってくるようにする
+     */
     public function testCheckIn() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
@@ -37,6 +42,10 @@ class CheckInOutTest extends TestCase {
         $this->assertResponseOk();
     }
 
+    /**
+     * 予約が存在しない
+     * RESERVATION_NOT_FOUND
+     */
     public function testReservationNotFound() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
@@ -54,6 +63,11 @@ class CheckInOutTest extends TestCase {
 
     //   INVALID_RESERVATION_INFO: NO TEST
 
+    /**
+     * すでに入場済み
+     * ALREADY_ENTERED_RESERVATION
+     * 入場処理を2回行ってチェック
+     */
     public function testAlreadyEnteredReservation() {
         $count = 5;
 
@@ -92,6 +106,11 @@ class CheckInOutTest extends TestCase {
         }
     }
 
+    /**
+     * 予約時間外
+     * OUT_OF_RESERVATION_TIME
+     * 入場可能時間前、時間後それぞれでエラーが発生する事をチェック
+     */
     public function testOutOfReservationTime() {
         $user = User::factory()->permission('executive')->create();
         $term[0] = Term::factory()->afterPeriod()->create();
@@ -113,6 +132,12 @@ class CheckInOutTest extends TestCase {
         }
     }
 
+    /**
+     * GuestIdの形式の誤り
+     * INVALID_WRISTBAND_CODE
+     * - {2文字でない}-{5文字でない} 形式のチェック
+     * - 使用できない文字を使っていないかのチェック
+     */
     public function testInvalidGuestCode() {
         $invalid_codes = [];
         $count = 5;
@@ -147,6 +172,10 @@ class CheckInOutTest extends TestCase {
         }
     }
 
+    /**
+     * 使用するカラーが間違っている
+     * prefix: XX を使用してチェック
+     */
     public function testWrongWristbandColor() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
@@ -168,6 +197,10 @@ class CheckInOutTest extends TestCase {
         $this->assertEquals('WRONG_WRISTBAND_COLOR', $code);
     }
 
+    /**
+     * GuestId が使用済み
+     * 異なる reservation で2回入場処理を行う
+     */
     public function testAlreadyUsedGuestCode() {
         $count = 5;
 
@@ -203,6 +236,10 @@ class CheckInOutTest extends TestCase {
 
     /* Check-Out */
 
+    /**
+     * checkOut テスト
+     * 200が返ってきている
+     */
     public function testCheckOut() {
         $user = User::factory()->permission('executive')->create();
         $guest = Guest::factory()->create();
@@ -213,6 +250,10 @@ class CheckInOutTest extends TestCase {
         $this->assertResponseOk();
     }
 
+    /**
+     * Guest が存在しない
+     * その場で適当に生成した GuestId でテスト
+     */
     public function testCheckOutGuestNotFound() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
@@ -225,6 +266,10 @@ class CheckInOutTest extends TestCase {
         $this->assertResponseStatus(404);
     }
 
+    /**
+     * すでに退場済み
+     * 2回処理をしてチェック
+     */
     public function testAlreadyExited() {
         $user = User::factory()->permission('executive')->create();
         $guest = Guest::factory()->create();
@@ -241,6 +286,10 @@ class CheckInOutTest extends TestCase {
         $this->assertEquals('GUEST_ALREADY_EXITED', $code);
     }
 
+    /**
+     * 権限不足
+     * Exhibition, Admin, ロール無し ですべて403が返ってくる事をチェック
+     */
     public function testForbidden() {
         $users[] = User::factory()->permission('exhibition')->create();
         $users[] =  User::factory()->permission('admin')->create(); // ADMIN perm doesnt mean all perm
@@ -258,6 +307,10 @@ class CheckInOutTest extends TestCase {
         }
     }
 
+    /**
+     * ログインしていない
+     * 401
+     */
     public function testGuest() {
         $guest_id = Guest::factory()->create()->id;
         $paths = [

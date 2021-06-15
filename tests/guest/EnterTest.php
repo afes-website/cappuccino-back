@@ -41,7 +41,7 @@ class EnterTest extends TestCase {
 
     /**
      * Exhibition が存在しない
-     * EXHIBITION_NOT_FOUND が返ってきている
+     * EXHIBITION_NOT_FOUND
      */
     public function testExhibitionNotFound() {
         $user = User::factory()->permission('exhibition')->create();
@@ -132,8 +132,8 @@ class EnterTest extends TestCase {
     }
 
     /**
+     * Guest が存在しない
      * GUEST_NOT_FOUND
-     * Guest が存在しないとき
      */
     public function testGuestNotFound() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
@@ -159,7 +159,7 @@ class EnterTest extends TestCase {
 
     /**
      * Guest が既に退場処理をしているとき
-     * GUEST_ALREADY_EXITED が返ってきている
+     * GUEST_ALREADY_EXITED
      */
     public function testAlreadyExited() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
@@ -185,7 +185,7 @@ class EnterTest extends TestCase {
 
     /**
      * Guest が既に展示に入室しているとき
-     * GUEST_ALREADY_ENTERED が返ってきている
+     * GUEST_ALREADY_ENTERED
      */
     public function testAlreadyEntered() {
         $user = User::factory()
@@ -257,7 +257,7 @@ class EnterTest extends TestCase {
 
     /**
      * Guest が退場予定時間を過ぎている
-     * EXIT_TIME_EXCEEDED が返ってきている
+     * EXIT_TIME_EXCEEDED
      */
     public function testExitTimeExceeded() {
         $term = Term::factory()->afterPeriod();
@@ -276,7 +276,7 @@ class EnterTest extends TestCase {
 
     /**
      * ログインチェック
-     * ログインしていないときに 403 が返ってきている
+     * ログインしていないときに 401 が返ってきている
      */
     public function testGuest() {
         $guest_id = Guest::factory()->create()->id;

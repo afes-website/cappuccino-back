@@ -9,6 +9,9 @@ use App\Models\User;
  */
 
 class TermTest extends TestCase {
+    /**
+     * Term についてのデータの中身が正しい
+     */
     public function testData() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->create();
@@ -27,6 +30,9 @@ class TermTest extends TestCase {
         ]);
     }
 
+    /**
+     * 存在する全タームが返ってきている
+     */
     public function testCount() {
         $count = 5;
         Term::factory()->count($count)->create();
@@ -37,6 +43,10 @@ class TermTest extends TestCase {
         $this->assertJson($this->response->getContent());
         $this->assertCount($count, get_object_vars(json_decode($this->response->getContent())));
     }
+
+    /**
+     * 権限チェック
+     */
     public function testGetPermission() {
         foreach (['executive', 'exhibition'] as $perm) {
             $user = User::factory()->permission($perm)->create();
