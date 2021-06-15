@@ -142,7 +142,7 @@ class GuestController extends Controller {
         $guest = Guest::find($id);
         $exhibition = Exhibition::find($exhibition_id);
 
-        if (!$request->user()->hasPermission('reservation') && $exhibition_id !== $user_id)
+        if (!$request->user()->hasPermission('admin') && $request->exhibition_id !== $request->user()->id)
             abort(403);
 
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
