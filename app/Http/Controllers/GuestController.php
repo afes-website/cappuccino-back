@@ -4,18 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Models\Exhibition;
-use App\Resources\ActivityLogEntryResource;
 use App\Resources\GuestResource;
 use App\Models\Guest;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\ActivityLogEntry;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 
 class GuestController extends Controller {
-    public function show(Request $request, $id) {
+    public function show($id) {
         $guest = Guest::find($id);
         if (!$guest) {
             abort(404);
@@ -138,7 +136,6 @@ class GuestController extends Controller {
         ]);
 
         $exhibition_id = $request->exhibition_id;
-        $user_id = $request->user()->id;
         $guest = Guest::find($id);
         $exhibition = Exhibition::find($exhibition_id);
 

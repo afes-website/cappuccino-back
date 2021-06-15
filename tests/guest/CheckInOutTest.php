@@ -7,7 +7,6 @@ use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Term;
 use App\Models\User;
-use Faker\Provider\DateTime;
 use Illuminate\Support\Str;
 
 /**

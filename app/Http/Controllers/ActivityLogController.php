@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Resources\ActivityLogEntryResource;
 use App\Models\ActivityLogEntry;
-use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Controller as BaseController;
 

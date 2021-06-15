@@ -7,7 +7,6 @@ use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Term;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class GuestFactory extends Factory {
 

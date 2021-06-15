@@ -158,7 +158,7 @@ class ExhibitionTest extends TestCase {
     public function testDontShowEmptyTerm() {
         $guest_count = 10;
         $user = User::factory()->permission('exhibition')->create();
-        $exhibition = Exhibition::factory()
+        Exhibition::factory()
             ->for($user)
             ->has(Guest::factory()->count($guest_count*2))
             ->create();

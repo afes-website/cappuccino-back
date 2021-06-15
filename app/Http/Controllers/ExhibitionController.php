@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Resources\ExhibitionResource;
 use App\Models\Exhibition;
 use App\Models\Guest;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ExhibitionController extends Controller {
@@ -28,7 +26,7 @@ class ExhibitionController extends Controller {
         ]);
     }
 
-    public function show(Request $request, $id) {
+    public function show($id) {
         $exhibition = Exhibition::find($id);
         if (!$exhibition) {
             abort(404);

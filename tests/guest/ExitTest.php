@@ -3,13 +3,9 @@ namespace Tests\guest;
 
 use App\Models\ActivityLogEntry;
 use App\Models\Exhibition;
-use Database\Factories\GuestFactory;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 use App\Models\Guest;
-use App\Models\Term;
 use App\Models\User;
-use Faker\Provider\DateTime;
 
 /**
  * - /guests/$id/exit:post
