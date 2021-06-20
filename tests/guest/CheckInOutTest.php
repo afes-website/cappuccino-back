@@ -268,11 +268,12 @@ class CheckInOutTest extends TestCase {
 
                 switch ($state[0]) {
                     case 'already_entered_reservation':
-                        $reservation = $reservation->has(Guest::factory());
+                        $reservation = $reservation->has(Guest::factory()->for(Term::factory()->create()));
                         break;
                     case 'not_entered_reservation':
                         break;
                 }
+                $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
                 switch ($state[1]) {
                     case 'after_period':
                         $term = $term->afterPeriod();
@@ -314,7 +315,7 @@ class CheckInOutTest extends TestCase {
                         break;
                 }
 
-                $reservation = $reservation->has($term)->create();
+                $reservation = $reservation->for($term->create())->create();
 
                 $this->actingAs($user)->post(
                     '/guests/check-in',
@@ -324,7 +325,6 @@ class CheckInOutTest extends TestCase {
                 DB::rollBack();
             } catch (\Exception $e) {
                 var_dump($state);
-                echo($guest_code);
                 DB::rollBack();
                 throw $e;
             }
