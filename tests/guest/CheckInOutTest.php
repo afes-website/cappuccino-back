@@ -2,12 +2,14 @@
 namespace Tests\guest;
 
 use Database\Factories\GuestFactory;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Term;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Tests\Common;
 
 /**
  * - /guests/check-in:post
@@ -15,6 +17,7 @@ use Illuminate\Support\Str;
  */
 
 class CheckInOutTest extends TestCase {
+
     const ID_CHARACTER = '234578acdefghijkmnprstuvwxyz';
     const PREFIX_LENGTH = 2;
     const ID_LENGTH = 5;
@@ -234,6 +237,97 @@ class CheckInOutTest extends TestCase {
             $this->assertJson($this->response->getContent());
             $code = json_decode($this->response->getContent())->error_code;
             $this->assertEquals('ALREADY_USED_WRISTBAND', $code);
+        }
+    }
+
+    public function testMultipleError() {
+        foreach (Common::multipleArray(
+            ['already_entered_reservation', 'not_entered_reservation'],
+            ['after_period', 'before_period', 'in_period'],
+            ['character_invalid', 'character_valid'],
+            ['length_invalid', 'length_valid'],
+            ['guest_used', 'guest_unused'],
+            ['wrong_term', 'right_term']
+        ) as $state
+        ) {
+            if ($state === [
+                'not_entered_reservation',
+                'in_period',
+                'character_valid',
+                'length_valid',
+                'guest_unused',
+                'right_term',
+            ]) continue;
+
+            DB::beginTransaction();
+            try {
+                $user = User::factory()->permission('admin', 'executive')->create();
+                $reservation = Reservation::factory();
+                $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
+                $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
+
+                switch ($state[0]) {
+                    case 'already_entered_reservation':
+                        $reservation = $reservation->has(Guest::factory());
+                        break;
+                    case 'not_entered_reservation':
+                        break;
+                }
+                switch ($state[1]) {
+                    case 'after_period':
+                        $term = $term->afterPeriod();
+                        break;
+                    case 'before_period':
+                        $term = $term->beforePeriod();
+                        break;
+                    case 'in_period':
+                        $term = $term->inPeriod();
+                        break;
+                }
+                switch ($state[2]) {
+                    case 'character_invalid':
+                        $guest_code .= '9';
+                        break;
+                    case 'character_valid':
+                        $guest_code .= '2';
+                        break;
+                }
+                switch ($state[3]) {
+                    case 'length_invalid':
+                        $guest_code .= '2';
+                        break;
+                    case 'length_valid':
+                        break;
+                }
+                switch ($state[4]) {
+                    case 'guest_used':
+                        Guest::factory()->state(['id' => $guest_code])->create();
+                        break;
+                    case 'guest_unused':
+                        break;
+                }
+                switch ($state[5]) {
+                    case 'wrong_term':
+                        $guest_code[1] = 'X';
+                        break;
+                    case 'right_term':
+                        break;
+                }
+
+                $reservation = $reservation->has($term)->create();
+
+                $this->actingAs($user)->post(
+                    '/guests/check-in',
+                    ['guest_id' => $guest_code, 'reservation_id' => $reservation->id]
+                );
+                $this->assertResponseStatus(400);
+                DB::rollBack();
+            } catch (\Exception $e) {
+                var_dump($state);
+                echo($guest_code);
+                DB::rollBack();
+                throw $e;
+            }
         }
     }
 
