@@ -152,7 +152,7 @@ class CheckInOutTest extends TestCase {
             } while ($prefix === 2 && $id === 5);
             $code = '';
             $character_count = strlen(self::ID_CHARACTER);
-            for ($i = 0; $i < 5; $i++) {
+            for ($i = 0; $i < $id; $i++) {
                 $code .= self::ID_CHARACTER[rand(0, $character_count - 1)];
             }
             $invalid_codes[] = Str::random($prefix) . '-' . $code;
