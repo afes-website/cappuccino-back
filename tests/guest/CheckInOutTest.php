@@ -157,7 +157,11 @@ class CheckInOutTest extends TestCase {
             }
             $invalid_codes[] = Str::random($prefix) . '-' . $code;
         }
-        $invalid_codes[] = Str::random(self::PREFIX_LENGTH) . '-' . Str::random(self::ID_LENGTH);
+        do {
+            $code = Str::random(self::PREFIX_LENGTH) . '-' . Str::random(self::ID_LENGTH);
+        } while (preg_match(Guest::VALID_FORMAT, $code));
+
+        $invalid_codes[] = $code;
 
         foreach ($invalid_codes as $invalid_code) {
             $this->actingAs($user)->post(
