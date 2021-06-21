@@ -263,7 +263,6 @@ class CheckInOutTest extends TestCase {
             try {
                 $user = User::factory()->permission('admin', 'executive')->create();
                 $reservation = Reservation::factory();
-                $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
                 $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
 
                 switch ($state[0]) {
@@ -285,6 +284,7 @@ class CheckInOutTest extends TestCase {
                         $term = $term->inPeriod();
                         break;
                 }
+                $term = $term->create();
                 switch ($state[2]) {
                     case 'character_invalid':
                         $guest_code .= '9';
@@ -302,7 +302,7 @@ class CheckInOutTest extends TestCase {
                 }
                 switch ($state[4]) {
                     case 'guest_used':
-                        Guest::factory()->state(['id' => $guest_code])->create();
+                        Guest::factory()->state(['id' => $guest_code])->for(Term::factory()->create())->create();
                         break;
                     case 'guest_unused':
                         break;
@@ -315,7 +315,7 @@ class CheckInOutTest extends TestCase {
                         break;
                 }
 
-                $reservation = $reservation->for($term->create())->create();
+                $reservation = $reservation->for($term)->create();
 
                 $this->actingAs($user)->post(
                     '/guests/check-in',
@@ -389,7 +389,7 @@ class CheckInOutTest extends TestCase {
      */
     public function testForbidden() {
         $users[] = User::factory()->permission('exhibition')->create();
-        $users[] =  User::factory()->permission('admin')->create(); // ADMIN perm doesnt mean all perm
+        $users[] = User::factory()->permission('admin')->create(); // ADMIN perm doesnt mean all perm
         $users[] = User::factory()->create();
 
         $paths = [
