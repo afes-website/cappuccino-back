@@ -24,7 +24,7 @@ class EnterTest extends TestCase {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
         $guest = Guest::factory()->create();
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
@@ -47,7 +47,7 @@ class EnterTest extends TestCase {
         $guest = Guest::factory()->create();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $user->id]
         );
 
@@ -82,7 +82,7 @@ class EnterTest extends TestCase {
                 $guest = Guest::factory()->create();
                 $exh_id = $mode === true ? $user->id : $other_exhibition->id;
                 $this->actingAs($user)->post(
-                    "/guests/$guest->id/enter",
+                    "/guests/{$guest->id}/enter",
                     ['exhibition_id' => $exh_id]
                 );
                 $this->assertResponseOk();
@@ -93,14 +93,14 @@ class EnterTest extends TestCase {
 
         $guest = Guest::factory()->create();
         $this->actingAs($exhibition_user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $exhibition_user->id]
         );
         $this->assertResponseOk();
 
         $guest = Guest::factory()->create();
         $this->actingAs($exhibition_user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $other_exhibition->id]
         );
         $this->assertResponseStatus(403);
@@ -120,7 +120,7 @@ class EnterTest extends TestCase {
             $user = User::factory()->permission('exhibition')->has($exhibition)->create();
             $guest = Guest::factory()->create();
             $this->actingAs($user)->post(
-                "/guests/$guest->id/enter",
+                "/guests/{$guest->id}/enter",
                 ['exhibition_id' => $user->id]
             );
             $this->assertResponseStatus(400);
@@ -166,13 +166,13 @@ class EnterTest extends TestCase {
         $guest = Guest::factory()->create();
 
         $this->actingAs($executive_user)->post(
-            "/guests/$guest->id/check-out",
+            "/guests/{$guest->id}/check-out",
         );
 
         $this->assertResponseOk();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $user->id]
         );
 
@@ -193,13 +193,13 @@ class EnterTest extends TestCase {
             ->create();
         $guest = Guest::factory()->create();
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $user->id]
         );
 
@@ -223,13 +223,13 @@ class EnterTest extends TestCase {
 
         $guest = Guest::factory()->create();
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $exhibition_id]
         );
         $this->assertResponseOk();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $user->id]
         );
 
@@ -264,7 +264,7 @@ class EnterTest extends TestCase {
         $guest = Guest::factory()->for($term)->create();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/enter",
+            "/guests/{$guest->id}/enter",
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseStatus(400);

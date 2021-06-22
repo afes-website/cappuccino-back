@@ -341,7 +341,7 @@ class CheckInOutTest extends TestCase {
         $guest = Guest::factory()->create();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/check-out",
+            "/guests/{$guest->id}/check-out",
         );
         $this->assertResponseOk();
     }
@@ -371,10 +371,10 @@ class CheckInOutTest extends TestCase {
         $guest = Guest::factory()->create();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/check-out",
+            "/guests/{$guest->id}/check-out",
         );
         $this->actingAs($user)->post(
-            "/guests/$guest->id/check-out",
+            "/guests/{$guest->id}/check-out",
         );
         $this->assertResponseStatus(400);
         $this->assertJson($this->response->getContent());

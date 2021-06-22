@@ -22,7 +22,7 @@ class ExitTest extends TestCase {
         $guest = Guest::factory()->state(['exhibition_id'=>$user->id])->create();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/exit",
+            "/guests/{$guest->id}/exit",
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseOk();
@@ -46,7 +46,7 @@ class ExitTest extends TestCase {
         $guest = Guest::factory()->create();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/exit",
+            "/guests/{$guest->id}/exit",
             ['exhibition_id' => $user->id]
         );
         $this->assertResponseStatus(400);
@@ -80,7 +80,7 @@ class ExitTest extends TestCase {
                 $guest = Guest::factory()->create();
                 $exh_id = $mode === true ? $user->id : $other_exhibition->id;
                 $this->actingAs($user)->post(
-                    "/guests/$guest->id/exit",
+                    "/guests/{$guest->id}/exit",
                     ['exhibition_id' => $exh_id]
                 );
                 $this->assertResponseOk();
@@ -91,14 +91,14 @@ class ExitTest extends TestCase {
 
         $guest = Guest::factory()->create();
         $this->actingAs($exhibition_user)->post(
-            "/guests/$guest->id/exit",
+            "/guests/{$guest->id}/exit",
             ['exhibition_id' => $exhibition_user->id]
         );
         $this->assertResponseOk();
 
         $guest = Guest::factory()->create();
         $this->actingAs($exhibition_user)->post(
-            "/guests/$guest->id/exit",
+            "/guests/{$guest->id}/exit",
             ['exhibition_id' => $other_exhibition->id]
         );
         $this->assertResponseStatus(403);
@@ -132,13 +132,13 @@ class ExitTest extends TestCase {
         $guest = Guest::factory()->create();
 
         $this->actingAs($executive_user)->post(
-            "/guests/$guest->id/check-out"
+            "/guests/{$guest->id}/check-out"
         );
 
         $this->assertResponseOk();
 
         $this->actingAs($user)->post(
-            "/guests/$guest->id/exit",
+            "/guests/{$guest->id}/exit",
             ['exhibition_id' => $user->id]
         );
 
@@ -165,7 +165,7 @@ class ExitTest extends TestCase {
 
         foreach ($guests as $guest) {
             $this->actingAs($user)->post(
-                "/guests/$guest->id/exit",
+                "/guests/{$guest->id}/exit",
                 ['exhibition_id' => $user->id]
             );
             $this->assertResponseOk();
@@ -188,7 +188,7 @@ class ExitTest extends TestCase {
     public function testGuest() {
         $guest_id = Guest::factory()->create()->id;
 
-        $this->post("/guests/$guest_id/exit");
+        $this->post("/guests/{$guest_id}/exit");
         $this->assertResponseStatus(401);
     }
 }

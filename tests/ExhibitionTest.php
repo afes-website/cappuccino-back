@@ -81,7 +81,7 @@ class ExhibitionTest extends TestCase {
         $user = User::factory()->permission('exhibition')->create();
         $exhibition = Exhibition::factory()->create();
 
-        $this->actingAs($user)->get("/exhibitions/$exhibition->id");
+        $this->actingAs($user)->get("/exhibitions/{$exhibition->id}");
         $this->assertResponseOk();
         $this->assertJson($this->response->getContent());
 
@@ -115,7 +115,7 @@ class ExhibitionTest extends TestCase {
                     ))
             )->for($user)->create();
 
-        $this->actingAs($user)->get("/exhibitions/$exhibition->id");
+        $this->actingAs($user)->get("/exhibitions/{$exhibition->id}");
         $this->assertResponseOk();
         $this->assertJson($this->response->getContent());
 
@@ -145,7 +145,7 @@ class ExhibitionTest extends TestCase {
             ->for($user)
             ->create();
 
-        $this->actingAs($user)->get("/exhibitions/$exhibition->id");
+        $this->actingAs($user)->get("/exhibitions/{$exhibition->id}");
         $this->assertResponseOk();
         $this->assertJson($this->response->getContent());
 
@@ -164,7 +164,7 @@ class ExhibitionTest extends TestCase {
             ->create();
         $term = Term::factory()->create();
 
-        $this->actingAs($user)->get("/exhibitions/$user->id");
+        $this->actingAs($user)->get("/exhibitions/{$user->id}");
         $this->assertResponseOk();
 
         $this->seeJsonDoesntContains([
