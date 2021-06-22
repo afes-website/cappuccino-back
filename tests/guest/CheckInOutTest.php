@@ -15,7 +15,6 @@ use Tests\Common;
  * - /guests/check-in:post
  * - /guests/$id/check-out:post
  */
-
 class CheckInOutTest extends TestCase {
 
     const ID_CHARACTER = '234578acdefghijkmnprstuvwxyz';

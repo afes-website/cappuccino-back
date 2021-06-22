@@ -11,7 +11,6 @@ use Illuminate\Support\Str;
  * - /guest:get
  * - /guest/$id:get
  */
-
 class GuestTest extends TestCase {
     /**
      * Guest の一覧取得

@@ -13,7 +13,6 @@ use App\Models\User;
 /**
  * - /guests/$id/enter:post
  */
-
 class EnterTest extends TestCase {
 
     /**
