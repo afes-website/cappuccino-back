@@ -11,6 +11,7 @@ use App\Models\User;
  * - /guests/$id/exit:post
  */
 class ExitTest extends TestCase {
+
     /**
      * 展示退室のテスト
      * Guest の滞在中の展示が更新されている

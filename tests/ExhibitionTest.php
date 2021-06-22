@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
  * - /guest/$id:get
  */
 class ExhibitionTest extends TestCase {
+
     /**
      * 全展示の情報が返ってきている
      */

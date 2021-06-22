@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
  * - /guest/$id:get
  */
 class GuestTest extends TestCase {
+
     /**
      * Guest の一覧取得
      * 返ってくる Guest の個数が DB 上の個数と一致する

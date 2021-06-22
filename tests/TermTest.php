@@ -8,6 +8,7 @@ use App\Models\User;
  * - /terms:get
  */
 class TermTest extends TestCase {
+    
     /**
      * Term についてのデータの中身が正しい
      */

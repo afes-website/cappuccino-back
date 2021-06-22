@@ -9,6 +9,7 @@ use App\Models\User;
  * - /log:get
  */
 class LogTest extends TestCase {
+
     /**
      * Data が正しい形になっている
      * Guest については GuestTest で別途チェック
