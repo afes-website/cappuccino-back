@@ -20,7 +20,7 @@ $router->get('/', function () use ($router) {
 
 $router->post(
     '/auth/login',
-    ['uses'=>'AuthController@authenticate','middleware'=>'throttle:5, 1']
+    ['uses'=>'AuthController@authenticate', 'middleware'=>'throttle:5, 1']
 ); // throttled 5 requests/1 min
 
 $router->get('/auth/user', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
