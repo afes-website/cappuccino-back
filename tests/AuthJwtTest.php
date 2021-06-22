@@ -154,13 +154,12 @@ class AuthJwtTest extends TestCase {
     public function testExpiredToken() {
         // login and get token
         $user = $this->getToken($this);
-        $cbi = CarbonImmutable::now();
         CarbonImmutable::setTestNow((new \DateTimeImmutable())->modify(env('JWT_EXPIRE'))->modify('+1 seconds'));
         // now token must be expired
 
         $response = $this->get('/auth/user', $user['auth_hdr']);
         $response->assertResponseStatus(401);
-        CarbonImmutable::setTestNow($cbi);
+        CarbonImmutable::setTestNow();
     }
 
     /**
