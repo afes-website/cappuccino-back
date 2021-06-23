@@ -324,8 +324,9 @@ class CheckInOutTest extends TestCase {
                 DB::rollBack();
             } catch (\Exception $e) {
                 var_dump($state);
-                DB::rollBack();
                 throw $e;
+            } finally {
+                DB::rollBack();
             }
         }
     }
