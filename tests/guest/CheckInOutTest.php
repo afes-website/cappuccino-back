@@ -321,7 +321,6 @@ class CheckInOutTest extends TestCase {
                     ['guest_id' => $guest_code, 'reservation_id' => $reservation->id]
                 );
                 $this->assertResponseStatus(400);
-                DB::rollBack();
             } catch (\Exception $e) {
                 var_dump($state);
                 throw $e;
