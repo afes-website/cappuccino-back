@@ -22,7 +22,7 @@ class TermFactory extends Factory {
     public function definition() {
         $enter = $this->faker->dateTimeBetween('-2 days', '+2 days');
         return [
-            'id' => $this->faker->unique()->realText(16),
+            'id' => $this->faker->unique()->userName,
             'enter_scheduled_time' => $enter,
             'exit_scheduled_time' => $this->faker->dateTimeBetween($enter, '+2 days'),
             'guest_type' => array_rand(config('cappuccino.guest_types'))
@@ -37,7 +37,7 @@ class TermFactory extends Factory {
     }
 
     public function beforePeriod() {
-        $enter = $this->faker->dateTimeBetween('+1 sec', '+2 days');
+        $enter = $this->faker->dateTimeBetween('+1 hour', '+2 days');
         return $this->state([
             'enter_scheduled_time' => $enter,
             'exit_scheduled_time' => $this->faker->dateTimeBetween($enter, '+2 days'),
@@ -45,7 +45,7 @@ class TermFactory extends Factory {
     }
 
     public function afterPeriod() {
-        $exit = $this->faker->dateTimeBetween('-2 days', '-1 sec');
+        $exit = $this->faker->dateTimeBetween('-2 days', '-1 hour');
         return $this->state([
             'enter_scheduled_time' => $this->faker->dateTimeBetween('-2 days', $exit),
             'exit_scheduled_time' => $exit,

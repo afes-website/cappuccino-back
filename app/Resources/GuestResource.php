@@ -18,7 +18,7 @@ class GuestResource extends JsonResource {
             'term' => new TermResource($this->term),
             'entered_at' => $this->entered_at,
             'exited_at' => $this->exited_at,
-            'exh_id' =>$this->exh_id,
+            'exhibition_id' =>$this->exhibition_id,
         ];
     }
 }

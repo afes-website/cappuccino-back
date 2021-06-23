@@ -12,6 +12,10 @@ class Reservation extends Model {
 
     protected $primaryKey = 'id';
 
+    protected $fillable = [
+        'term_id', 'people_count', 'name', 'address', 'cellphone',
+    ];
+
     protected $keyType = 'string';
 
     public $incrementing = false;
@@ -37,7 +41,7 @@ class Reservation extends Model {
             return 'OUT_OF_RESERVATION_TIME';
         }
 
-        if (!$this->guest()->exists()) {
+        if ($this->guest()->exists()) {
             return 'ALREADY_ENTERED_RESERVATION';
         }
 

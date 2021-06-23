@@ -61,14 +61,14 @@ class Handler extends ExceptionHandler {
         if ($e instanceof HttpException) {
             return response([
                 'code'=>$e->getStatusCode(),
-                'message'=>$e->getMessage()
+                'error_code'=>$e->getMessage()
             ], $e->getStatusCode());
         }
         if ($e instanceof ValidationException) {
-            return response(['code'=>400, 'message'=> $e->getMessage()], 400);
+            return response(['code'=>400, 'error_code'=> $e->getMessage()], 400);
         }
         if (env('APP_DEBUG'))
-            return response(['message'=>$e->getMessage(), 'code'=>500], 500);
-        else return response(['message'=>'Internal Server Error', 'code'=>500], 500);
+            return response(['error_code'=>$e->getMessage(), 'code'=>500], 500);
+        else return response(['error_code'=>'INTERNAL_SERVER_ERROR', 'code'=>500], 500);
     }
 }

@@ -22,10 +22,10 @@ class ReservationFactory extends Factory {
      */
     public function definition() {
         return [
-            'id'=>$this->faker->userName,
+            'id'=>$this->faker->unique()->userName,
             'people_count'=>$this->faker->numberBetween(1, 100),
             'name'=>$this->faker->name,
-            'term_id'=>Term::factory(),
+            'term_id'=>Term::factory()->inPeriod(),
             'email'=>$this->faker->email,
             'address'=>$this->faker->address,
             'cellphone'=>$this->faker->phoneNumber

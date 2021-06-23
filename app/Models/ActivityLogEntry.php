@@ -15,6 +15,8 @@ class ActivityLogEntry extends Model {
 
     protected $keyType = 'int';
 
+    protected $guarded = [];
+
     public $incrementing = true;
 
     public $timestamps = true;
