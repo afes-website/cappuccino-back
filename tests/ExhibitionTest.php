@@ -39,7 +39,7 @@ class ExhibitionTest extends TestCase {
         $exh_count = 2;
         $term = Term::factory()->count(3)->create();
         $user = User::factory()->permission('exhibition')->create();
-        Exhibition::factory()
+        $my_exh = Exhibition::factory()
             ->has(
                 Guest::factory()
                     ->count($guest_count * $term_count)
@@ -50,7 +50,7 @@ class ExhibitionTest extends TestCase {
                     ))
             )->for($user)->create();
 
-        Exhibition::factory()
+        $exhibitions = Exhibition::factory()
             ->has(
                 Guest::factory()
                     ->count($guest_count * $term_count)
@@ -60,6 +60,7 @@ class ExhibitionTest extends TestCase {
                         ['term_id' => $term[2]->id]
                     ))
             )->count($exh_count - 1)->create();
+        $all_capacity = $exhibitions[0]->capacity + $my_exh->capacity;
 
         $this->actingAs($user)->get("/exhibitions");
         $this->assertResponseOk();
@@ -67,9 +68,12 @@ class ExhibitionTest extends TestCase {
 
         $this->seeJsonContains([
             'all' => [
-                $term[0]->id => $guest_count * $exh_count,
-                $term[1]->id => $guest_count * $exh_count,
-                $term[2]->id => $guest_count * $exh_count,
+                'count' => [
+                    $term[0]->id => $guest_count * $exh_count,
+                    $term[1]->id => $guest_count * $exh_count,
+                    $term[2]->id => $guest_count * $exh_count,
+                ],
+                'capacity' => $all_capacity
             ]
         ]);
     }
