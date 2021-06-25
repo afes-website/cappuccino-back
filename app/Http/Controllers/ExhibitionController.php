@@ -18,11 +18,14 @@ class ExhibitionController extends Controller {
 
         return response()->json([
             'exhibition' => $exh_status,
-            'all' => Guest::query()
-                ->whereNull('exited_at')
-                ->select('term_id', DB::raw('count(1) as cnt'))
-                ->groupBy('term_id')
-                ->pluck('cnt', 'term_id')
+            'all' => [
+                'count' => Guest::query()
+                    ->whereNull('exited_at')
+                    ->select('term_id', DB::raw('count(1) as cnt'))
+                    ->groupBy('term_id')
+                    ->pluck('cnt', 'term_id'),
+                'capacity' => $all_limit
+            ]
         ]);
     }
 
