@@ -23,7 +23,7 @@ class Reservation extends Model {
     public $timestamps = false;
 
     public function guest() {
-        return $this->hasOne(Guest::class);
+        return $this->hasMany(Guest::class);
     }
 
     public function term() {
