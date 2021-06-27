@@ -13,7 +13,7 @@ class Reservation extends Model {
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'term_id', 'people_count', 'name', 'address', 'cellphone',
+        'term_id', 'member_all',
     ];
 
     protected $keyType = 'string';
@@ -23,7 +23,7 @@ class Reservation extends Model {
     public $timestamps = false;
 
     public function guest() {
-        return $this->hasOne(Guest::class);
+        return $this->hasMany(Guest::class);
     }
 
     public function term() {
