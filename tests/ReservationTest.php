@@ -2,18 +2,19 @@
 namespace Tests;
 
 use App\Models\Reservation;
-use App\Models\Term;
 use App\Models\User;
 use App\Resources\ReservationResource;
 use App\Resources\TermResource;
 
 /**
- * - /terms:get
+ * - /reservation/{id}:get
+ * - /reservation/{id}/check:get
+ * - /reservation/search:get
  */
 class ReservationTest extends TestCase {
 
     /**
-     * Term についてのデータの中身が正しい
+     * /reservation/{id}:get
      */
     public function testShow() {
         $user = User::factory()->permission('reservation')->create();
@@ -30,22 +31,7 @@ class ReservationTest extends TestCase {
     }
 
     /**
-     * 存在する全タームが返ってきている
-     */
-    public function testSearch() {
-        $count = 5;
-        $user = User::factory()->permission('reservation')->create();
-
-        $reservation = Reservation::factory()->create();
-        Reservation::factory()->count($count)->create();
-
-        $this->actingAs($user)->json('GET', '/reservations/search', ['term_id' => $reservation->term->id]);
-        $this->assertResponseOk();
-        $this->assertCount(1, json_decode($this->response->getContent()));
-    }
-
-    /**
-     * 権限チェック
+     * /reservation/{id}/check:get
      */
     public function testCheck() {
         $user = User::factory()->permission('reservation')->create();
@@ -59,5 +45,20 @@ class ReservationTest extends TestCase {
             'error_code' => null,
             'reservation' => new ReservationResource($reservation)
         ]);
+    }
+
+    /**
+     * /reservation/search:get
+     */
+    public function testSearch() {
+        $count = 5;
+        $user = User::factory()->permission('reservation')->create();
+
+        $reservation = Reservation::factory()->create();
+        Reservation::factory()->count($count)->create();
+
+        $this->actingAs($user)->json('GET', '/reservations/search', ['term_id' => $reservation->term->id]);
+        $this->assertResponseOk();
+        $this->assertCount(1, json_decode($this->response->getContent()));
     }
 }
