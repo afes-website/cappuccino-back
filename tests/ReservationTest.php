@@ -34,10 +34,13 @@ class ReservationTest extends TestCase {
      * /reservation/{id}/check:get
      */
     public function testCheck() {
-        $user = User::factory()->permission('reservation')->create();
         $reservation = Reservation::factory()->create();
-        $this->actingAs($user)->get("/reservations/{$reservation->id}/check");
-        $this->assertResponseOk();
+
+        foreach (['executive', 'reservation'] as $role) {
+            $user = User::factory()->permission($role)->create();
+            $this->actingAs($user)->get("/reservations/{$reservation->id}/check");
+            $this->assertResponseOk();
+        }
 
         $this->assertJson($this->response->getContent());
         $this->seeJsonEquals([
