@@ -15,8 +15,8 @@ class ReservationResource extends JsonResource {
     public function toArray($request) {
         return [
             'id' => $this->id,
-            'term' => $this->term,
-            'member_all' => $this->people_count,
+            'term' => new TermResource($this->term),
+            'member_all' => $this->member_count,
             'member_checked_in' => $this->guest->count()
         ];
     }
