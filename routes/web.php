@@ -45,7 +45,7 @@ $router->get(
 );
 
 $router->group(['prefix' => 'reservations'], function () use ($router) {
-    $router->get('search', ['uses' => 'ReservationController@index', 'middleware' => 'auth:reservation']);
+    $router->get('search', ['uses' => 'ReservationController@search', 'middleware' => 'auth:reservation']);
     $router->get('{id}', ['uses' => 'ReservationController@show', 'middleware' => 'auth:reservation']);
     $router->get(
         '{id}/check',

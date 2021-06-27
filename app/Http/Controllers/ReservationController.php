@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ReservationController extends Controller {
 
-    public function index(Request $request) {
+    public function search(Request $request) {
         $query = $this->validate($request, [
             'term_id' => ['string'],
         ]);
