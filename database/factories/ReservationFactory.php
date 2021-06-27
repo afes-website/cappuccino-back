@@ -23,7 +23,7 @@ class ReservationFactory extends Factory {
     public function definition() {
         return [
             'id'=>$this->faker->unique()->userName,
-            'member_count'=>$this->faker->numberBetween(1, 100),
+            'member_all'=>$this->faker->numberBetween(1, 100),
             'term_id'=>Term::factory()->inPeriod(),
         ];
     }

@@ -13,7 +13,7 @@ class Reservation extends Model {
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'term_id', 'member_count',
+        'term_id', 'member_all',
     ];
 
     protected $keyType = 'string';

@@ -16,7 +16,7 @@ class ReservationResource extends JsonResource {
         return [
             'id' => $this->id,
             'term' => new TermResource($this->term),
-            'member_all' => $this->member_count,
+            'member_all' => $this->member_all,
             'member_checked_in' => $this->guest->count()
         ];
     }

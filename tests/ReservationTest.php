@@ -25,7 +25,7 @@ class ReservationTest extends TestCase {
         $this->seeJsonEquals([
             'id' => $reservation->id,
             'term'=> new TermResource($reservation->term),
-            'member_all' => $reservation->member_count,
+            'member_all' => $reservation->member_all,
             'member_checked_in' => 0,
         ]);
     }

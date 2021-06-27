@@ -14,7 +14,7 @@ class RenewReservationTable extends Migration {
     public function up() {
         Schema::table('reservations', function (Blueprint $table) {
             $table->dropColumn('email');
-            $table->renameColumn('people_count', 'member_count');
+            $table->renameColumn('people_count', 'member_all');
             $table->dropColumn('name');
             $table->dropColumn('address');
             $table->dropColumn('cellphone');
@@ -29,7 +29,7 @@ class RenewReservationTable extends Migration {
     public function down() {
         Schema::table('reservations', function (Blueprint $table) {
             $table->string('email');
-            $table->renameColumn('member_count', 'people_count');
+            $table->renameColumn('member_all', 'people_count');
             $table->string('name');
             $table->string('address');
             $table->string('cellphone');
