@@ -13,11 +13,11 @@ class ReservationController extends Controller {
             'term_id' => ['string'],
         ]);
 
-        $response = Reservation::query();
+        $data = Reservation::query();
 
-        foreach ($query as $i => $value) $response->where($i, $value);
+        foreach ($query as $i => $value) $data->where($i, $value);
 
-        return response(ReservationResource::collection($response->get()));
+        return response(ReservationResource::collection($data->get()));
     }
 
     public function show($id) {
