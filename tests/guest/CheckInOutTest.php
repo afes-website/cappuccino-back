@@ -95,30 +95,19 @@ class CheckInOutTest extends TestCase {
 
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        $used_id = [];
         for ($i = 0; $i < $count; ++$i) {
-            $reservation = Reservation::factory()->for($term)->create();
+            $member_count = rand(1, 10);
+            $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
+
+            Guest::factory()->for($reservation)->count($member_count)->create();
 
             do {
-                $guest_id_1 = $this->createGuestId($term->guest_type);
-            } while (in_array($guest_id_1, $used_id));
-            $used_id[] = $guest_id_1;
-
-            do {
-                $guest_id_2 = $this->createGuestId($term->guest_type);
-            } while (in_array($guest_id_2, $used_id));
-            $used_id[] = $guest_id_2;
+                $new_guest_id = $this->createGuestId($term->guest_type);
+            } while (Guest::find($new_guest_id));
 
             $this->actingAs($user)->post(
                 '/guests/check-in',
-                ['guest_id' => $guest_id_1, 'reservation_id' => $reservation->id]
-            );
-
-            $this->assertResponseOk();
-
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $guest_id_1, 'reservation_id' => $reservation->id]
+                ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
             );
 
             $this->assertResponseStatus(400);
