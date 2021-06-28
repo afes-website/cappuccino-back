@@ -43,6 +43,27 @@ class CheckInOutTest extends TestCase {
         $this->assertResponseOk();
     }
 
+
+    /**
+     * 複数人のCheckInができる事の確認
+     */
+    public function testCheckInMultiple() {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+        $member_count = $reservation->member_all;
+
+        for ($i = 0; $i < $member_count; $i++) {
+            do {
+                $guest_id = $this->createGuestId($reservation->term->guest_type);
+            } while (Guest::find($guest_id));
+            $this->actingAs($user)->post(
+                '/guests/check-in',
+                ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
+            );
+            $this->assertResponseOk();
+        }
+    }
+
     /**
      * 予約が存在しない
      * RESERVATION_NOT_FOUND
