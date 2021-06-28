@@ -271,12 +271,16 @@ class CheckInOutTest extends TestCase {
             DB::beginTransaction();
             try {
                 $user = User::factory()->permission('admin', 'executive')->create();
-                $reservation = Reservation::factory();
+                $member_count = rand(1, 10);
+                $reservation = Reservation::factory()->state(['member_all' => $member_count]);
                 $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
 
                 switch ($state[0]) {
                     case 'already_entered_reservation':
-                        $reservation = $reservation->has(Guest::factory()->for(Term::factory()->create()));
+                        $reservation = $reservation
+                            ->has(Guest::factory()
+                                ->for(Term::factory()->create())
+                                ->count($member_count));
                         break;
                     case 'not_entered_reservation':
                         break;
