@@ -41,7 +41,7 @@ class Reservation extends Model {
             return 'OUT_OF_RESERVATION_TIME';
         }
 
-        if ($this->guest()->exists()) {
+        if ($this->guest()->count() >= $this->member_all) {
             return 'ALREADY_ENTERED_RESERVATION';
         }
 
