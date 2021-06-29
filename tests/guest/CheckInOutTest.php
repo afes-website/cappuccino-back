@@ -44,7 +44,7 @@ class CheckInOutTest extends TestCase {
     }
 
     /**
-     * 複数人のCheckInができる事の確認
+     * 複数人 CheckIn
      */
     public function testCheckInMultiple() {
         $user = User::factory()->permission('executive')->create();
