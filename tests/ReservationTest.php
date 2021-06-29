@@ -20,7 +20,7 @@ class ReservationTest extends TestCase {
     public function testShow() {
         $user = User::factory()->permission('reservation')->create();
         $reservation = Reservation::factory()->create();
-        $member_count = rand(1,$reservation->member_all);
+        $member_count = rand(1, $reservation->member_all);
         Guest::factory()->for($reservation)->count($member_count)->create();
 
         $this->actingAs($user)->get("/reservations/{$reservation->id}");
