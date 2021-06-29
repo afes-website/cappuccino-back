@@ -42,7 +42,7 @@ class Reservation extends Model {
         }
 
         if ($this->guest()->count() >= $this->member_all) {
-            return 'ALREADY_ENTERED_RESERVATION';
+            return 'ALL_MEMBER_CHECKED_IN';
         }
 
         return null;

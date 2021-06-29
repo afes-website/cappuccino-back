@@ -87,7 +87,7 @@ class CheckInOutTest extends TestCase {
 
     /**
      * すでに入場済み
-     * ALREADY_ENTERED_RESERVATION
+     * ALL_MEMBER_CHECKED_IN
      * 入場処理を2回行ってチェック
      */
     public function testAlreadyEnteredReservation() {
@@ -113,7 +113,7 @@ class CheckInOutTest extends TestCase {
             $this->assertResponseStatus(400);
             $this->assertJson($this->response->getContent());
             $code = json_decode($this->response->getContent())->error_code;
-            $this->assertEquals('ALREADY_ENTERED_RESERVATION', $code);
+            $this->assertEquals('ALL_MEMBER_CHECKED_IN', $code);
         }
     }
 
@@ -251,7 +251,7 @@ class CheckInOutTest extends TestCase {
 
     public function testMultipleError() {
         foreach (Common::multipleArray(
-            ['already_entered_reservation', 'not_entered_reservation'],
+            ['all_member_checked_in', 'no_member_checked_in'],
             ['after_period', 'before_period', 'in_period'],
             ['character_invalid', 'character_valid'],
             ['length_invalid', 'length_valid'],
@@ -260,7 +260,7 @@ class CheckInOutTest extends TestCase {
         ) as $state
         ) {
             if ($state === [
-                'not_entered_reservation',
+                'no_member_checked_in',
                 'in_period',
                 'character_valid',
                 'length_valid',
@@ -276,13 +276,13 @@ class CheckInOutTest extends TestCase {
                 $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
 
                 switch ($state[0]) {
-                    case 'already_entered_reservation':
+                    case 'all_member_checked_in':
                         $reservation = $reservation
                             ->has(Guest::factory()
                                 ->for(Term::factory()->create())
                                 ->count($member_count));
                         break;
-                    case 'not_entered_reservation':
+                    case 'no_member_checked_in':
                         break;
                 }
                 $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
