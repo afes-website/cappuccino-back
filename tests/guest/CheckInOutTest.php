@@ -54,12 +54,13 @@ class CheckInOutTest extends TestCase {
         $reservation = Reservation::factory()->create();
         $member_count = $reservation->member_all;
 
-        for ($i = 0; $i < $member_count; $i++) {
+        for ($i = 1; $i <= $member_count; $i++) {
             $guest_id = $this->createGuestId($reservation->term->guest_type);
             $this->actingAs($user)->post(
                 '/guests/check-in',
                 ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
             );
+            $this->assertEquals($i, $reservation->guest()->count());
             $this->assertResponseOk();
         }
     }
