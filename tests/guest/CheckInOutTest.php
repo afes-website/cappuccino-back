@@ -22,7 +22,10 @@ class CheckInOutTest extends TestCase {
     const ID_LENGTH = 5;
 
     private static function createGuestId(string $guest_type): string {
-        return GuestFactory::createGuestId($guest_type);
+        do {
+            $guest_id = GuestFactory::createGuestId($guest_type);
+        } while (Guest::find($guest_id));
+        return $guest_id;
     }
 
     /* Check-In */
@@ -41,6 +44,38 @@ class CheckInOutTest extends TestCase {
             ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
         );
         $this->assertResponseOk();
+        $guest = Guest::find($guest_id);
+        $this->seeJsonEquals([
+            'id' => $guest->id,
+            'entered_at' => $guest->entered_at,
+            'exited_at' => $guest->exited_at,
+            'exhibition_id' => $guest->exhibition_id,
+            'term' => [
+                'id' => $guest->term->id,
+                'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601String(),
+                'exit_scheduled_time' => $guest->term->exit_scheduled_time->toIso8601String(),
+                'guest_type' => $guest->term->guest_type
+            ]
+        ]);
+    }
+
+    /**
+     * 複数人 CheckIn
+     */
+    public function testCheckInMultiple() {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+        $member_count = $reservation->member_all;
+
+        for ($i = 1; $i <= $member_count; $i++) {
+            $guest_id = $this->createGuestId($reservation->term->guest_type);
+            $this->actingAs($user)->post(
+                '/guests/check-in',
+                ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
+            );
+            $this->assertEquals($i, $reservation->guest()->count());
+            $this->assertResponseOk();
+        }
     }
 
     /**
@@ -66,7 +101,7 @@ class CheckInOutTest extends TestCase {
 
     /**
      * すでに入場済み
-     * ALREADY_ENTERED_RESERVATION
+     * ALL_MEMBER_CHECKED_IN
      * 入場処理を2回行ってチェック
      */
     public function testAlreadyEnteredReservation() {
@@ -74,36 +109,25 @@ class CheckInOutTest extends TestCase {
 
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        $used_id = [];
         for ($i = 0; $i < $count; ++$i) {
-            $reservation = Reservation::factory()->for($term)->create();
+            $member_count = rand(1, 10);
+            $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
+
+            Guest::factory()->for($reservation)->count($member_count)->create();
 
             do {
-                $guest_id_1 = $this->createGuestId($term->guest_type);
-            } while (in_array($guest_id_1, $used_id));
-            $used_id[] = $guest_id_1;
-
-            do {
-                $guest_id_2 = $this->createGuestId($term->guest_type);
-            } while (in_array($guest_id_2, $used_id));
-            $used_id[] = $guest_id_2;
+                $new_guest_id = $this->createGuestId($term->guest_type);
+            } while (Guest::find($new_guest_id));
 
             $this->actingAs($user)->post(
                 '/guests/check-in',
-                ['guest_id' => $guest_id_1, 'reservation_id' => $reservation->id]
-            );
-
-            $this->assertResponseOk();
-
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $guest_id_1, 'reservation_id' => $reservation->id]
+                ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
             );
 
             $this->assertResponseStatus(400);
             $this->assertJson($this->response->getContent());
             $code = json_decode($this->response->getContent())->error_code;
-            $this->assertEquals('ALREADY_ENTERED_RESERVATION', $code);
+            $this->assertEquals('ALL_MEMBER_CHECKED_IN', $code);
         }
     }
 
@@ -215,9 +239,7 @@ class CheckInOutTest extends TestCase {
         for ($i = 0; $i < $count; ++$i) {
             $reservation_1 = Reservation::factory()->for($term)->create();
             $reservation_2 = Reservation::factory()->for($term)->create();
-            do {
-                $guest_id = $this->createGuestId($term->guest_type);
-            } while (in_array($guest_id, $used_id));
+            $guest_id = $this->createGuestId($term->guest_type);
             $used_id[] = $guest_id;
 
             $this->actingAs($user)->post(
@@ -241,7 +263,7 @@ class CheckInOutTest extends TestCase {
 
     public function testMultipleError() {
         foreach (Common::multipleArray(
-            ['already_entered_reservation', 'not_entered_reservation'],
+            ['all_member_checked_in', 'no_member_checked_in'],
             ['after_period', 'before_period', 'in_period'],
             ['character_invalid', 'character_valid'],
             ['length_invalid', 'length_valid'],
@@ -250,7 +272,7 @@ class CheckInOutTest extends TestCase {
         ) as $state
         ) {
             if ($state === [
-                'not_entered_reservation',
+                'no_member_checked_in',
                 'in_period',
                 'character_valid',
                 'length_valid',
@@ -261,14 +283,18 @@ class CheckInOutTest extends TestCase {
             DB::beginTransaction();
             try {
                 $user = User::factory()->permission('admin', 'executive')->create();
-                $reservation = Reservation::factory();
+                $member_count = rand(1, 10);
+                $reservation = Reservation::factory()->state(['member_all' => $member_count]);
                 $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
 
                 switch ($state[0]) {
-                    case 'already_entered_reservation':
-                        $reservation = $reservation->has(Guest::factory()->for(Term::factory()->create()));
+                    case 'all_member_checked_in':
+                        $reservation = $reservation
+                            ->has(Guest::factory()
+                                ->for(Term::factory()->create())
+                                ->count($member_count));
                         break;
-                    case 'not_entered_reservation':
+                    case 'no_member_checked_in':
                         break;
                 }
                 $term = Term::factory()->state(['guest_type' => 'GuestBlue']);

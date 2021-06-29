@@ -41,8 +41,8 @@ class Reservation extends Model {
             return 'OUT_OF_RESERVATION_TIME';
         }
 
-        if ($this->guest()->exists()) {
-            return 'ALREADY_ENTERED_RESERVATION';
+        if ($this->guest()->count() >= $this->member_all) {
+            return 'ALL_MEMBER_CHECKED_IN';
         }
 
         return null;
