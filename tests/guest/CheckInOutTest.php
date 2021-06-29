@@ -22,7 +22,10 @@ class CheckInOutTest extends TestCase {
     const ID_LENGTH = 5;
 
     private static function createGuestId(string $guest_type): string {
-        return GuestFactory::createGuestId($guest_type);
+        do {
+            $guest_id = GuestFactory::createGuestId($guest_type);
+        } while (Guest::find($guest_id));
+        return $guest_id;
     }
 
     /* Check-In */
@@ -52,9 +55,7 @@ class CheckInOutTest extends TestCase {
         $member_count = $reservation->member_all;
 
         for ($i = 0; $i < $member_count; $i++) {
-            do {
-                $guest_id = $this->createGuestId($reservation->term->guest_type);
-            } while (Guest::find($guest_id));
+            $guest_id = $this->createGuestId($reservation->term->guest_type);
             $this->actingAs($user)->post(
                 '/guests/check-in',
                 ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
@@ -224,9 +225,7 @@ class CheckInOutTest extends TestCase {
         for ($i = 0; $i < $count; ++$i) {
             $reservation_1 = Reservation::factory()->for($term)->create();
             $reservation_2 = Reservation::factory()->for($term)->create();
-            do {
-                $guest_id = $this->createGuestId($term->guest_type);
-            } while (in_array($guest_id, $used_id));
+            $guest_id = $this->createGuestId($term->guest_type);
             $used_id[] = $guest_id;
 
             $this->actingAs($user)->post(
