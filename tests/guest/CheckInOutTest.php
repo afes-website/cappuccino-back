@@ -43,7 +43,6 @@ class CheckInOutTest extends TestCase {
         $this->assertResponseOk();
     }
 
-
     /**
      * 複数人のCheckInができる事の確認
      */
