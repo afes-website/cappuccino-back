@@ -3,6 +3,7 @@ namespace Tests;
 
 use App\Models\Reservation;
 use App\Models\User;
+use App\Models\Guest;
 use App\Resources\ReservationResource;
 use App\Resources\TermResource;
 
@@ -19,6 +20,9 @@ class ReservationTest extends TestCase {
     public function testShow() {
         $user = User::factory()->permission('reservation')->create();
         $reservation = Reservation::factory()->create();
+        $member_count = rand(1,$reservation->member_all);
+        Guest::factory()->for($reservation)->count($member_count)->create();
+
         $this->actingAs($user)->get("/reservations/{$reservation->id}");
         $this->assertResponseOk();
         $this->assertJson($this->response->getContent());
@@ -26,7 +30,7 @@ class ReservationTest extends TestCase {
             'id' => $reservation->id,
             'term'=> new TermResource($reservation->term),
             'member_all' => $reservation->member_all,
-            'member_checked_in' => 0,
+            'member_checked_in' => $member_count,
         ]);
     }
 
