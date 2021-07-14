@@ -9,6 +9,8 @@ class Image extends Model {
 
     use HasFactory;
 
+    protected $guarded = [];
+
     protected $primaryKey = 'id';
 
     protected $keyType = 'string';
