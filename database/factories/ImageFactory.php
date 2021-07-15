@@ -39,7 +39,8 @@ class ImageFactory extends Factory {
                 "550000000a4944415408d763780e0000".
                 "e900e8f07b6a770000000049454e44ae".
                 "426082"
-            ),'user_id' => User::factory(),
+            ),
+            'user_id' => User::factory(),
             'mime_type' => 'image/png'
         ];
     }
