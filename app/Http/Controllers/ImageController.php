@@ -18,10 +18,10 @@ class ImageController extends Controller {
     }
 
     public function create(Request $request) {
-        if (!$request->hasFile('content'))abort(400, 'file is not uploaded');
+        if (!$request->hasFile('content')) abort(400, 'file is not uploaded');
         $file = $request->file('content');
         $mine_type = $file->getMimeType();
-        if (substr($mine_type, 0, 6) !== 'image/')abort(400, 'uploaded file is not an image');
+        if (substr($mine_type, 0, 6) !== 'image/') abort(400, 'uploaded file is not an image');
 
         $content_medium = \Intervention\Image\Facades\Image::make($file->get());
         $content_small = \Intervention\Image\Facades\Image::make($file->get());
