@@ -20,8 +20,8 @@ class ImageController extends Controller {
     public function create(Request $request) {
         if (!$request->hasFile('content')) abort(400, 'file is not uploaded');
         $file = $request->file('content');
-        $mine_type = $file->getMimeType();
-        if (substr($mine_type, 0, 6) !== 'image/') abort(400, 'uploaded file is not an image');
+        $mime_type = $file->getMimeType();
+        if (substr($mime_type, 0, 6) !== 'image/') abort(400, 'uploaded file is not an image');
 
         $content_medium = \Intervention\Image\Facades\Image::make($file->get());
         $content_small = \Intervention\Image\Facades\Image::make($file->get());
@@ -46,10 +46,10 @@ class ImageController extends Controller {
 
         Image::create([
             'id' => $id,
-            'content' => $content_medium->encode($mine_type),
-            'content_small' => $content_small->encode($mine_type),
+            'content' => $content_medium->encode($mime_type),
+            'content_small' => $content_small->encode($mime_type),
             'user_id' => $request->user()->id,
-            'mime_type' => $mine_type
+            'mime_type' => $mime_type
         ]);
 
         return response()->json(['id' => $id], 201);
