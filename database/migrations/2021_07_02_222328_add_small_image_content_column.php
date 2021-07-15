@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class AddSmallImageContentColumn extends Migration {
 
@@ -15,6 +16,9 @@ class AddSmallImageContentColumn extends Migration {
         Schema::table('images', function (Blueprint $table) {
             $table->binary('content_small');
         });
+
+        if (env('DB_CONNECTION') == 'mysql')
+            DB::statement('ALTER TABLE images MODIFY content_small LONGBLOB NOT NULL');
     }
 
     /**
