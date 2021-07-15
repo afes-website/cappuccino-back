@@ -3,6 +3,7 @@ namespace Tests;
 
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
 /**
@@ -103,5 +104,23 @@ class ImageTest extends TestCase {
             $this->assertEquals($width, $img->width());
             $this->assertEquals($height, $img->height());
         }
+    }
+
+    public function testNotFound() {
+        $user = User::factory()->create();
+        $this->actingAs($user)->call(
+            'POST',
+            '/images',
+            [],
+            [],
+            [
+                'content' => UploadedFile::fake()->image('hoge.jpg')
+            ]
+        );
+        $this->assertResponseStatus(201);
+
+        $id = Str::random();
+        $this->get("/images/$id");
+        $this->assertResponseStatus(404);
     }
 }
