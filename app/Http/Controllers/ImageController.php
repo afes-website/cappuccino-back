@@ -10,9 +10,9 @@ class ImageController extends Controller {
     public function show(Request $request, $id) {
         $image = Image::find($id);
         if (!$image) abort(404);
-        $flag = $request->query('flag');
+        $size = $request->query('size');
 
-        return response($flag === 's' ? $image->content_small : $image->content)
+        return response($size === 's' ? $image->content_small : $image->content)
             ->header('Content-Type', $image->mime_type)
             ->header('Last-Modified', $image->created_at->toRfc7231String());
     }

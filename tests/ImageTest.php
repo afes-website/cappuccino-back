@@ -96,8 +96,8 @@ class ImageTest extends TestCase {
 
         $id = json_decode($this->response->getContent())->id;
 
-        foreach (['m' => $medium, 's' => $small] as $flag => [$width, $height]) {
-            $this->get("/images/{$id}?flag={$flag}");
+        foreach (['m' => $medium, 's' => $small] as $size => [$width, $height]) {
+            $this->get("/images/{$id}?size={$size}");
             $this->assertResponseOk();
             $img = Image::make($this->response->getContent());
             $this->assertEquals($width, $img->width());
