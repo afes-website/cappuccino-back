@@ -21,10 +21,11 @@ class CheckInOutTest extends TestCase {
     const PREFIX_LENGTH = 2;
     const ID_LENGTH = 5;
 
-    private static function createGuestId(string $guest_type): string {
+    private static function createGuestId(string $guest_type, $prefix = null): string {
         do {
             $guest_id = GuestFactory::createGuestId($guest_type);
         } while (Guest::find($guest_id));
+        if ($prefix) $guest_id = $prefix."-".substr($guest_id, 3);
         return $guest_id;
     }
 
