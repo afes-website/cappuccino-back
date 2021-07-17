@@ -209,12 +209,8 @@ class CheckInOutTest extends TestCase {
     public function testWrongWristbandColor() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
-        $character_count = strlen(self::ID_CHARACTER);
-        $id = '';
-        for ($i = 0; $i < self::ID_LENGTH; $i++) {
-            $id .= self::ID_CHARACTER[rand(0, $character_count - 1)];
-        }
-        $guest_id = "XX" . "-" . $id; //存在しない Prefix
+
+        $guest_id = self::createGuestId($reservation->term->guest_type, 'XX'); //存在しない Prefix
 
         $this->actingAs($user)->post(
             '/guests/check-in',
