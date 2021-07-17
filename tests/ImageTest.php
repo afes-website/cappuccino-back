@@ -24,10 +24,10 @@ class ImageTest extends TestCase {
     }
 
     /**
-     * upload のテスト
+     * post のテスト
      * @dataProvider imageProvider
      */
-    public function testUpload($upload) {
+    public function testPost($upload) {
         $user = User::factory()->create();
         [$width, $height] = $upload;
         $this->actingAs($user)->call(
@@ -45,9 +45,9 @@ class ImageTest extends TestCase {
     }
 
     /**
-     * Login してないときは Upload ができない
+     * Login してないときは post ができない
      */
-    public function testUploadWithoutLogin() {
+    public function testPostWithoutLogin() {
         $this->call(
             'POST',
             '/images',
@@ -61,9 +61,9 @@ class ImageTest extends TestCase {
     }
 
     /**
-     * Image でないものはアップロードできない
+     * Image でないものは post できない
      */
-    public function testUploadNonImage() {
+    public function testPostNonImage() {
         $writer_user = User::factory()->create();
         $this->actingAs($writer_user)->call(
             'POST',
@@ -78,10 +78,10 @@ class ImageTest extends TestCase {
     }
 
     /**
-     * Download / リサイズのテスト
+     * Get / リサイズのテスト
      * @dataProvider imageProvider
      */
-    public function testDownload($upload, $medium, $small) {
+    public function testGet($upload, $medium, $small) {
         $user = User::factory()->create();
         [$width, $height] = $upload;
         $this->actingAs($user)->call(
@@ -106,7 +106,7 @@ class ImageTest extends TestCase {
         }
     }
 
-    public function testNotFound() {
+    public function testGetNotFound() {
         $user = User::factory()->create();
         $this->actingAs($user)->call(
             'POST',
