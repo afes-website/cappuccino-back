@@ -45,7 +45,7 @@ class ImageTest extends TestCase {
     }
 
     /**
-     * LoginしてないときはUploadができない
+     * Login してないときは Upload ができない
      */
     public function testUploadWithoutLogin() {
         $this->call(
