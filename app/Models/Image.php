@@ -29,7 +29,7 @@ class Image extends Model {
 
         $id = Str::random(40);
 
-        return Image::create([
+        return self::create([
             'id' => $id,
             'content' => $content_medium->encode($mime_type),
             'content_small' => $content_small->encode($mime_type),
