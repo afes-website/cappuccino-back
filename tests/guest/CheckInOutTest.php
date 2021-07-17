@@ -224,6 +224,28 @@ class CheckInOutTest extends TestCase {
     }
 
     /**
+     * チェックサムが誤っている
+     */
+    public function testCheckSumFail() {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+
+        $guest_id = self::createGuestId($reservation->term->guest_type);
+
+        $guest_id = substr($guest_id, -1). ($guest_id[-1] === '0' ? '1' : '0');
+
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
+        );
+
+        $this->assertResponseStatus(400);
+        $this->assertJson($this->response->getContent());
+        $code = json_decode($this->response->getContent())->error_code;
+        $this->assertEquals('INVALID_WRISTBAND_CODE', $code);
+    }
+
+    /**
      * GuestId が使用済み
      * 異なる reservation で2回入場処理を行う
      */
