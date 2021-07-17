@@ -55,6 +55,15 @@ class GuestController extends Controller {
             throw new HttpExceptionWithErrorCode(400, 'WRONG_WRISTBAND_COLOR');
         }
 
+        $digits = [];
+        foreach (str_split(substr($request->guest_id, 3)) as $digit) {
+            $digits[] = hexdec($digit);
+        }
+        if (($digits[0] + $digits[1] * 3 + $digits[2] + $digits[3] * 3) % 0x10 !== $digits[4]) {
+            throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
+        }
+
+
         return DB::transaction(function () use ($request, $reservation, $term) {
             $guest = Guest::create(
                 [
