@@ -23,30 +23,9 @@ class ImageController extends Controller {
         $mime_type = $file->getMimeType();
         if (substr($mime_type, 0, 6) !== 'image/') abort(400, 'uploaded file is not an image');
 
-        $content_medium = \Intervention\Image\Facades\Image::make($file->get());
-        $content_small = \Intervention\Image\Facades\Image::make($file->get());
-        $upsize_callback = function ($constraint) {
-            $constraint->upsize();
-        };
 
-        if ($content_medium->width() >= $content_small->height()) {
-            $content_medium->widen(1440, $upsize_callback);
-            $content_small->widen(400, $upsize_callback);
-        } else {
-            $content_medium->heighten(1440, $upsize_callback);
-            $content_small->heighten(400, $upsize_callback);
-        }
+        $image = Image::imageCreate($file, $request->user()->id, $mime_type);
 
-        $id = Str::random(40);
-
-        Image::create([
-            'id' => $id,
-            'content' => $content_medium->encode($mime_type),
-            'content_small' => $content_small->encode($mime_type),
-            'user_id' => $request->user()->id,
-            'mime_type' => $mime_type
-        ]);
-
-        return response()->json(['id' => $id], 201);
+        return response()->json(['id' => $image->id], 201);
     }
 }
