@@ -23,7 +23,6 @@ class ImageController extends Controller {
         $mime_type = $file->getMimeType();
         if (substr($mime_type, 0, 6) !== 'image/') abort(400, 'uploaded file is not an image');
 
-
         $image = Image::imageCreate($file, $request->user()->id, $mime_type);
 
         return response()->json(['id' => $image->id], 201);
