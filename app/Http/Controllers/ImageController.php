@@ -25,21 +25,16 @@ class ImageController extends Controller {
 
         $content_medium = \Intervention\Image\Facades\Image::make($file->get());
         $content_small = \Intervention\Image\Facades\Image::make($file->get());
+        $upsize_callback = function ($constraint) {
+            $constraint->upsize();
+        };
 
         if ($content_medium->width() >= $content_small->height()) {
-            $content_medium->widen(1440, function ($constraint) {
-                $constraint->upsize();
-            });
-            $content_small->widen(400, function ($constraint) {
-                $constraint->upsize();
-            });
+            $content_medium->widen(1440, $upsize_callback);
+            $content_small->widen(400, $upsize_callback);
         } else {
-            $content_medium->heighten(1440, function ($constraint) {
-                $constraint->upsize();
-            });
-            $content_small->heighten(400, function ($constraint) {
-                $constraint->upsize();
-            });
+            $content_medium->heighten(1440, $upsize_callback);
+            $content_small->heighten(400, $upsize_callback);
         }
 
         $id = Str::random(40);
