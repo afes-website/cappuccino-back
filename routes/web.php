@@ -39,6 +39,9 @@ $router->group(['prefix' => 'guests'], function () use ($router) {
     $router->post('{id}/exit', ['uses' => 'GuestController@exit', 'middleware' => 'auth:exhibition, admin']);
 });
 
+$router->get('/images/{id}', ['uses' => 'ImageController@show']);
+$router->post('/images', ['uses' => 'ImageController@create', 'middleware' => 'auth']);
+
 $router->get(
     'log',
     ['uses' => 'ActivityLogController@index', 'middleware' => 'auth:executive, exhibition, reservation']
