@@ -21,7 +21,7 @@ class ReservationController extends Controller {
     }
 
     public function show($id) {
-        $reservation = Reservation::find($id);
+        $reservation = Reservation::find(strtoupper($id));
         if (!$reservation) abort(404);
 
         return response()->json(new ReservationResource($reservation));

@@ -21,9 +21,9 @@ class CheckInOutTest extends TestCase {
     const PREFIX_LENGTH = 2;
     const ID_LENGTH = 5;
 
-    private static function createGuestId(string $guest_type): string {
+    private static function createGuestId(string $guest_type, string $prefix = null): string {
         do {
-            $guest_id = GuestFactory::createGuestId($guest_type);
+            $guest_id = GuestFactory::createGuestId($guest_type, $prefix);
         } while (Guest::find($guest_id));
         return $guest_id;
     }
@@ -208,12 +208,8 @@ class CheckInOutTest extends TestCase {
     public function testWrongWristbandColor() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
-        $character_count = strlen(self::ID_CHARACTER);
-        $id = '';
-        for ($i = 0; $i < self::ID_LENGTH; $i++) {
-            $id .= self::ID_CHARACTER[rand(0, $character_count - 1)];
-        }
-        $guest_id = "XX" . "-" . $id; //存在しない Prefix
+
+        $guest_id = self::createGuestId($reservation->term->guest_type, 'XX'); //存在しない Prefix
 
         $this->actingAs($user)->post(
             '/guests/check-in',
@@ -224,6 +220,28 @@ class CheckInOutTest extends TestCase {
         $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         $this->assertEquals('WRONG_WRISTBAND_COLOR', $code);
+    }
+
+    /**
+     * チェックサムが誤っている
+     */
+    public function testCheckSumFail() {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+
+        $guest_id = self::createGuestId($reservation->term->guest_type);
+
+        $guest_id = substr($guest_id, -1) . ($guest_id[-1] === '0' ? '1' : '0');
+
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
+        );
+
+        $this->assertResponseStatus(400);
+        $this->assertJson($this->response->getContent());
+        $code = json_decode($this->response->getContent())->error_code;
+        $this->assertEquals('INVALID_WRISTBAND_CODE', $code);
     }
 
     /**
@@ -285,7 +303,7 @@ class CheckInOutTest extends TestCase {
                 $user = User::factory()->permission('admin', 'executive')->create();
                 $member_count = rand(1, 10);
                 $reservation = Reservation::factory()->state(['member_all' => $member_count]);
-                $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
+                $guest_code = self::createGuestId('GuestBlue');
 
                 switch ($state[0]) {
                     case 'all_member_checked_in':
@@ -312,10 +330,9 @@ class CheckInOutTest extends TestCase {
                 $term = $term->create();
                 switch ($state[2]) {
                     case 'character_invalid':
-                        $guest_code .= '9';
+                        $guest_code[-1] = 'z';
                         break;
                     case 'character_valid':
-                        $guest_code .= '2';
                         break;
                 }
                 switch ($state[3]) {

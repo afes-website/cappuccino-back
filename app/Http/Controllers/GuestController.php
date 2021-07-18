@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class GuestController extends Controller {
     public function show($id) {
+        $id = strtoupper($id);
         $guest = Guest::find($id);
         if (!$guest) {
             abort(404);
@@ -31,12 +32,14 @@ class GuestController extends Controller {
             'reservation_id' => ['string', 'required'],
             'guest_id' => ['string', 'required']
         ]);
-
-        if (!preg_match(Guest::VALID_FORMAT, $request->guest_id)) {
+        if (!Guest::validate($request->guest_id)) {
             throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
         }
 
-        $reservation = Reservation::find($request->reservation_id);
+        $guest_id = strtoupper($request->guest_id);
+        $reservation_id = strtoupper($request->reservation_id);
+
+        $reservation = Reservation::find($reservation_id);
 
         if (!$reservation) throw new HttpExceptionWithErrorCode(400, 'RESERVATION_NOT_FOUND');
 
@@ -44,23 +47,23 @@ class GuestController extends Controller {
             throw new HttpExceptionWithErrorCode(400, $reservation_error_code);
         }
 
-        if (Guest::find($request->guest_id)) {
+        if (Guest::find($guest_id)) {
             throw new HttpExceptionWithErrorCode(400, 'ALREADY_USED_WRISTBAND');
         }
 
         $term = $reservation->term;
 
-        if (strpos($request->guest_id, config('cappuccino.guest_types')[$term->guest_type]['prefix']) !== 0
+        if (strpos($guest_id, config('cappuccino.guest_types')[$term->guest_type]['prefix']) !== 0
         ) {
             throw new HttpExceptionWithErrorCode(400, 'WRONG_WRISTBAND_COLOR');
         }
 
-        return DB::transaction(function () use ($request, $reservation, $term) {
+        return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
             $guest = Guest::create(
                 [
-                    'id' => $request->guest_id,
+                    'id' => $guest_id,
                     'term_id' => $term->id,
-                    'reservation_id' => $request->reservation_id
+                    'reservation_id' => $reservation->id
                 ]
             );
             $reservation->update(['guest_id' => $guest->id]);
@@ -71,6 +74,7 @@ class GuestController extends Controller {
     }
 
     public function checkOut($id) {
+        $id = strtoupper($id);
 
         $guest = Guest::find($id);
         if (!$guest) {
@@ -90,6 +94,7 @@ class GuestController extends Controller {
         $this->validate($request, [
             'exhibition_id' => ['string', 'required']
         ]);
+        $id = strtoupper($id);
 
         $guest = Guest::find($id);
 
@@ -129,6 +134,7 @@ class GuestController extends Controller {
         $this->validate($request, [
             'exhibition_id' => ['string', 'required']
         ]);
+        $id = strtoupper($id);
 
         $exhibition_id = $request->exhibition_id;
         $guest = Guest::find($id);
