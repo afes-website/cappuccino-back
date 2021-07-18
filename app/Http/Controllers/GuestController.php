@@ -32,14 +32,14 @@ class GuestController extends Controller {
             'reservation_id' => ['string', 'required'],
             'guest_id' => ['string', 'required']
         ]);
-
         if (!Guest::validate($request->guest_id)) {
             throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
         }
 
         $guest_id = strtoupper($request->guest_id);
+        $reservation_id = strtoupper($request->reservation_id);
 
-        $reservation = Reservation::find($request->reservation_id);
+        $reservation = Reservation::find($reservation_id);
 
         if (!$reservation) throw new HttpExceptionWithErrorCode(400, 'RESERVATION_NOT_FOUND');
 
