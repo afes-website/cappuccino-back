@@ -23,7 +23,7 @@ class Guest extends Model {
 
     const UPDATED_AT = null;
 
-    const VALID_CHARACTER = '0123456789ABCDEF';
+    const VALID_CHARACTER = '0123456789ABCDEFabcdef';
     const ID_LENGTH = 5;
     const VALID_FORMAT = '/\A[A-Za-z]{2}-[0-9A-Fa-f]{5}\Z/';
 
