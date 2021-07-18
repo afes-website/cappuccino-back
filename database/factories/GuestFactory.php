@@ -29,7 +29,7 @@ class GuestFactory extends Factory {
             for ($i = 0; $i < Guest::ID_LENGTH - 1; $i++) {
                 $id .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
             }
-            $guest_id = $prefix . "-" . $id.Guest::calculateParity($id);
+            $guest_id = $prefix . "-" . $id . Guest::calculateParity($id);
         } while (Guest::find($guest_id));
         return $guest_id;
     }
