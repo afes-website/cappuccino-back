@@ -231,7 +231,7 @@ class CheckInOutTest extends TestCase {
 
         $guest_id = self::createGuestId($reservation->term->guest_type);
 
-        $guest_id = substr($guest_id, -1). ($guest_id[-1] === '0' ? '1' : '0');
+        $guest_id = substr($guest_id, -1) . ($guest_id[-1] === '0' ? '1' : '0');
 
         $this->actingAs($user)->post(
             '/guests/check-in',
