@@ -303,7 +303,7 @@ class CheckInOutTest extends TestCase {
                 $user = User::factory()->permission('admin', 'executive')->create();
                 $member_count = rand(1, 10);
                 $reservation = Reservation::factory()->state(['member_all' => $member_count]);
-                $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
+                $guest_code = self::createGuestId('GuestBlue');
 
                 switch ($state[0]) {
                     case 'all_member_checked_in':
@@ -330,10 +330,9 @@ class CheckInOutTest extends TestCase {
                 $term = $term->create();
                 switch ($state[2]) {
                     case 'character_invalid':
-                        $guest_code .= '9';
+                        $guest_code[-1] = 'z';
                         break;
                     case 'character_valid':
-                        $guest_code .= '2';
                         break;
                 }
                 switch ($state[3]) {
