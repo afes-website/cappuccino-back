@@ -27,6 +27,17 @@ class Guest extends Model {
     const ID_LENGTH = 5;
     const VALID_FORMAT = '/\A[A-Z]{2}-[0-9a-f]{5}\Z/';
 
+    public static function validate(string $guest_id): bool {
+        if (!preg_match(self::VALID_FORMAT, $guest_id)) return false;
+        $digits = [];
+        foreach (str_split(substr($guest_id, 3)) as $digit) {
+            $digits[] = hexdec($digit);
+        }
+        if (($digits[0] + $digits[1] * 3 + $digits[2] + $digits[3] * 3) % 0x10 !== $digits[4]) return false;
+        return true;
+    }
+
+
     public function reservation() {
         return $this->belongsTo(Reservation::class);
     }
