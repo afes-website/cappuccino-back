@@ -241,98 +241,105 @@ class CheckInOutTest extends TestCase {
         }
     }
 
-    public function testMultipleError() {
-        foreach (Common::multipleArray(
+    public function multipleCase() {
+        return Common::multipleArray(
             ['all_member_checked_in', 'no_member_checked_in'],
             ['after_period', 'before_period', 'in_period'],
             ['character_invalid', 'character_valid'],
             ['length_invalid', 'length_valid'],
             ['guest_used', 'guest_unused'],
             ['wrong_term', 'right_term']
-        ) as $state
-        ) {
-            if ($state === [
-                'no_member_checked_in',
-                'in_period',
-                'character_valid',
-                'length_valid',
-                'guest_unused',
-                'right_term',
-            ]) continue;
+        );
+    }
 
-            DB::beginTransaction();
-            try {
-                $user = User::factory()->permission('admin', 'executive')->create();
-                $member_count = rand(1, 10);
-                $reservation = Reservation::factory()->state(['member_all' => $member_count]);
-                $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
+    /**
+     * @dataProvider multipleCase
+     */
+    public function testMultipleError(...$state) {
+        if ($state === [
+            'no_member_checked_in',
+            'in_period',
+            'character_valid',
+            'length_valid',
+            'guest_unused',
+            'right_term',
+        ]) {
+            $this->assertTrue(true);
+            return;
+        }
 
-                switch ($state[0]) {
-                    case 'all_member_checked_in':
-                        $reservation = $reservation
-                            ->has(Guest::factory()
-                                ->for(Term::factory()->create())
-                                ->count($member_count));
-                        break;
-                    case 'no_member_checked_in':
-                        break;
-                }
-                $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
-                switch ($state[1]) {
-                    case 'after_period':
-                        $term = $term->afterPeriod();
-                        break;
-                    case 'before_period':
-                        $term = $term->beforePeriod();
-                        break;
-                    case 'in_period':
-                        $term = $term->inPeriod();
-                        break;
-                }
-                $term = $term->create();
-                switch ($state[2]) {
-                    case 'character_invalid':
-                        $guest_code .= '9';
-                        break;
-                    case 'character_valid':
-                        $guest_code .= '2';
-                        break;
-                }
-                switch ($state[3]) {
-                    case 'length_invalid':
-                        $guest_code .= '2';
-                        break;
-                    case 'length_valid':
-                        break;
-                }
-                switch ($state[4]) {
-                    case 'guest_used':
-                        Guest::factory()->state(['id' => $guest_code])->for(Term::factory()->create())->create();
-                        break;
-                    case 'guest_unused':
-                        break;
-                }
-                switch ($state[5]) {
-                    case 'wrong_term':
-                        $guest_code[1] = 'X';
-                        break;
-                    case 'right_term':
-                        break;
-                }
+        DB::beginTransaction();
+        try {
+            $user = User::factory()->permission('admin', 'executive')->create();
+            $member_count = rand(1, 10);
+            $reservation = Reservation::factory()->state(['member_all' => $member_count]);
+            $guest_code = substr(self::createGuestId('GuestBlue'), 0, -1);
 
-                $reservation = $reservation->for($term)->create();
-
-                $this->actingAs($user)->post(
-                    '/guests/check-in',
-                    ['guest_id' => $guest_code, 'reservation_id' => $reservation->id]
-                );
-                $this->assertResponseStatus(400);
-            } catch (\Exception $e) {
-                var_dump($state);
-                throw $e;
-            } finally {
-                DB::rollBack();
+            switch ($state[0]) {
+                case 'all_member_checked_in':
+                    $reservation = $reservation
+                        ->has(Guest::factory()
+                            ->for(Term::factory()->create())
+                            ->count($member_count));
+                    break;
+                case 'no_member_checked_in':
+                    break;
             }
+            $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
+            switch ($state[1]) {
+                case 'after_period':
+                    $term = $term->afterPeriod();
+                    break;
+                case 'before_period':
+                    $term = $term->beforePeriod();
+                    break;
+                case 'in_period':
+                    $term = $term->inPeriod();
+                    break;
+            }
+            $term = $term->create();
+            switch ($state[2]) {
+                case 'character_invalid':
+                    $guest_code .= '9';
+                    break;
+                case 'character_valid':
+                    $guest_code .= '2';
+                    break;
+            }
+            switch ($state[3]) {
+                case 'length_invalid':
+                    $guest_code .= '2';
+                    break;
+                case 'length_valid':
+                    break;
+            }
+            switch ($state[4]) {
+                case 'guest_used':
+                    Guest::factory()->state(['id' => $guest_code])->for(Term::factory()->create())->create();
+                    break;
+                case 'guest_unused':
+                    break;
+            }
+            switch ($state[5]) {
+                case 'wrong_term':
+                    $guest_code[1] = 'X';
+                    break;
+                case 'right_term':
+                    break;
+            }
+
+            $reservation = $reservation->for($term)->create();
+
+            $this->actingAs($user)->post(
+                '/guests/check-in',
+                ['guest_id' => $guest_code, 'reservation_id' => $reservation->id]
+            );
+            $this->expectErrorResponse();
+        } catch (\Exception $e) {
+            var_dump($state);
+            throw $e;
+        } finally {
+            DB::rollBack();
         }
     }
 
