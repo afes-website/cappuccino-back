@@ -23,9 +23,8 @@ class CheckInOutTest extends TestCase {
 
     private static function createGuestId(string $guest_type, $prefix = null): string {
         do {
-            $guest_id = GuestFactory::createGuestId($guest_type);
+            $guest_id = GuestFactory::createGuestId($guest_type, $prefix);
         } while (Guest::find($guest_id));
-        if ($prefix) $guest_id = $prefix."-".substr($guest_id, 3);
         return $guest_id;
     }
 

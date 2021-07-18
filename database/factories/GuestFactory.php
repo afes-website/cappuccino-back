@@ -17,10 +17,12 @@ class GuestFactory extends Factory {
      */
     protected $model = Guest::class;
 
-    public static function createGuestId(string $guest_type = null): string {
+    public static function createGuestId(string $guest_type = null, string $prefix = null): string {
         if ($guest_type === null) {
             $guest_type = array_rand(config('cappuccino.guest_types'));
         }
+        if ($prefix === null) $prefix = config('cappuccino.guest_types')[$guest_type]['prefix'];
+
         do {
             $character_count = strlen(Guest::VALID_CHARACTER);
             $id = '';
@@ -31,7 +33,7 @@ class GuestFactory extends Factory {
                 $digits_sum += hexdec($d) * (1 + ($i % 2) * 2);
             }
             $id .= dechex($digits_sum % 0x10);
-            $guest_id = config('cappuccino.guest_types')[$guest_type]['prefix'] . "-" . $id;
+            $guest_id = $prefix . "-" . $id;
         } while (Guest::find($guest_id));
         return $guest_id;
     }
