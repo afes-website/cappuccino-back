@@ -25,7 +25,7 @@ class Guest extends Model {
 
     const VALID_CHARACTER = '0123456789abcdef';
     const ID_LENGTH = 5;
-    const VALID_FORMAT = '/\A[A-Z]{2}-[0-9a-f]{5}\Z/';
+    const VALID_FORMAT = '/\A[A-Za-z]{2}-[0-9A-Fa-f]{5}\Z/';
 
     public static function validate(string $guest_id): bool {
         if (!preg_match(self::VALID_FORMAT, $guest_id)) return false;
