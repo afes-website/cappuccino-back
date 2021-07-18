@@ -26,14 +26,10 @@ class GuestFactory extends Factory {
         do {
             $character_count = strlen(Guest::VALID_CHARACTER);
             $id = '';
-            $digits_sum = 0;
             for ($i = 0; $i < Guest::ID_LENGTH - 1; $i++) {
-                $d = Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
-                $id .= $d;
-                $digits_sum += hexdec($d) * (1 + ($i % 2) * 2);
+                $id .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
             }
-            $id .= dechex($digits_sum % 0x10);
-            $guest_id = $prefix . "-" . $id;
+            $guest_id = $prefix . "-" . $id.Guest::calculateParity($id);
         } while (Guest::find($guest_id));
         return $guest_id;
     }
