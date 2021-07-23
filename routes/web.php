@@ -27,7 +27,7 @@ $router->get('/auth/user', ['uses'=>'AuthController@userInfo', 'middleware'=>'au
 
 $router->group(['prefix' => 'exhibitions'], function () use ($router) {
     $router->get('/', ['uses' => 'ExhibitionController@index', 'middleware' => 'auth:exhibition, executive']);
-    $router->get('{id}', ['uses' => 'ExhibitionController@show', 'middleware' => 'auth:exhibition']);
+    $router->get('{id}', ['uses' => 'ExhibitionController@show', 'middleware' => 'auth:exhibition, executive']);
 });
 
 $router->group(['prefix' => 'guests'], function () use ($router) {
