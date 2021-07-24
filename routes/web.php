@@ -26,8 +26,8 @@ $router->post(
 $router->get('/auth/user', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
 
 $router->group(['prefix' => 'exhibitions'], function () use ($router) {
-    $router->get('/', ['uses' => 'ExhibitionController@index', 'middleware' => 'auth:exhibition, executive']);
-    $router->get('{id}', ['uses' => 'ExhibitionController@show', 'middleware' => 'auth:exhibition']);
+    $router->get('/', ['uses' => 'ExhibitionController@index']);
+    $router->get('{id}', ['uses' => 'ExhibitionController@show']);
 });
 
 $router->group(['prefix' => 'guests'], function () use ($router) {
