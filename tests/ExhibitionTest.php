@@ -20,7 +20,7 @@ class ExhibitionTest extends TestCase {
      */
     public function testGetAll() {
         $count = 3;
-        $user = User::factory()->permission('exhibition')->create();
+        $user = User::factory()->create();
         Exhibition::factory()->count($count)->create();
 
         $this->actingAs($user)->get('/exhibitions');
@@ -38,7 +38,7 @@ class ExhibitionTest extends TestCase {
         $term_count = 3;
         $exh_count = 2;
         $term = Term::factory()->count(3)->create();
-        $user = User::factory()->permission('exhibition')->create();
+        $user = User::factory()->create();
         $my_exh = Exhibition::factory()
             ->has(
                 Guest::factory()
@@ -82,7 +82,7 @@ class ExhibitionTest extends TestCase {
      * 各展示について叩いたときに Document 通りの内容のものが返ってきている
      */
     public function testShowInfo() {
-        $user = User::factory()->permission('exhibition')->create();
+        $user = User::factory()->create();
         $exhibition = Exhibition::factory()->create();
 
         $this->actingAs($user)->get("/exhibitions/{$exhibition->id}");
@@ -107,7 +107,7 @@ class ExhibitionTest extends TestCase {
         $guest_count = 10;
         $term_count = 3;
         $term = Term::factory()->count(3)->create();
-        $user = User::factory()->permission('exhibition')->create();
+        $user = User::factory()->create();
         $exhibition = Exhibition::factory()
             ->has(
                 Guest::factory()
@@ -137,7 +137,7 @@ class ExhibitionTest extends TestCase {
      */
     public function testCountExited() {
         $guest_count = 10;
-        $user = User::factory()->permission('exhibition')->create();
+        $user = User::factory()->create();
         $term = Term::factory()->create();
         $exhibition = Exhibition::factory()
             ->has(
@@ -161,7 +161,7 @@ class ExhibitionTest extends TestCase {
      */
     public function testDontShowEmptyTerm() {
         $guest_count = 10;
-        $user = User::factory()->permission('exhibition')->create();
+        $user = User::factory()->create();
         Exhibition::factory()
             ->for($user)
             ->has(Guest::factory()->count($guest_count*2))
@@ -181,7 +181,7 @@ class ExhibitionTest extends TestCase {
      * 404
      */
     public function testNotFound() {
-        $user = User::factory()->permission('exhibition')->create();
+        $user = User::factory()->create();
         $id = Str::random(8);
         Guest::factory()->create();
         $this->actingAs($user)->get("/exhibitions/$id");
