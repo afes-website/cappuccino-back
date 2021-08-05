@@ -5,7 +5,7 @@ use Generator;
 
 class Common {
     /**
-     * 与えられた配列をかけざんする
+     * 与えられた配列の直積をとる
      * @param $head array
      * @param ...$tail array
      * @return \Generator
