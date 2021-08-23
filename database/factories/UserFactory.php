@@ -4,9 +4,11 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
-class UserFactory extends Factory
-{
+class UserFactory extends Factory {
+
     /**
      * The name of the factory's corresponding model.
      *
@@ -19,11 +21,34 @@ class UserFactory extends Factory
      *
      * @return array
      */
-    public function definition()
-    {
+    public function definition() {
         return [
+            'id' => Str::random(16),
             'name' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
+            'password' => Hash::make($this->faker->password),
+            "perm_admin" => false,
+            "perm_reservation" => false,
+            "perm_executive" => false,
+            "perm_exhibition" => false,
+            'perm_teacher' => false,
         ];
+    }
+
+    public function permission(...$permissions) {
+        $roles = [
+            'admin' => 'perm_admin',
+            'reservation' => 'perm_reservation',
+            'executive' => 'perm_executive',
+            'exhibition' => 'perm_exhibition',
+            'teacher' => 'perm_teacher'
+        ];
+
+        $states = [];
+
+        foreach ($permissions as $permission) {
+            $states[$roles[$permission]] = true;
+        }
+
+        return $this->state($states);
     }
 }

@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Resources\UserResource;
+
+class AuthController extends Controller {
+    private function jwt(User $user) {
+        $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText(env('APP_KEY')));
+        $now = new \DateTimeImmutable();
+        $token = $config->builder()
+            ->issuedBy(env('APP_URL'))
+            ->permittedFor(env('APP_URL'))
+            ->identifiedBy(uniqid())
+            ->issuedAt($now)
+            ->canOnlyBeUsedAfter($now)
+            ->expiresAt($now->modify('+'.env('JWT_EXPIRE')))
+            ->withClaim('user_id', $user->id)
+            ->getToken($config->signer(), $config->signingKey());
+
+        return $token;
+    }
+
+    public function authenticate(Request $request) {
+        $this->validate($request, [
+            'id'       => ['required', 'string'],
+            'password' => ['required', 'string']
+        ]);
+
+        $user = User::find($request->input('id'));
+
+        if (!$user)
+            throw new HttpException(401);
+
+        if (Hash::check($request->input('password'), $user->password))
+            return ['token' => $this->jwt($user)->toString()];
+        else throw new HttpException(401);
+    }
+
+    public function userInfo(Request $request) {
+        return response(new UserResource($request->user()));
+    }
+
+    public function changePassword(Request $request) {
+        $this->validate($request, [
+            'password' => ['required', 'string', 'min:8']
+        ]);
+        $user = $request->user();
+        $user->update([
+            'password' => Hash::make($request->input('password'))
+        ]);
+        return response('', 204);
+    }
+}

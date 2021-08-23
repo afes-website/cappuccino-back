@@ -2,9 +2,24 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-(new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
-    dirname(__DIR__)
-))->bootstrap();
+$files = [];
+
+$files[] = '.env';
+if (env('APP_ENV')) $files[] = '.env.' . env('APP_ENV');
+if (php_sapi_name() == 'cli') {
+    $input = new \Symfony\Component\Console\Input\ArgvInput();
+    $envParameterOption = $input->getParameterOption('--env');
+    if ($input->hasParameterOption('--env')) {
+        $files[] = '.env.' . $envParameterOption;
+    }
+}
+
+\Dotenv\Dotenv::create(
+    \Illuminate\Support\Env::getRepository(),
+    dirname(__DIR__),
+    $files,
+    false
+)->safeLoad();
 
 date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
 
@@ -23,9 +38,9 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
-// $app->withFacades();
+$app->withFacades();
 
-// $app->withEloquent();
+$app->withEloquent();
 
 /*
 |--------------------------------------------------------------------------
@@ -72,13 +87,14 @@ $app->configure('app');
 |
 */
 
-// $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
-// ]);
+$app->middleware([
+    App\Http\Middleware\CorsMiddleware::class
+]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+$app->routeMiddleware([
+    'auth' => App\Http\Middleware\Authenticate::class,
+    'throttle' => App\Http\Middleware\ThrottleRequests::class,
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -91,9 +107,10 @@ $app->configure('app');
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
+$app->register(Intervention\Image\ImageServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -112,4 +129,6 @@ $app->router->group([
     require __DIR__.'/../routes/web.php';
 });
 
-return $app;
+$app->configure('cappuccino');
+
+ return $app;

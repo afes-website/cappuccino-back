@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<ruleset name="Laravel Standards">
+    <description>The Laravel Coding Standards</description>
+
+    <!-- 対象フォルダ -->
+    <file>app</file>
+<!--    <file>config</file>-->
+    <file>resources</file>
+    <file>routes</file>
+    <file>tests</file>
+    <file>bootstrap</file>
+    <file>database</file>
+
+    <!-- 除外したいファイル、ディレクトリ -->
+    <exclude-pattern>*/cache/*</exclude-pattern>
+    <exclude-pattern>*/*.js</exclude-pattern>
+    <exclude-pattern>*/*.css</exclude-pattern>
+    <exclude-pattern>*/*.xml</exclude-pattern>
+    <exclude-pattern>*/*.blade.php</exclude-pattern>
+    <exclude-pattern>*/autoload.php</exclude-pattern>
+    <exclude-pattern>*/storage/*</exclude-pattern>
+    <exclude-pattern>*/docs/*</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+    <!-- PSR2をベースとする -->
+    <rule ref="PSR2">
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
+        <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
+        <exclude name="Generic.ControlStructures.InlineControlStructure" />
+    </rule>
+
+    <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie" />
+    <rule ref="Generic.Classes.OpeningBraceSameLine" />
+    <rule ref="Generic.Arrays.ArrayIndent" />
+    <rule ref="Squiz.Arrays.ArrayDeclaration.NoCommaAfterLast" />
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>database/migrations</exclude-pattern>
+    </rule>
+
+    <arg name="colors"/>
+    <arg value="p"/>
+
+    <ini name="memory_limit" value="128M"/>
+    <!-- <rule ref="PSR2"/> -->
+</ruleset>

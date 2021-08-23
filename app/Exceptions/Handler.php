@@ -2,15 +2,19 @@
 
 namespace App\Exceptions;
 
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
-class Handler extends ExceptionHandler
-{
+class Handler extends ExceptionHandler {
+
     /**
      * A list of the exception types that should not be reported.
      *
@@ -28,27 +32,43 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param  \Throwable  $exception
+     * @param Throwable $e
      * @return void
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function report(Throwable $exception)
-    {
-        parent::report($exception);
+    public function report(Throwable $e) {
+        parent::report($e);
     }
 
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Throwable  $exception
-     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     * @param Request  $request
+     * @param Throwable $e
+     * @return Response|JsonResponse
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
-    public function render($request, Throwable $exception)
-    {
-        return parent::render($request, $exception);
+    public function render($request, Throwable $e) {
+        $request->headers->set('Accept', 'application/json');
+        if ($e instanceof HttpExceptionWithErrorCode) {
+            return response([
+                'code'=>$e->getStatusCode(),
+                'error_code'=>$e->getErrorCode()
+            ], $e->getStatusCode());
+        }
+        if ($e instanceof HttpException) {
+            return response([
+                'code'=>$e->getStatusCode(),
+                'error_code'=>$e->getMessage()
+            ], $e->getStatusCode());
+        }
+        if ($e instanceof ValidationException) {
+            return response(['code'=>400, 'error_code'=> $e->getMessage()], 400);
+        }
+        if (env('APP_DEBUG'))
+            return response(['error_code'=>$e->getMessage(), 'code'=>500], 500);
+        else return response(['error_code'=>'INTERNAL_SERVER_ERROR', 'code'=>500], 500);
     }
 }
