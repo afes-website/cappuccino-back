@@ -58,6 +58,10 @@ class AuthServiceProvider extends ServiceProvider {
             } catch (Exception $e) {
                 return;
             }
+
+            if ($token->claims()->get('session_key') !== $user->session_key)
+                return;
+
             return $user;//*/
         });
     }

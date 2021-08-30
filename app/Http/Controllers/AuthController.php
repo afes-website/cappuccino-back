@@ -23,6 +23,7 @@ class AuthController extends Controller {
             ->canOnlyBeUsedAfter($now)
             ->expiresAt($now->modify('+'.env('JWT_EXPIRE')))
             ->withClaim('user_id', $user->id)
+            ->withClaim('session_key', $user->session_key)
             ->getToken($config->signer(), $config->signingKey());
 
         return $token;
