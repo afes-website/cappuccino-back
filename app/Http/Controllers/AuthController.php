@@ -48,6 +48,10 @@ class AuthController extends Controller {
         return response(new UserResource($request->user()));
     }
 
+    public function userList(Request $request) {
+        return response()->json(UserResource::collection(User::all()));
+    }
+
     public function changePassword(Request $request) {
         $this->validate($request, [
             'password' => ['required', 'string', 'min:8']

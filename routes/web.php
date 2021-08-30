@@ -18,12 +18,13 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->post('/auth/change_password', ['uses'=>'AuthController@changePassword', 'middleware'=>'auth']);
 $router->post(
     '/auth/login',
     ['uses'=>'AuthController@authenticate', 'middleware'=>'throttle:5, 1']
 ); // throttled 5 requests/1 min
 $router->get('/auth/me', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
+$router->get('/auth/users', ['uses'=>'AuthController@userList', 'middleware'=>'auth:admin']);
+$router->post('/auth/change_password', ['uses'=>'AuthController@changePassword', 'middleware'=>'auth']);
 
 $router->group(['prefix' => 'exhibitions'], function () use ($router) {
     $router->get('/', ['uses' => 'ExhibitionController@index']);
