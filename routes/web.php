@@ -26,6 +26,7 @@ $router->get('/auth/me', ['uses'=>'AuthController@currentUserInfo', 'middleware'
 $router->get('/auth/users', ['uses'=>'AuthController@all', 'middleware'=>'auth:admin']);
 $router->get('/auth/users/{id}', ['uses'=>'AuthController@show', 'middleware'=>'auth']);
 $router->post('/auth/users/{id}/change_password', ['uses'=>'AuthController@changePassword', 'middleware'=>'auth']);
+$router->post('/auth/users/{id}/regenerate', ['uses'=>'AuthController@regenerate', 'middleware'=>'auth:admin']);
 
 $router->group(['prefix' => 'exhibitions'], function () use ($router) {
     $router->get('/', ['uses' => 'ExhibitionController@index']);

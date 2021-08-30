@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Models\User;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
@@ -78,6 +79,21 @@ class AuthController extends Controller {
 
         $user->update([
             'password' => Hash::make($request->input('password'))
+        ]);
+        return response('', 204);
+    }
+
+    public function regenerate($id) {
+        $user = User::find($id);
+        if (!$user)
+            abort(404);
+
+        do {
+            $key = Str::random(10);
+        } while ($user->session_key === $key);
+
+        $user->update([
+            'session_key' => $key
         ]);
         return response('', 204);
     }
