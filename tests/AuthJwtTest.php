@@ -225,10 +225,10 @@ class AuthJwtTest extends TestCase {
     }
 
     /**
-     * changing password
+     * changing password oneself
      * @return void
      */
-    public function testChangePassword() {
+    public function testChangeMyPassword() {
         // create user
         $new_password = Str::random(16);
         $old_password = Str::random(16);
@@ -254,6 +254,58 @@ class AuthJwtTest extends TestCase {
         $response->assertResponseStatus(401);
 
         // use new password instead old one
+        $response = $this->json(
+            'POST',
+            '/auth/login',
+            ['id'=>$id, 'password'=>$new_password]
+        );
+        $response->assertResponseOk();
+    }
+
+    /**
+     * changing other's password
+     * @return void
+     */
+    public function testChangeOthersPassword() {
+        // create user
+        $new_password = Str::random(16);
+        $old_password = Str::random(16);
+        $user = User::factory()->create([
+            'password' => Hash::make($old_password)
+        ]);
+        $admin_user = User::factory()->create([
+            'password' => Hash::make(Str::random(16)),
+            'perm_admin' => 1
+        ]);
+
+        $id = $user->id;
+        $admin_id = $admin_user->id;
+
+        // [204] admin changes user's password
+        $response = $this->actingAs($admin_user)->json(
+            'POST',
+            "/auth/users/$id/change_password",
+            ['password' => $new_password],
+        );
+        $response->assertResponseStatus(204);
+
+        // [403] user changes admin's password
+        $response = $this->actingAs($admin_user)->json(
+            'POST',
+            "/auth/users/$admin_id/change_password",
+            ['password' => $new_password],
+        );
+        $response->assertResponseStatus(403);
+
+        // old password is no longer valid
+        $response = $this->json(
+            'POST',
+            '/auth/login',
+            ['id'=>$id, 'password'=>$old_password]
+        );
+        $response->assertResponseStatus(401);
+
+        // use new password instead of old one
         $response = $this->json(
             'POST',
             '/auth/login',
