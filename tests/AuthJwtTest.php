@@ -33,6 +33,9 @@ class AuthJwtTest extends TestCase {
             'auth_hdr' => ['Authorization' => "bearer {$jwc_token}"],
         ];
     }
+
+    // ======== login & auth (/auth/me) ========
+
     /**
      * /auth/login allow only post
      * @return void
@@ -161,6 +164,8 @@ class AuthJwtTest extends TestCase {
         $response->assertResponseStatus(401);
         CarbonImmutable::setTestNow();
     }
+
+    // ======== change password =========
 
     /**
      * change password without login must be failed
