@@ -43,11 +43,11 @@ class AuthJwtTest extends TestCase {
     }
 
     /**
-     * /auth/user allow only get
+     * /auth/me allow only get
      * @return void
      */
     public function testUserPostNotAllowed() {
-        $response = $this->json('POST', '/auth/user');
+        $response = $this->json('POST', '/auth/me');
         $response->assertResponseStatus(405);
     }
 
@@ -96,7 +96,7 @@ class AuthJwtTest extends TestCase {
 
         $jwc_token = json_decode($response->response->getContent())->token;
 
-        $response = $this->get('/auth/user', ['Authorization'=>'bearer '.$jwc_token]);
+        $response = $this->get('/auth/me', ['Authorization'=>'bearer '.$jwc_token]);
         $response->assertResponseOk();
         $response->seeJson([
             'id'=>$user['user']->id,
@@ -120,7 +120,7 @@ class AuthJwtTest extends TestCase {
         }
 
         $user = $this->getToken($this, $perms);
-        $response = $this->get('/auth/user', $user['auth_hdr']);
+        $response = $this->get('/auth/me', $user['auth_hdr']);
         $response->assertResponseOk();
         $response->seeJsonEquals([
             'id' => $user['user']->id,
@@ -140,10 +140,10 @@ class AuthJwtTest extends TestCase {
      * @return void
      */
     public function testNoToken() {
-        $response = $this->get('/auth/user');
+        $response = $this->get('/auth/me');
         $response->assertResponseStatus(401);
 
-        $response = $this->get('/auth/user', ['Authorization'=>'bearer invalid_token']);
+        $response = $this->get('/auth/me', ['Authorization'=>'bearer invalid_token']);
         $response->assertResponseStatus(401);
     }
 
@@ -157,7 +157,7 @@ class AuthJwtTest extends TestCase {
         CarbonImmutable::setTestNow((new \DateTimeImmutable())->modify(env('JWT_EXPIRE'))->modify('+1 seconds'));
         // now token must be expired
 
-        $response = $this->get('/auth/user', $user['auth_hdr']);
+        $response = $this->get('/auth/me', $user['auth_hdr']);
         $response->assertResponseStatus(401);
         CarbonImmutable::setTestNow();
     }
