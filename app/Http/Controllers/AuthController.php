@@ -63,11 +63,18 @@ class AuthController extends Controller {
         return response()->json(new UserResource($user));
     }
 
-    public function changePassword(Request $request) {
+    public function changePassword(Request $request, $id) {
+        if (!$request->user()->hasPermission("admin") && $id !== $request->user()->id)
+            abort(403);
+
         $this->validate($request, [
             'password' => ['required', 'string', 'min:8']
         ]);
-        $user = $request->user();
+
+        $user = User::find($id);
+        if (!$user)
+            abort(404);
+
         $user->update([
             'password' => Hash::make($request->input('password'))
         ]);
