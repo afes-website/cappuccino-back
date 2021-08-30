@@ -22,6 +22,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'id',
         'name',
         'password',
+        'session_key',
         'perm_admin',
         'perm_reservation',
         'perm_executive',
@@ -36,6 +37,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     protected $hidden = [
         'password',
+        'session_key'
     ];
 
     protected $primaryKey = 'id';
