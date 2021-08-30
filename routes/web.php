@@ -22,8 +22,9 @@ $router->post(
     '/auth/login',
     ['uses'=>'AuthController@authenticate', 'middleware'=>'throttle:5, 1']
 ); // throttled 5 requests/1 min
-$router->get('/auth/me', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
-$router->get('/auth/users', ['uses'=>'AuthController@userList', 'middleware'=>'auth:admin']);
+$router->get('/auth/me', ['uses'=>'AuthController@currentUserInfo', 'middleware'=>'auth']);
+$router->get('/auth/users', ['uses'=>'AuthController@all', 'middleware'=>'auth:admin']);
+$router->get('/auth/users/{id}', ['uses'=>'AuthController@show', 'middleware'=>'auth']);
 $router->post('/auth/change_password', ['uses'=>'AuthController@changePassword', 'middleware'=>'auth']);
 
 $router->group(['prefix' => 'exhibitions'], function () use ($router) {

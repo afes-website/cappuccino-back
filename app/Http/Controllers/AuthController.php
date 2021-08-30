@@ -44,12 +44,23 @@ class AuthController extends Controller {
         else throw new HttpException(401);
     }
 
-    public function userInfo(Request $request) {
+    public function currentUserInfo(Request $request) {
         return response(new UserResource($request->user()));
     }
 
-    public function userList(Request $request) {
+    public function all() {
         return response()->json(UserResource::collection(User::all()));
+    }
+
+    public function show(Request $request, $id) {
+        if (!$request->user()->hasPermission("admin") && $id !== $request->user()->id)
+            abort(403);
+
+        $user = User::find($id);
+        if (!$user)
+            abort(404);
+
+        return response()->json(new UserResource($user));
     }
 
     public function changePassword(Request $request) {
