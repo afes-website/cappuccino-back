@@ -290,7 +290,7 @@ class AuthJwtTest extends TestCase {
         $response->assertResponseStatus(204);
 
         // [403] user changes admin's password
-        $response = $this->actingAs($admin_user)->json(
+        $response = $this->actingAs($user)->json(
             'POST',
             "/auth/users/$admin_id/change_password",
             ['password' => $new_password],
