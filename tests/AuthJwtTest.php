@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Hash;
 use \Carbon\Carbon;
 use \Illuminate\Support\Str;
+use phpDocumentor\Reflection\Types\Void_;
 
 class AuthJwtTest extends TestCase {
     private static function getToken(TestCase $tc, $perms = []) {
@@ -163,6 +164,107 @@ class AuthJwtTest extends TestCase {
         $response = $this->get('/auth/me', $user['auth_hdr']);
         $response->assertResponseStatus(401);
         CarbonImmutable::setTestNow();
+    }
+
+    // ======== users ========
+
+    /**
+     * all users info
+     * @return void
+     */
+    public function testAllUsers() {
+        $count = 5;
+        User::factory()->count($count - 1)->create();
+        $admin_user = User::factory()->create([ 'perm_admin' => 1 ]);
+
+        $this->actingAs($admin_user)->get('/auth/users');
+        $this->assertResponseOk();
+        $data = $this->response->json();
+        $this->assertCount($count, $data);
+    }
+
+    /**
+     * general user cannot get all users info
+     * @return void
+     */
+    public function testAllUsersByGeneralUser() {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get('/auth/users');
+        $this->assertResponseStatus(403);
+    }
+
+    /**
+     * general user can get their own user info
+     * @return void
+     */
+    public function testOwnUserInfo() {
+        $user = User::factory()->create();
+        $id = $user->id;
+
+        $this->actingAs($user)->get("/auth/users/$id");
+        $this->assertResponseOk();
+        $this->seeJsonEquals([
+            'id' => $user->id,
+            'name' => $user->name,
+            'permissions' => [
+                'admin' => $user->perm_admin,
+                'reservation' => $user->perm_reservation,
+                'executive' => $user->perm_executive,
+                'exhibition' => $user->perm_exhibition,
+                'teacher' => $user->perm_teacher,
+            ],
+        ]);
+    }
+
+    /**
+     * admin user can get other user info
+     * @return void
+     */
+    public function testOtherUserInfo() {
+        $user = User::factory()->create();
+        $id = $user->id;
+        $admin_user=User::factory()->create([
+            'perm_admin' => 1
+        ]);
+
+        $this->actingAs($admin_user)->get("/auth/users/$id");
+        $this->assertResponseOk();
+        $this->seeJsonEquals([
+            'id' => $user->id,
+            'name' => $user->name,
+            'permissions' => [
+                'admin' => $user->perm_admin,
+                'reservation' => $user->perm_reservation,
+                'executive' => $user->perm_executive,
+                'exhibition' => $user->perm_exhibition,
+                'teacher' => $user->perm_teacher,
+            ],
+        ]);
+    }
+
+    /**
+     * general user cannot get other user info
+     * @return void
+     */
+    public function testOtherUserInfoByGeneralUser() {
+        $users = User::factory()->count(2)->create();
+        $id = $users[0]->id;
+
+        $this->actingAs($users[1])->get("/auth/users/$id");
+        $this->assertResponseStatus(403);
+    }
+
+    /**
+     * cannot get user info about non-existing user
+     * @return void
+     */
+    public function testNonExistingUser() {
+        $admin_user = User::factory()->create([ 'perm_admin'=> 1 ]);
+        $id = Str::random(16);
+
+        $this->actingAs($admin_user)->get("/auth/users/$id");
+        $this->assertResponseStatus(404);
     }
 
     // ======== change password =========
