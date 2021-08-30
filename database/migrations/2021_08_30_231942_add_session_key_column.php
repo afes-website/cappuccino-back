@@ -4,15 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddSessionKeyColumn extends Migration
-{
+class AddSessionKeyColumn extends Migration {
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::table('users', function (Blueprint $table) {
             $table->string('session_key')->after("password");
         });
@@ -23,8 +21,7 @@ class AddSessionKeyColumn extends Migration
      *
      * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('session_key');
         });
