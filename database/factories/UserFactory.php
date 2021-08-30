@@ -26,6 +26,7 @@ class UserFactory extends Factory {
             'id' => Str::random(16),
             'name' => $this->faker->name,
             'password' => Hash::make($this->faker->password),
+            'session_key' => Str::random(10),
             "perm_admin" => false,
             "perm_reservation" => false,
             "perm_executive" => false,
