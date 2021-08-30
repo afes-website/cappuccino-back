@@ -23,7 +23,7 @@ $router->post(
     '/auth/login',
     ['uses'=>'AuthController@authenticate', 'middleware'=>'throttle:5, 1']
 ); // throttled 5 requests/1 min
-$router->get('/auth/user', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
+$router->get('/auth/me', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
 
 $router->group(['prefix' => 'exhibitions'], function () use ($router) {
     $router->get('/', ['uses' => 'ExhibitionController@index']);
