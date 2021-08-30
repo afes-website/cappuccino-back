@@ -167,10 +167,15 @@ class AuthJwtTest extends TestCase {
      * @return void
      */
     public function testChangePasswordAnonymously() {
+        $user = User::factory()->create([
+            'password'=>Hash::make(Str::random(16))
+        ]);
+        $id = $user->id;
+
         $new_password = Str::random(16);
         $response = $this->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password'=>$new_password]
         );
         $response->assertResponseStatus(401);
@@ -205,7 +210,7 @@ class AuthJwtTest extends TestCase {
         // weak password must be rejected
         $response = $this->actingAs($user)->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password'=>$new_weak_password]
         );
         $response->assertResponseStatus(400);
@@ -213,7 +218,7 @@ class AuthJwtTest extends TestCase {
         // strong password must be accepted
         $response = $this->actingAs($user)->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password'=>$new_strong_password]
         );
         $response->assertResponseStatus(204);
@@ -235,7 +240,7 @@ class AuthJwtTest extends TestCase {
 
         $response = $this->actingAs($user)->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password' => $new_password],
         );
         $response->assertResponseStatus(204);
