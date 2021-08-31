@@ -4,9 +4,7 @@ namespace Tests;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Hash;
-use \Carbon\Carbon;
 use \Illuminate\Support\Str;
-use phpDocumentor\Reflection\Types\Void_;
 
 class AuthJwtTest extends TestCase {
     private static function getToken(TestCase $tc, $perms = []) {
@@ -419,5 +417,49 @@ class AuthJwtTest extends TestCase {
             ['id'=>$id, 'password'=>$new_password]
         );
         $response->assertResponseOk();
+    }
+
+    // ======== session key ========
+
+    public function testDisableSession() {
+        $user = $this->getToken($this);
+        $hdr = $user["auth_hdr"];
+
+        $this->get("/auth/me", $hdr);
+        $this->assertResponseOk();
+
+        $user["user"]->update([ 'session_key' => Str::random(10) ]);
+
+        $this->get("/auth/me", $hdr);
+        $this->assertResponseStatus(401);
+    }
+
+    public function testRegenerateSessionKey() {
+        $user = $this->getToken($this);
+        $id = $user["user"]->id;
+        $admin_user = $this->getToken($this, ["admin"]);
+
+        $this->get("/auth/me", $user["auth_hdr"]);
+        $this->assertResponseOk();
+
+        $this->post("/auth/users/$id/regenerate", [], $admin_user["auth_hdr"]);
+        $this->assertResponseStatus(204);
+
+        $this->get("/auth/me", $user["auth_hdr"]);
+        $this->assertResponseStatus(401);
+    }
+
+    public function testRegenerateAdminSessionKey() {
+        $admin_user = $this->getToken($this, ["admin"]);
+        $id = $admin_user["user"]->id;
+
+        $this->get("/auth/me", $admin_user["auth_hdr"]);
+        $this->assertResponseOk();
+
+        $this->post("/auth/users/$id/regenerate", [], $admin_user["auth_hdr"]);
+        $this->assertResponseStatus(204);
+
+        $this->get("/auth/me", $admin_user["auth_hdr"]);
+        $this->assertResponseStatus(401);
     }
 }
