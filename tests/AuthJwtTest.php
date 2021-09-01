@@ -33,6 +33,12 @@ class AuthJwtTest extends TestCase {
         ];
     }
 
+    /**
+     * unset the protected guards property on the resolved auth manager
+     *
+     * oauth 2.0 - Method Illuminate\Auth\RequestGuard::logout does not exist Laravel Passport - Stack Overflow
+     * https://stackoverflow.com/questions/57813795/method-illuminate-auth-requestguardlogout-does-not-exist-laravel-passport/57941133#57941133
+     */
     private function resetAuth() {
         $protectedProperty = new \ReflectionProperty($this->app['auth'], 'guards');
         $protectedProperty->setAccessible(true);
