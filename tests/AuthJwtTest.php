@@ -33,6 +33,12 @@ class AuthJwtTest extends TestCase {
         ];
     }
 
+    private function resetAuth() {
+        $protectedProperty = new \ReflectionProperty($this->app['auth'], 'guards');
+        $protectedProperty->setAccessible(true);
+        $protectedProperty->setValue($this->app['auth'], []);
+    }
+
     // ======== login & auth (/auth/me) ========
 
     /**
@@ -428,14 +434,11 @@ class AuthJwtTest extends TestCase {
         $this->get("/auth/me", $hdr);
         $this->assertResponseOk();
 
-        $protectedProperty = new \ReflectionProperty($this->app['auth'], 'guards');
-        $protectedProperty->setAccessible(true);
-        $protectedProperty->setValue($this->app['auth'], []);
+        $this->resetAuth();
 
         $user["user"]->update([ 'session_key' => Str::random(10) ]);
 
-        $this->app->flush();
-        $this->refreshApplication();
+        $this->resetAuth();
 
         $this->get("/auth/me", $hdr);
         $this->assertResponseStatus(401);
@@ -449,15 +452,12 @@ class AuthJwtTest extends TestCase {
         $this->get("/auth/me", $user["auth_hdr"]);
         $this->assertResponseOk();
 
-        $protectedProperty = new \ReflectionProperty($this->app['auth'], 'guards');
-        $protectedProperty->setAccessible(true);
-        $protectedProperty->setValue($this->app['auth'], []);
+        $this->resetAuth();
 
         $this->post("/auth/users/$id/regenerate", [], $admin_user["auth_hdr"]);
         $this->assertResponseStatus(204);
 
-        $this->app->flush();
-        $this->refreshApplication();
+        $this->resetAuth();
 
         $this->get("/auth/me", $user["auth_hdr"]);
         $this->assertResponseStatus(401);
@@ -470,15 +470,12 @@ class AuthJwtTest extends TestCase {
         $this->get("/auth/me", $admin_user["auth_hdr"]);
         $this->assertResponseOk();
 
-        $protectedProperty = new \ReflectionProperty($this->app['auth'], 'guards');
-        $protectedProperty->setAccessible(true);
-        $protectedProperty->setValue($this->app['auth'], []);
+        $this->resetAuth();
 
         $this->post("/auth/users/$id/regenerate", [], $admin_user["auth_hdr"]);
         $this->assertResponseStatus(204);
 
-        $this->app->flush();
-        $this->refreshApplication();
+        $this->resetAuth();
 
         $this->get("/auth/me", $admin_user["auth_hdr"]);
         $this->assertResponseStatus(401);
