@@ -228,7 +228,7 @@ class AuthJwtTest extends TestCase {
     public function testOtherUserInfo() {
         $user = User::factory()->create();
         $id = $user->id;
-        $admin_user=User::factory()->create([
+        $admin_user = User::factory()->create([
             'perm_admin' => 1
         ]);
 
