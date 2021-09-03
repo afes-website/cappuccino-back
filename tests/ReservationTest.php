@@ -40,12 +40,7 @@ class ReservationTest extends TestCase {
     public function testCheck() {
         $reservation = Reservation::factory()->create();
 
-        foreach (['executive', 'reservation'] as $role) {
-            $user = User::factory()->permission($role)->create();
-            $this->actingAs($user)->get("/reservations/{$reservation->id}/check");
-            $this->assertResponseOk();
-        }
-
+        $this->get("/reservations/{$reservation->id}/check");
         $this->assertJson($this->response->getContent());
         $this->seeJsonEquals([
             'valid' => true,
