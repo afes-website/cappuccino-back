@@ -16,9 +16,7 @@ class GuestController extends Controller {
     public function show($id) {
         $id = strtoupper($id);
         $guest = Guest::find($id);
-        if (!$guest) {
-            abort(404);
-        }
+        if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
 
         return response()->json(new GuestResource($guest));
     }
