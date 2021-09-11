@@ -23,7 +23,7 @@ class ReservationController extends Controller {
 
     public function show($id) {
         $reservation = Reservation::find(strtoupper($id));
-        if (!$reservation) abort(404);
+        if (!$reservation) throw new HttpExceptionWithErrorCode(404, 'RESERVATION_NOT_FOUND');
 
         return response()->json(new ReservationResource($reservation));
     }
