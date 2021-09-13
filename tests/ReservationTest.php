@@ -52,6 +52,7 @@ class ReservationTest extends TestCase {
     public function testCheckNotFound() {
         $this->get("/reservations/R-00000000/check");
         $this->assertJson($this->response->getContent());
+        $this->assertResponseStatus(404);
         $this->seeJsonEquals([
             'code' => 404,
             'error_code' => "RESERVATION_NOT_FOUND"
