@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -60,7 +61,7 @@ class AuthController extends Controller {
 
         $user = User::find($id);
         if (!$user)
-            abort(404);
+            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
 
         return response()->json(new UserResource($user));
     }
@@ -75,7 +76,7 @@ class AuthController extends Controller {
 
         $user = User::find($id);
         if (!$user)
-            abort(404);
+            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
 
         $user->update([
             'password' => Hash::make($request->input('password'))
@@ -86,7 +87,7 @@ class AuthController extends Controller {
     public function regenerate($id) {
         $user = User::find($id);
         if (!$user)
-            abort(404);
+            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
 
         do {
             $key = Str::random(10);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Resources\ExhibitionResource;
 use App\Models\Exhibition;
 use App\Models\Guest;
@@ -32,7 +33,7 @@ class ExhibitionController extends Controller {
     public function show($id) {
         $exhibition = Exhibition::find($id);
         if (!$exhibition) {
-            abort(404);
+            throw new HttpExceptionWithErrorCode(404, 'EXHIBITION_NOT_FOUND');
         }
 
         return response()->json(new ExhibitionResource($exhibition));
