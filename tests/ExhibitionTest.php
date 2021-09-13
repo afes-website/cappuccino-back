@@ -187,5 +187,9 @@ class ExhibitionTest extends TestCase {
         $this->actingAs($user)->get("/exhibitions/$id");
 
         $this->assertResponseStatus(404);
+        $this->seeJsonEquals([
+            'code' => 404,
+            'error_code' => "EXHIBITION_NOT_FOUND"
+        ]);
     }
 }
