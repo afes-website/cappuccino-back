@@ -186,10 +186,6 @@ class ExhibitionTest extends TestCase {
         Guest::factory()->create();
         $this->actingAs($user)->get("/exhibitions/$id");
 
-        $this->assertResponseStatus(404);
-        $this->seeJsonEquals([
-            'code' => 404,
-            'error_code' => "EXHIBITION_NOT_FOUND"
-        ]);
+        $this->expectErrorResponse("EXHIBITION_NOT_FOUND", 404);
     }
 }

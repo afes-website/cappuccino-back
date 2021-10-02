@@ -275,10 +275,7 @@ class AuthJwtTest extends TestCase {
 
         $this->actingAs($admin_user)->get("/auth/users/$id");
         $this->assertResponseStatus(404);
-        $this->seeJsonEquals([
-            'code' => 404,
-            'error_code' => "USER_NOT_FOUND"
-        ]);
+        $this->expectErrorResponse("USER_NOT_FOUND", 404);
     }
 
     // ======== change password =========
@@ -425,10 +422,8 @@ class AuthJwtTest extends TestCase {
             ['password' => $new_password],
         );
         $response->assertResponseStatus(404);
-        $this->seeJsonEquals([
-            'code' => 404,
-            'error_code' => "USER_NOT_FOUND"
-        ]);
+        $this->expectErrorResponse("USER_NOT_FOUND", 404);
+
 
         // old password is no longer valid
         $response = $this->json(
@@ -514,9 +509,6 @@ class AuthJwtTest extends TestCase {
         $this->post("/auth/users/123456/regenerate", [], $admin_user["auth_hdr"]);
 
         $this->assertResponseStatus(404);
-        $this->seeJsonEquals([
-            'code' => 404,
-            'error_code' => "USER_NOT_FOUND"
-        ]);
+        $this->expectErrorResponse("USER_NOT_FOUND", 404);
     }
 }
