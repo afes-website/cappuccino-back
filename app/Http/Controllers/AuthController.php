@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Models\User;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
@@ -23,6 +25,7 @@ class AuthController extends Controller {
             ->canOnlyBeUsedAfter($now)
             ->expiresAt($now->modify('+'.env('JWT_EXPIRE')))
             ->withClaim('user_id', $user->id)
+            ->withClaim('session_key', $user->session_key)
             ->getToken($config->signer(), $config->signingKey());
 
         return $token;
@@ -44,17 +47,54 @@ class AuthController extends Controller {
         else throw new HttpException(401);
     }
 
-    public function userInfo(Request $request) {
+    public function currentUserInfo(Request $request) {
         return response(new UserResource($request->user()));
     }
 
-    public function changePassword(Request $request) {
+    public function all() {
+        return response()->json(UserResource::collection(User::all()));
+    }
+
+    public function show(Request $request, $id) {
+        if (!$request->user()->hasPermission("admin") && $id !== $request->user()->id)
+            abort(403);
+
+        $user = User::find($id);
+        if (!$user)
+            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
+
+        return response()->json(new UserResource($user));
+    }
+
+    public function changePassword(Request $request, $id) {
+        if (!$request->user()->hasPermission("admin") && $id !== $request->user()->id)
+            abort(403);
+
         $this->validate($request, [
             'password' => ['required', 'string', 'min:8']
         ]);
-        $user = $request->user();
+
+        $user = User::find($id);
+        if (!$user)
+            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
+
         $user->update([
             'password' => Hash::make($request->input('password'))
+        ]);
+        return response('', 204);
+    }
+
+    public function regenerate($id) {
+        $user = User::find($id);
+        if (!$user)
+            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
+
+        do {
+            $key = Str::random(10);
+        } while ($user->session_key === $key);
+
+        $user->update([
+            'session_key' => $key
         ]);
         return response('', 204);
     }

@@ -4,7 +4,6 @@ namespace Tests;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Hash;
-use \Carbon\Carbon;
 use \Illuminate\Support\Str;
 
 class AuthJwtTest extends TestCase {
@@ -33,6 +32,21 @@ class AuthJwtTest extends TestCase {
             'auth_hdr' => ['Authorization' => "bearer {$jwc_token}"],
         ];
     }
+
+    /**
+     * unset the protected guards property on the resolved auth manager
+     *
+     * oauth 2.0 - Method Illuminate\Auth\RequestGuard::logout does not exist Laravel Passport - Stack Overflow
+     * https://stackoverflow.com/questions/57813795/method-illuminate-auth-requestguardlogout-does-not-exist-laravel-passport/57941133#57941133
+     */
+    private function resetAuth() {
+        $protectedProperty = new \ReflectionProperty($this->app['auth'], 'guards');
+        $protectedProperty->setAccessible(true);
+        $protectedProperty->setValue($this->app['auth'], []);
+    }
+
+    // ======== login & auth (/auth/me) ========
+
     /**
      * /auth/login allow only post
      * @return void
@@ -43,11 +57,11 @@ class AuthJwtTest extends TestCase {
     }
 
     /**
-     * /auth/user allow only get
+     * /auth/me allow only get
      * @return void
      */
     public function testUserPostNotAllowed() {
-        $response = $this->json('POST', '/auth/user');
+        $response = $this->json('POST', '/auth/me');
         $response->assertResponseStatus(405);
     }
 
@@ -96,7 +110,7 @@ class AuthJwtTest extends TestCase {
 
         $jwc_token = json_decode($response->response->getContent())->token;
 
-        $response = $this->get('/auth/user', ['Authorization'=>'bearer '.$jwc_token]);
+        $response = $this->get('/auth/me', ['Authorization'=>'bearer '.$jwc_token]);
         $response->assertResponseOk();
         $response->seeJson([
             'id'=>$user['user']->id,
@@ -120,7 +134,7 @@ class AuthJwtTest extends TestCase {
         }
 
         $user = $this->getToken($this, $perms);
-        $response = $this->get('/auth/user', $user['auth_hdr']);
+        $response = $this->get('/auth/me', $user['auth_hdr']);
         $response->assertResponseOk();
         $response->seeJsonEquals([
             'id' => $user['user']->id,
@@ -140,10 +154,10 @@ class AuthJwtTest extends TestCase {
      * @return void
      */
     public function testNoToken() {
-        $response = $this->get('/auth/user');
+        $response = $this->get('/auth/me');
         $response->assertResponseStatus(401);
 
-        $response = $this->get('/auth/user', ['Authorization'=>'bearer invalid_token']);
+        $response = $this->get('/auth/me', ['Authorization'=>'bearer invalid_token']);
         $response->assertResponseStatus(401);
     }
 
@@ -157,20 +171,132 @@ class AuthJwtTest extends TestCase {
         CarbonImmutable::setTestNow((new \DateTimeImmutable())->modify(env('JWT_EXPIRE'))->modify('+1 seconds'));
         // now token must be expired
 
-        $response = $this->get('/auth/user', $user['auth_hdr']);
+        $response = $this->get('/auth/me', $user['auth_hdr']);
         $response->assertResponseStatus(401);
         CarbonImmutable::setTestNow();
     }
+
+    // ======== users ========
+
+    /**
+     * all users info
+     * @return void
+     */
+    public function testAllUsers() {
+        $count = 5;
+        User::factory()->count($count - 1)->create();
+        $admin_user = User::factory()->create([ 'perm_admin' => 1 ]);
+
+        $this->actingAs($admin_user)->get('/auth/users');
+        $this->assertResponseOk();
+        $data = $this->response->json();
+        $this->assertCount($count, $data);
+    }
+
+    /**
+     * general user cannot get all users info
+     * @return void
+     */
+    public function testAllUsersByGeneralUser() {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get('/auth/users');
+        $this->assertResponseStatus(403);
+    }
+
+    /**
+     * general user can get their own user info
+     * @return void
+     */
+    public function testOwnUserInfo() {
+        $user = User::factory()->create();
+        $id = $user->id;
+
+        $this->actingAs($user)->get("/auth/users/$id");
+        $this->assertResponseOk();
+        $this->seeJsonEquals([
+            'id' => $user->id,
+            'name' => $user->name,
+            'permissions' => [
+                'admin' => $user->perm_admin,
+                'reservation' => $user->perm_reservation,
+                'executive' => $user->perm_executive,
+                'exhibition' => $user->perm_exhibition,
+                'teacher' => $user->perm_teacher,
+            ],
+        ]);
+    }
+
+    /**
+     * admin user can get other user info
+     * @return void
+     */
+    public function testOtherUserInfo() {
+        $user = User::factory()->create();
+        $id = $user->id;
+        $admin_user = User::factory()->create([
+            'perm_admin' => 1
+        ]);
+
+        $this->actingAs($admin_user)->get("/auth/users/$id");
+        $this->assertResponseOk();
+        $this->seeJsonEquals([
+            'id' => $user->id,
+            'name' => $user->name,
+            'permissions' => [
+                'admin' => $user->perm_admin,
+                'reservation' => $user->perm_reservation,
+                'executive' => $user->perm_executive,
+                'exhibition' => $user->perm_exhibition,
+                'teacher' => $user->perm_teacher,
+            ],
+        ]);
+    }
+
+    /**
+     * general user cannot get other user info
+     * @return void
+     */
+    public function testOtherUserInfoByGeneralUser() {
+        $users = User::factory()->count(2)->create();
+        $id = $users[0]->id;
+
+        $this->actingAs($users[1])->get("/auth/users/$id");
+        $this->assertResponseStatus(403);
+    }
+
+    /**
+     * cannot get user info about non-existing user
+     * @return void
+     */
+    public function testNonExistingUser() {
+        $admin_user = User::factory()->create([ 'perm_admin'=> 1 ]);
+        $id = Str::random(16);
+
+        $this->actingAs($admin_user)->get("/auth/users/$id");
+        $this->assertResponseStatus(404);
+        $this->seeJsonEquals([
+            'code' => 404,
+            'error_code' => "USER_NOT_FOUND"
+        ]);
+    }
+
+    // ======== change password =========
 
     /**
      * change password without login must be failed
      * @return void
      */
     public function testChangePasswordAnonymously() {
+        $user = User::factory()->create([
+            'password'=>Hash::make(Str::random(16))
+        ]);
+        $id = $user->id;
+
         $new_password = Str::random(16);
         $response = $this->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password'=>$new_password]
         );
         $response->assertResponseStatus(401);
@@ -205,7 +331,7 @@ class AuthJwtTest extends TestCase {
         // weak password must be rejected
         $response = $this->actingAs($user)->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password'=>$new_weak_password]
         );
         $response->assertResponseStatus(400);
@@ -213,17 +339,17 @@ class AuthJwtTest extends TestCase {
         // strong password must be accepted
         $response = $this->actingAs($user)->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password'=>$new_strong_password]
         );
         $response->assertResponseStatus(204);
     }
 
     /**
-     * changing password
+     * changing password oneself
      * @return void
      */
-    public function testChangePassword() {
+    public function testChangeMyPassword() {
         // create user
         $new_password = Str::random(16);
         $old_password = Str::random(16);
@@ -235,7 +361,7 @@ class AuthJwtTest extends TestCase {
 
         $response = $this->actingAs($user)->json(
             'POST',
-            '/auth/change_password',
+            "/auth/users/$id/change_password",
             ['password' => $new_password],
         );
         $response->assertResponseStatus(204);
@@ -255,5 +381,142 @@ class AuthJwtTest extends TestCase {
             ['id'=>$id, 'password'=>$new_password]
         );
         $response->assertResponseOk();
+    }
+
+    /**
+     * changing other's password
+     * @return void
+     */
+    public function testChangeOthersPassword() {
+        // create user
+        $new_password = Str::random(16);
+        $old_password = Str::random(16);
+        $user = User::factory()->create([
+            'password' => Hash::make($old_password)
+        ]);
+        $admin_user = User::factory()->create([
+            'password' => Hash::make(Str::random(16)),
+            'perm_admin' => 1
+        ]);
+
+        $id = $user->id;
+        $admin_id = $admin_user->id;
+
+        // [204] admin changes user's password
+        $response = $this->actingAs($admin_user)->json(
+            'POST',
+            "/auth/users/$id/change_password",
+            ['password' => $new_password],
+        );
+        $response->assertResponseStatus(204);
+
+        // [403] user changes admin's password
+        $response = $this->actingAs($user)->json(
+            'POST',
+            "/auth/users/$admin_id/change_password",
+            ['password' => $new_password],
+        );
+        $response->assertResponseStatus(403);
+
+        // [404] user changes non-existing user's password
+        $response = $this->actingAs($admin_user)->json(
+            'POST',
+            "/auth/users/123456/change_password",
+            ['password' => $new_password],
+        );
+        $response->assertResponseStatus(404);
+        $this->seeJsonEquals([
+            'code' => 404,
+            'error_code' => "USER_NOT_FOUND"
+        ]);
+
+        // old password is no longer valid
+        $response = $this->json(
+            'POST',
+            '/auth/login',
+            ['id'=>$id, 'password'=>$old_password]
+        );
+        $response->assertResponseStatus(401);
+
+        // use new password instead of old one
+        $response = $this->json(
+            'POST',
+            '/auth/login',
+            ['id'=>$id, 'password'=>$new_password]
+        );
+        $response->assertResponseOk();
+    }
+
+    // ======== session key ========
+
+    public function testDisableSession() {
+        $user = $this->getToken($this);
+        $hdr = $user["auth_hdr"];
+
+        $this->get("/auth/me", $hdr);
+        $this->assertResponseOk();
+
+        $this->resetAuth();
+
+        $user["user"]->update([ 'session_key' => Str::random(10) ]);
+
+        $this->resetAuth();
+
+        $this->get("/auth/me", $hdr);
+        $this->assertResponseStatus(401);
+    }
+
+    public function testRegenerateSessionKey() {
+        $user = $this->getToken($this);
+        $id = $user["user"]->id;
+        $admin_user = $this->getToken($this, ["admin"]);
+
+        $this->get("/auth/me", $user["auth_hdr"]);
+        $this->assertResponseOk();
+
+        $this->resetAuth();
+
+        $this->post("/auth/users/$id/regenerate", [], $admin_user["auth_hdr"]);
+        $this->assertResponseStatus(204);
+
+        $this->resetAuth();
+
+        $this->get("/auth/me", $user["auth_hdr"]);
+        $this->assertResponseStatus(401);
+    }
+
+    public function testRegenerateAdminSessionKey() {
+        $admin_user = $this->getToken($this, ["admin"]);
+        $id = $admin_user["user"]->id;
+
+        $this->get("/auth/me", $admin_user["auth_hdr"]);
+        $this->assertResponseOk();
+
+        $this->resetAuth();
+
+        $this->post("/auth/users/$id/regenerate", [], $admin_user["auth_hdr"]);
+        $this->assertResponseStatus(204);
+
+        $this->resetAuth();
+
+        $this->get("/auth/me", $admin_user["auth_hdr"]);
+        $this->assertResponseStatus(401);
+    }
+
+    public function testRegenerateNonExistingUserSessionKey() {
+        $admin_user = $this->getToken($this, ["admin"]);
+
+        $this->get("/auth/me", $admin_user["auth_hdr"]);
+        $this->assertResponseOk();
+
+        $this->resetAuth();
+
+        $this->post("/auth/users/123456/regenerate", [], $admin_user["auth_hdr"]);
+
+        $this->assertResponseStatus(404);
+        $this->seeJsonEquals([
+            'code' => 404,
+            'error_code' => "USER_NOT_FOUND"
+        ]);
     }
 }

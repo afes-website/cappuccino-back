@@ -34,23 +34,39 @@ class ReservationTest extends TestCase {
         ]);
     }
 
+    public function testNotFound() {
+        $user = User::factory()->permission('reservation')->create();
+        $this->actingAs($user)->get("/reservations/R-00000000");
+        $this->assertJson($this->response->getContent());
+        $this->assertResponseStatus(404);
+        $this->seeJsonEquals([
+            'code' => 404,
+            'error_code' => "RESERVATION_NOT_FOUND"
+        ]);
+    }
+
     /**
      * /reservation/{id}/check:get
      */
     public function testCheck() {
         $reservation = Reservation::factory()->create();
 
-        foreach (['executive', 'reservation'] as $role) {
-            $user = User::factory()->permission($role)->create();
-            $this->actingAs($user)->get("/reservations/{$reservation->id}/check");
-            $this->assertResponseOk();
-        }
-
+        $this->get("/reservations/{$reservation->id}/check");
         $this->assertJson($this->response->getContent());
         $this->seeJsonEquals([
             'valid' => true,
             'error_code' => null,
             'reservation' => new ReservationResource($reservation)
+        ]);
+    }
+
+    public function testCheckNotFound() {
+        $this->get("/reservations/R-00000000/check");
+        $this->assertJson($this->response->getContent());
+        $this->assertResponseStatus(404);
+        $this->seeJsonEquals([
+            'code' => 404,
+            'error_code' => "RESERVATION_NOT_FOUND"
         ]);
     }
 

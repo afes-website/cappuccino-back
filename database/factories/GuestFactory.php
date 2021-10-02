@@ -17,17 +17,19 @@ class GuestFactory extends Factory {
      */
     protected $model = Guest::class;
 
-    public static function createGuestId(string $guest_type = null): string {
+    public static function createGuestId(string $guest_type = null, string $prefix = null): string {
         if ($guest_type === null) {
             $guest_type = array_rand(config('cappuccino.guest_types'));
         }
+        if ($prefix === null) $prefix = config('cappuccino.guest_types')[$guest_type]['prefix'];
+
         do {
             $character_count = strlen(Guest::VALID_CHARACTER);
             $id = '';
-            for ($i = 0; $i < Guest::ID_LENGTH; $i++) {
+            for ($i = 0; $i < Guest::ID_LENGTH - 1; $i++) {
                 $id .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
             }
-            $guest_id = config('cappuccino.guest_types')[$guest_type]['prefix'] . "-" . $id;
+            $guest_id = $prefix . "-" . $id . Guest::calculateParity($id);
         } while (Guest::find($guest_id));
         return $guest_id;
     }

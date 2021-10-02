@@ -18,16 +18,19 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->post('/auth/change_password', ['uses'=>'AuthController@changePassword', 'middleware'=>'auth']);
 $router->post(
     '/auth/login',
     ['uses'=>'AuthController@authenticate', 'middleware'=>'throttle:5, 1']
 ); // throttled 5 requests/1 min
-$router->get('/auth/user', ['uses'=>'AuthController@userInfo', 'middleware'=>'auth']);
+$router->get('/auth/me', ['uses'=>'AuthController@currentUserInfo', 'middleware'=>'auth']);
+$router->get('/auth/users', ['uses'=>'AuthController@all', 'middleware'=>'auth:admin']);
+$router->get('/auth/users/{id}', ['uses'=>'AuthController@show', 'middleware'=>'auth']);
+$router->post('/auth/users/{id}/change_password', ['uses'=>'AuthController@changePassword', 'middleware'=>'auth']);
+$router->post('/auth/users/{id}/regenerate', ['uses'=>'AuthController@regenerate', 'middleware'=>'auth:admin']);
 
 $router->group(['prefix' => 'exhibitions'], function () use ($router) {
-    $router->get('/', ['uses' => 'ExhibitionController@index', 'middleware' => 'auth:exhibition, executive']);
-    $router->get('{id}', ['uses' => 'ExhibitionController@show', 'middleware' => 'auth:exhibition']);
+    $router->get('/', ['uses' => 'ExhibitionController@index']);
+    $router->get('{id}', ['uses' => 'ExhibitionController@show']);
 });
 
 $router->group(['prefix' => 'guests'], function () use ($router) {
@@ -50,10 +53,7 @@ $router->get(
 $router->group(['prefix' => 'reservations'], function () use ($router) {
     $router->get('search', ['uses' => 'ReservationController@search', 'middleware' => 'auth:reservation']);
     $router->get('{id}', ['uses' => 'ReservationController@show', 'middleware' => 'auth:reservation']);
-    $router->get(
-        '{id}/check',
-        ['uses' => 'ReservationController@check', 'middleware' => 'auth:reservation, executive']
-    );
+    $router->get('{id}/check', ['uses' => 'ReservationController@check']);
 });
 
 $router->get('terms', ['uses' => 'TermController@index', 'middleware' => 'auth:executive, exhibition']);

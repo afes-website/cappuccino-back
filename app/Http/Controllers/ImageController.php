@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -9,7 +10,9 @@ use Illuminate\Support\Str;
 class ImageController extends Controller {
     public function show(Request $request, $id) {
         $image = Image::find($id);
-        if (!$image) abort(404);
+        if (!$image)
+            throw new HttpExceptionWithErrorCode(404, "IMAGE_NOT_FOUND");
+
         $size = $request->query('size');
 
         return response($size === 's' ? $image->content_small : $image->content)
