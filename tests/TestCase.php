@@ -42,8 +42,8 @@ abstract class TestCase extends \Laravel\Lumen\Testing\TestCase {
         parent::tearDown();
     }
 
-    public function expectErrorResponse($expected = null) {
-        $this->assertResponseStatus(400);
+    public function expectErrorResponse($expected = null, $status = 400) {
+        $this->assertResponseStatus($status);
         $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
         if ($expected) $this->assertEquals($expected, $code);
