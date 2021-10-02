@@ -38,11 +38,7 @@ class ReservationTest extends TestCase {
         $user = User::factory()->permission('reservation')->create();
         $this->actingAs($user)->get("/reservations/R-00000000");
         $this->assertJson($this->response->getContent());
-        $this->assertResponseStatus(404);
-        $this->seeJsonEquals([
-            'code' => 404,
-            'error_code' => "RESERVATION_NOT_FOUND"
-        ]);
+        $this->expectErrorResponse("RESERVATION_NOT_FOUND", 404);
     }
 
     /**
@@ -63,11 +59,7 @@ class ReservationTest extends TestCase {
     public function testCheckNotFound() {
         $this->get("/reservations/R-00000000/check");
         $this->assertJson($this->response->getContent());
-        $this->assertResponseStatus(404);
-        $this->seeJsonEquals([
-            'code' => 404,
-            'error_code' => "RESERVATION_NOT_FOUND"
-        ]);
+        $this->expectErrorResponse("RESERVATION_NOT_FOUND", 404);
     }
 
     /**

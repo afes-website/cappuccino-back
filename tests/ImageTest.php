@@ -121,9 +121,6 @@ class ImageTest extends TestCase {
 
         $id = Str::random();
         $this->get("/images/$id");
-        $this->seeJsonEquals([
-            'code' => 404,
-            'error_code' => "IMAGE_NOT_FOUND"
-        ]);
+        $this->expectErrorResponse("IMAGE_NOT_FOUND", 404);
     }
 }
