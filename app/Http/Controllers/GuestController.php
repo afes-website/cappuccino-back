@@ -83,11 +83,11 @@ class GuestController extends Controller {
             throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
         }
 
-        if ($guest->exited_at !== null) {
+        if ($guest->revoked_at !== null) {
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
         }
 
-        $guest->update(['exited_at' => Carbon::now()]);
+        $guest->update(['revoked_at' => Carbon::now()]);
         ActivityLogEntry::create([
             'log_type' => 'check-out',
             'guest_id' => $guest->id
@@ -118,7 +118,7 @@ class GuestController extends Controller {
         if ($exhibition->capacity <= $exhibition->guests()->count())
             throw new HttpExceptionWithErrorCode(400, 'PEOPLE_LIMIT_EXCEEDED');
 
-        if ($guest->exited_at !== null)
+        if ($guest->revoked_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
         if ($guest->term->exit_scheduled_time < Carbon::now())
@@ -152,7 +152,7 @@ class GuestController extends Controller {
         if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
         if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
 
-        if ($guest->exited_at !== null)
+        if ($guest->revoked_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
         return DB::transaction(function () use ($guest, $exhibition) {

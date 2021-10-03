@@ -47,8 +47,8 @@ class GuestFactory extends Factory {
                 $guest_type = Term::find($attributes['term_id'])->guest_type;
                 return $this->createGuestId($guest_type);
             },
-            'entered_at'=>$this->faker->dateTime,
-            'exited_at'=>null,
+            'registered_at'=>$this->faker->dateTime,
+            'revoked_at'=>null,
             'exhibition_id'=>Exhibition::factory(),
         ];
     }

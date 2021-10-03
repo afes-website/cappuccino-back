@@ -19,7 +19,7 @@ class Guest extends Model {
 
     public $timestamps = true;
 
-    const CREATED_AT = 'entered_at';
+    const CREATED_AT = 'registered_at';
 
     const UPDATED_AT = null;
 

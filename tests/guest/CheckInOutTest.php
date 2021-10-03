@@ -47,8 +47,8 @@ class CheckInOutTest extends TestCase {
         $guest = Guest::find($guest_id);
         $this->seeJsonEquals([
             'id' => $guest->id,
-            'entered_at' => $guest->entered_at,
-            'exited_at' => $guest->exited_at,
+            'registered_at' => $guest->registered_at,
+            'revoked_at' => $guest->revoked_at,
             'exhibition_id' => $guest->exhibition_id,
             'term' => [
                 'id' => $guest->term->id,
