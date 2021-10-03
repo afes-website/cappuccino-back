@@ -65,6 +65,10 @@ class GuestController extends Controller {
                 ]
             );
             $reservation->update(['guest_id' => $guest->id]);
+            ActivityLogEntry::create([
+                'log_type' => 'check-in',
+                'guest_id' => $guest->id
+            ]);
             return response()->json(new GuestResource($guest));
         });
 
@@ -84,6 +88,10 @@ class GuestController extends Controller {
         }
 
         $guest->update(['exited_at' => Carbon::now()]);
+        ActivityLogEntry::create([
+            'log_type' => 'check-out',
+            'guest_id' => $guest->id
+        ]);
 
         return response()->json(new GuestResource($guest));
     }
