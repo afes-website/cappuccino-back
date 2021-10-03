@@ -31,15 +31,6 @@ class GuestController extends Controller {
         return $exhibition;
     }
 
-    private function checkWristband($guest_id, $guest_type) {
-        if (!Guest::validate($guest_id))
-            throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
-        if (strpos($guest_id, config('cappuccino.guest_types')[$guest_type]['prefix']) !== 0)
-            throw new HttpExceptionWithErrorCode(400, 'WRONG_WRISTBAND_COLOR');
-        if (Guest::find($guest_id))
-            throw new HttpExceptionWithErrorCode(400, 'ALREADY_USED_WRISTBAND');
-    }
-
     public function show($id) {
         $id = strtoupper($id);
         $guest = self::findGuestOrFail($id, 404);
@@ -62,7 +53,7 @@ class GuestController extends Controller {
         if (($reservation_error_code = $reservation->getErrorCode()) !== null)
             throw new HttpExceptionWithErrorCode(400, $reservation_error_code);
 
-        self::checkWristband($guest_id, $term->guest_type);
+        Guest::canBeRegistered($guest_id, $term->guest_type);
 
         return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
             $guest = Guest::create(
@@ -97,7 +88,7 @@ class GuestController extends Controller {
         if ($reservation->term->exit_scheduled_time < Carbon::now())
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
-        self::checkWristband($guest_id, $term->guest_type);
+        Guest::canBeRegistered($guest_id, $term->guest_type);
 
         return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
             $guest = Guest::create(

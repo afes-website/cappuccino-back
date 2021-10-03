@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -40,6 +41,15 @@ class Guest extends Model {
         if (!preg_match(self::VALID_FORMAT, $guest_id)) return false;
         $guest_id = strtoupper($guest_id);
         return self::calculateParity(substr($guest_id, 3, 4)) === $guest_id[-1];
+    }
+
+    public static function canBeRegistered(string $guest_id, string $guest_type): void {
+        if (!self::validate($guest_id))
+            throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
+        if (strpos($guest_id, config('cappuccino.guest_types')[$guest_type]['prefix']) !== 0)
+            throw new HttpExceptionWithErrorCode(400, 'WRONG_WRISTBAND_COLOR');
+        if (self::find($guest_id))
+            throw new HttpExceptionWithErrorCode(400, 'ALREADY_USED_WRISTBAND');
     }
 
 
