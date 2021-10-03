@@ -109,6 +109,42 @@ class GuestController extends Controller {
         // TODO: 複数人で処理するときの扱いを考える (docsの編集待ち)
     }
 
+    public function registerSpare(Request $request) {
+        $this->validate($request, [
+            'reservation_id' => ['string', 'required'],
+            'guest_id' => ['string', 'required']
+        ]);
+        $guest_id = strtoupper($request->guest_id);
+        $reservation = self::findReservationOrFail($request->reservation_id);
+        $term = $reservation->term;
+
+        if ($reservation->guest()->count() === 0) {
+            throw new HttpExceptionWithErrorCode(400, 'NO_MEMBER_CHECKED_IN');
+        }
+        if ($reservation->term->exit_scheduled_time < Carbon::now()) {
+            throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
+        }
+        self::validateWristbandCode($guest_id);
+        self::checkWristbandUnused($guest_id);
+
+        return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
+            $guest = Guest::create(
+                [
+                    'id' => $guest_id,
+                    'is_spare' => true,
+                    'term_id' => $term->id,
+                    'reservation_id' => $reservation->id,
+                ]
+            );
+            $reservation->update(['guest_id' => $guest->id]);
+            ActivityLogEntry::create([
+                'log_type' => 'register-spare',
+                'guest_id' => $guest->id
+            ]);
+            return response()->json(new GuestResource($guest));
+        });
+    }
+
     public function checkOut($id) {
         $id = strtoupper($id);
         $guest = self::findGuestOrFail($id, 404);
