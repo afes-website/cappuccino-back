@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\Models\ActivityLogEntry;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GuestController extends Controller {
     private function findGuestOrFail($guest_id, $http_code) {
@@ -146,17 +147,32 @@ class GuestController extends Controller {
     }
 
     public function checkOut($id) {
-        $id = strtoupper($id);
-        $guest = self::findGuestOrFail($id, 404);
-        self::checkGuestNotExited($guest);
+        return DB::transaction(function () use ($id) {
+            $id = strtoupper($id);
+            $guest = self::findGuestOrFail($id, 404);
+            self::checkGuestNotExited($guest);
 
-        $guest->update(['revoked_at' => Carbon::now()]);
-        ActivityLogEntry::create([
-            'log_type' => 'check-out',
-            'guest_id' => $guest->id
-        ]);
+            $guest->update(['revoked_at' => Carbon::now()]);
+            ActivityLogEntry::create([
+                'log_type' => 'check-out',
+                'guest_id' => $guest->id
+            ]);
 
-        return response()->json(new GuestResource($guest));
+            $reservation = $guest->reservation;
+            $guests = $reservation->guest;
+            if ($guests->whereNotNull('revoked_at')->count() === $reservation->member_all) {
+                $revoke_guests = $guests->whereNull('revoked_at');
+                if ($revoke_guests->count()) {
+                    $revoke_guests->toQuery()->update([
+                        'revoked_at' => Carbon::now(),
+                        'is_force_revoked' => true
+                    ]);
+                    Log::info("{$revoke_guests->count()} guest has revoked.");
+                }
+            }
+
+            return response()->json(new GuestResource($guest));
+        });
     }
 
     public function enter(Request $request, $id) {
