@@ -60,7 +60,8 @@ class GuestController extends Controller {
                 [
                     'id' => $guest_id,
                     'term_id' => $term->id,
-                    'reservation_id' => $reservation->id
+                    'reservation_id' => $reservation->id,
+                    'is_spare' => false
                 ]
             );
             $reservation->update(['guest_id' => $guest->id]);
