@@ -50,6 +50,7 @@ class CheckInOutTest extends TestCase {
             'registered_at' => $guest->registered_at,
             'revoked_at' => $guest->revoked_at,
             'exhibition_id' => $guest->exhibition_id,
+            'is_spare' => false,
             'term' => [
                 'id' => $guest->term->id,
                 'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601String(),

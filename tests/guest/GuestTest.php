@@ -47,6 +47,7 @@ class GuestTest extends TestCase {
 
         $this->seeJsonEquals([
             'id' => $guest->id,
+            'is_spare' => $guest->is_spare,
             'registered_at' => $guest->registered_at,
             'revoked_at' => $guest->revoked_at,
             'exhibition_id' => $guest->exhibition_id,

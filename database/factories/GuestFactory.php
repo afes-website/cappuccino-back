@@ -43,6 +43,7 @@ class GuestFactory extends Factory {
         return [
             'term_id'=>Term::factory()->inPeriod(),
             'reservation_id'=>Reservation::factory(),
+            'is_spare'=>false,
             'id'=> function (array $attributes) {
                 $guest_type = Term::find($attributes['term_id'])->guest_type;
                 return $this->createGuestId($guest_type);
