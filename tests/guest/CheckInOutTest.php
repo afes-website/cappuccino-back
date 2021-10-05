@@ -2,6 +2,7 @@
 namespace Tests\guest;
 
 use Database\Factories\GuestFactory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\Guest;
@@ -417,6 +418,41 @@ class CheckInOutTest extends TestCase {
             $data = Guest::find($i->id);
             $this->assertTrue($data->is_force_revoked == 1);
             $this->assertNotNull($data->revoked_at);
+        }
+    }
+
+    /**
+     * まだ 場内に人が残っていなるなら Force Revoke は行わない
+     * @dataProvider guestSpareProvider
+     */
+    public function testGuestRest($to_revoke) {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+        $member_all = $reservation->member_all;
+        Guest::factory()->for($reservation)->count($member_all - 2)->create(['revoked_at' => Carbon::now()]);
+        Guest::factory()->for($reservation)->create();
+        $guest = Guest::factory()->for($reservation)->create();
+        $spare = Guest::factory()->for($reservation)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($reservation)->create(['is_spare' => true]);
+
+        if ($to_revoke === 'guest') {
+            $this->actingAs($user)->post(
+                "/guests/{$guest->id}/check-out",
+            );
+            $data = Guest::find($spare->id);
+        } else {
+            $this->actingAs($user)->post(
+                "/guests/{$spare->id}/check-out",
+            );
+            $data = Guest::find($guest->id);
+        }
+        $this->assertFalse($data->is_force_revoked == 1);
+        $this->assertNull($data->revoked_at);
+
+        foreach ($other_spares as $i) {
+            $data = Guest::find($i->id);
+            $this->assertFalse($data->is_force_revoked == 1);
+            $this->assertNull($data->revoked_at);
         }
     }
 
