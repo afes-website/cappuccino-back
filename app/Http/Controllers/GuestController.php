@@ -125,13 +125,14 @@ class GuestController extends Controller {
             $reservation = $guest->reservation;
             $guests = $reservation->guest;
             if ($guests->whereNotNull('revoked_at')->count() === $reservation->member_all) {
-                $revoke_guests = $guests->whereNull('revoked_at');
-                if ($revoke_guests->count()) {
-                    $revoke_guests->toQuery()->update([
+                $guests_to_be_revoked = $guests->whereNull('revoked_at');
+                if ($guests_to_be_revoked->count()) {
+                    $guests_to_be_revoked->toQuery()->update([
                         'revoked_at' => Carbon::now(),
                         'is_force_revoked' => true
                     ]);
-                    Log::info("{$revoke_guests->count()} guest has revoked.");
+                    Log::info("{$guests_to_be_revoked->count()} guest has revoked.");
+                    echo "{$guests_to_be_revoked->count()} guest has revoked.";
                 }
             }
 
