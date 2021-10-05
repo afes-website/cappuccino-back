@@ -377,6 +377,49 @@ class CheckInOutTest extends TestCase {
         $this->assertResponseOk();
     }
 
+    public function guestSpareProvider(): array {
+        return [['guest'], ['spare']];
+    }
+
+    /**
+     * Force Revoke のテスト
+     * - 予約人数分に退場した時に余分数が ForceRevoke される
+     *  - Spare かどうかを問わない
+     *  - revoked_at に時刻が入る
+     *  - is_force_revoked = true
+     * @dataProvider guestSpareProvider
+     */
+    public function testForceRevoke($to_revoke) {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+        $member_all = $reservation->member_all;
+        Guest::factory()->for($reservation)->count($member_all - 1)->create(['revoked_at' => Carbon::now()]);
+
+        $guest = Guest::factory()->for($reservation)->create();
+        $spare = Guest::factory()->for($reservation)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($reservation)->create(['is_spare' => true]);
+
+        if ($to_revoke === 'guest') {
+            $this->actingAs($user)->post(
+                "/guests/{$guest->id}/check-out",
+            );
+            $data = Guest::find($spare->id);
+        } else {
+            $this->actingAs($user)->post(
+                "/guests/{$spare->id}/check-out",
+            );
+            $data = Guest::find($guest->id);
+        }
+        $this->assertTrue($data->is_force_revoked == 1);
+        $this->assertNotNull($data->revoked_at);
+
+        foreach ($other_spares as $i) {
+            $data = Guest::find($i->id);
+            $this->assertTrue($data->is_force_revoked == 1);
+            $this->assertNotNull($data->revoked_at);
+        }
+    }
+
     /**
      * Guest が存在しない
      * その場で適当に生成した GuestId でテスト
