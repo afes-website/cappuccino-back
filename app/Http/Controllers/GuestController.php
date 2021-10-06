@@ -48,7 +48,6 @@ class GuestController extends Controller {
                     'is_spare' => false
                 ]
             );
-            $reservation->update(['guest_id' => $guest->id]);
             ActivityLogEntry::create([
                 'log_type' => 'check-in',
                 'guest_id' => $guest->id
@@ -84,7 +83,6 @@ class GuestController extends Controller {
                     'reservation_id' => $reservation->id,
                 ]
             );
-            $reservation->update(['guest_id' => $guest->id]);
             ActivityLogEntry::create([
                 'log_type' => 'register-spare',
                 'guest_id' => $guest->id
