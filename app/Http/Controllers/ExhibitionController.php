@@ -31,7 +31,6 @@ class ExhibitionController extends Controller {
     }
 
     public function show($id) {
-        $exhibition = Exhibition::findOrFail($id);
-        return response()->json(new ExhibitionResource($exhibition));
+        return response()->json(new ExhibitionResource(Exhibition::findOrFail($id)));
     }
 }

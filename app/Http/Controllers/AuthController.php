@@ -59,9 +59,7 @@ class AuthController extends Controller {
         if (!$request->user()->hasPermission("admin") && $id !== $request->user()->id)
             abort(403);
 
-        $user = User::findOrFail($id);
-
-        return response()->json(new UserResource($user));
+        return response()->json(new UserResource(User::findOrFail($id)));
     }
 
     public function changePassword(Request $request, $id) {

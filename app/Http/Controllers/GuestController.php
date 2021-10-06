@@ -16,9 +16,7 @@ use Illuminate\Support\Facades\Log;
 
 class GuestController extends Controller {
     public function show($id) {
-        $id = strtoupper($id);
-        $guest = Guest::FindOrFail($id);
-        return response()->json(new GuestResource($guest));
+        return response()->json(new GuestResource(Guest::FindOrFail(strtoupper($id))));
     }
 
     public function index() {

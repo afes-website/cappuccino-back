@@ -22,8 +22,7 @@ class ReservationController extends Controller {
     }
 
     public function show($id) {
-        $reservation = Reservation::findOrFail($id);
-        return response()->json(new ReservationResource($reservation));
+        return response()->json(new ReservationResource(Reservation::findOrFail($id)));
     }
 
     public function check($id) {
