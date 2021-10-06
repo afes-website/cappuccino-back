@@ -9,10 +9,7 @@ use Illuminate\Support\Str;
 
 class ImageController extends Controller {
     public function show(Request $request, $id) {
-        $image = Image::find($id);
-        if (!$image)
-            throw new HttpExceptionWithErrorCode(404, "IMAGE_NOT_FOUND");
-
+        $image = Image::findOrFail($id);
         $size = $request->query('size');
 
         return response($size === 's' ? $image->content_small : $image->content)
