@@ -28,6 +28,12 @@ class Guest extends Model {
     const ID_LENGTH = 5;
     const VALID_FORMAT = '/\A[A-Za-z]{2}-[0-9A-Fa-f]{5}\Z/';
 
+    public static function findOrFail(string $id, $http_code = 404) {
+        $guest = self::find($id);
+        if (!$guest) throw new HttpExceptionWithErrorCode($http_code, 'GUEST_NOT_FOUND');
+        return $guest;
+    }
+
     public static function calculateParity(string $id_sub): string {
         $digits = [];
         foreach (str_split($id_sub) as $char) {

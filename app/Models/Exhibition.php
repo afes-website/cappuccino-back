@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,12 @@ class Exhibition extends Model {
     const CREATED_AT = null;
 
     const UPDATED_AT = 'updated_at';
+
+    public static function findOrFail(string $id, $http_code = 404) {
+        $exhibition = self::find($id);
+        if (!$exhibition) throw new HttpExceptionWithErrorCode($http_code, 'EXHIBITION_NOT_FOUND');
+        return $exhibition;
+    }
 
     public function guests() {
         return $this->hasMany(Guest::class);

@@ -15,25 +15,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class GuestController extends Controller {
-    private function findGuestOrFail($guest_id, $http_code) {
-        $guest = Guest::find($guest_id);
-        if (!$guest) throw new HttpExceptionWithErrorCode($http_code, 'GUEST_NOT_FOUND');
-        return $guest;
-    }
-    private function findReservationOrFail($reservation_id) {
-        $reservation = Reservation::find($reservation_id);
-        if (!$reservation) throw new HttpExceptionWithErrorCode(400, 'RESERVATION_NOT_FOUND');
-        return $reservation;
-    }
-    private function findExhibitionOrFail($exhibition_id) {
-        $exhibition = Exhibition::find($exhibition_id);
-        if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
-        return $exhibition;
-    }
-
     public function show($id) {
         $id = strtoupper($id);
-        $guest = self::findGuestOrFail($id, 404);
+        $guest = Guest::FindOrFail($id);
         return response()->json(new GuestResource($guest));
     }
 
@@ -47,7 +31,7 @@ class GuestController extends Controller {
             'guest_id' => ['string', 'required']
         ]);
         $guest_id = strtoupper($request->guest_id);
-        $reservation = self::findReservationOrFail($request->reservation_id);
+        $reservation = Reservation::findOrFail($request->reservation_id, 400);
         $term = $reservation->term;
 
         if (($reservation_error_code = $reservation->getErrorCode()) !== null)
@@ -81,7 +65,7 @@ class GuestController extends Controller {
             'guest_id' => ['string', 'required']
         ]);
         $guest_id = strtoupper($request->guest_id);
-        $reservation = self::findReservationOrFail($request->reservation_id);
+        $reservation = Reservation::findOrFail($request->reservation_id, 400);
         $term = $reservation->term;
 
         if ($reservation->guest()->count() === 0)
@@ -112,7 +96,7 @@ class GuestController extends Controller {
     public function checkOut($id) {
         return DB::transaction(function () use ($id) {
             $id = strtoupper($id);
-            $guest = self::findGuestOrFail($id, 404);
+            $guest = Guest::FindOrFail($id);
             if ($guest->revoked_at !== null)
                 throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
@@ -148,8 +132,8 @@ class GuestController extends Controller {
             abort(403);
 
         $id = strtoupper($id);
-        $guest = self::findGuestOrFail($id, 404);
-        $exhibition = self::findExhibitionOrFail($request->exhibition_id);
+        $guest = Guest::FindOrFail($id);
+        $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
         if ($guest->exhibition_id === $exhibition->id)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_ENTERED');
@@ -180,8 +164,8 @@ class GuestController extends Controller {
             abort(403);
 
         $id = strtoupper($id);
-        $guest = $this->findGuestOrFail($id, 404);
-        $exhibition = self::findExhibitionOrFail($request->exhibition_id);
+        $guest = Guest::FindOrFail($id);
+        $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
         if ($guest->revoked_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');

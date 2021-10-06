@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,12 @@ class Reservation extends Model {
     public $incrementing = false;
 
     public $timestamps = false;
+
+    public static function findOrFail(string $id, $http_code = 404) {
+        $reservation = self::find($id);
+        if (!$reservation) throw new HttpExceptionWithErrorCode($http_code, 'RESERVATION_NOT_FOUND');
+        return $reservation;
+    }
 
     public function guest() {
         return $this->hasMany(Guest::class);

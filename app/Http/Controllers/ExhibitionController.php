@@ -31,11 +31,7 @@ class ExhibitionController extends Controller {
     }
 
     public function show($id) {
-        $exhibition = Exhibition::find($id);
-        if (!$exhibition) {
-            throw new HttpExceptionWithErrorCode(404, 'EXHIBITION_NOT_FOUND');
-        }
-
+        $exhibition = Exhibition::findOrFail($id);
         return response()->json(new ExhibitionResource($exhibition));
     }
 }
