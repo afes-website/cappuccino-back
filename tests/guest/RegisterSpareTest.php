@@ -68,7 +68,6 @@ class RegisterSpareTest extends TestCase {
     /**
      * 予約情報について、入場処理をまだ1度もしていない
      * NO_MEMBER_CHECKED_IN
-     * 入場処理を2回行ってチェック
      */
     public function testUnusedReservation() {
         $count = 5;
