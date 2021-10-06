@@ -54,8 +54,6 @@ class GuestController extends Controller {
             ]);
             return response()->json(new GuestResource($guest));
         });
-
-        // TODO: 複数人で処理するときの扱いを考える (docsの編集待ち)
     }
 
     public function registerSpare(Request $request) {

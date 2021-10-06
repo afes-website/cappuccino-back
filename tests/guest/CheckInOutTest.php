@@ -34,7 +34,6 @@ class CheckInOutTest extends TestCase {
     /**
      * CheckIn
      * Guestオブジェクトが返ってきている
-     * @todo 返ってくるようにする
      */
     public function testCheckIn() {
         $user = User::factory()->permission('executive')->create();
