@@ -110,7 +110,6 @@ class GuestController extends Controller {
                         'is_force_revoked' => true
                     ]);
                     Log::info("{$guests_to_be_revoked->count()} guest has revoked.");
-                    echo "{$guests_to_be_revoked->count()} guest has revoked.";
                 }
             }
 
