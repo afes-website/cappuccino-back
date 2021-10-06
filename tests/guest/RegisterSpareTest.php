@@ -227,7 +227,7 @@ class RegisterSpareTest extends TestCase {
             return;
         }
 
-            DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $user = User::factory()->permission('admin', 'executive')->create();
             $member_count = rand(1, 10);
