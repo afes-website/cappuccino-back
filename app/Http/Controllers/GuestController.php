@@ -35,7 +35,7 @@ class GuestController extends Controller {
         if (($reservation_error_code = $reservation->getErrorCode()) !== null)
             throw new HttpExceptionWithErrorCode(400, $reservation_error_code);
 
-        Guest::checkCanBeRegistered($guest_id, $term->guest_type);
+        Guest::assertCanBeRegistered($guest_id, $term->guest_type);
 
         return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
             $guest = Guest::create(
@@ -68,7 +68,7 @@ class GuestController extends Controller {
         if ($reservation->term->exit_scheduled_time < Carbon::now())
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
-        Guest::checkCanBeRegistered($guest_id, $term->guest_type);
+        Guest::assertCanBeRegistered($guest_id, $term->guest_type);
 
         return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
             $guest = Guest::create(

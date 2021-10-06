@@ -49,7 +49,7 @@ class Guest extends Model {
         return self::calculateParity(substr($guest_id, 3, 4)) === $guest_id[-1];
     }
 
-    public static function checkCanBeRegistered(string $guest_id, string $guest_type): void {
+    public static function assertCanBeRegistered(string $guest_id, string $guest_type): void {
         if (!self::validate($guest_id))
             throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
         if (strpos($guest_id, config('cappuccino.guest_types')[$guest_type]['prefix']) !== 0)
