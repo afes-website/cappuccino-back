@@ -182,10 +182,7 @@ class RegisterSpareTest extends TestCase {
             ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
         );
 
-        $this->assertResponseStatus(400);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('INVALID_WRISTBAND_CODE', $code);
+        $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
     }
 
     /**
