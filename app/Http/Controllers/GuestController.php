@@ -48,7 +48,8 @@ class GuestController extends Controller {
             );
             ActivityLogEntry::create([
                 'log_type' => 'check-in',
-                'guest_id' => $guest->id
+                'guest_id' => $guest->id,
+                'exhibition_id' => null
             ]);
             return response()->json(new GuestResource($guest));
         });
@@ -81,7 +82,8 @@ class GuestController extends Controller {
             );
             ActivityLogEntry::create([
                 'log_type' => 'register-spare',
-                'guest_id' => $guest->id
+                'guest_id' => $guest->id,
+                'exhibition_id' => null
             ]);
             return response()->json(new GuestResource($guest));
         });
@@ -97,7 +99,8 @@ class GuestController extends Controller {
             $guest->update(['revoked_at' => Carbon::now()]);
             ActivityLogEntry::create([
                 'log_type' => 'check-out',
-                'guest_id' => $guest->id
+                'guest_id' => $guest->id,
+                'exhibition_id' => null
             ]);
 
             $reservation = $guest->reservation;
