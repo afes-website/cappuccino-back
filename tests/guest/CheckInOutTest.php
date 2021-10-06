@@ -18,17 +18,6 @@ use Tests\Common;
  */
 class CheckInOutTest extends TestCase {
 
-    const ID_CHARACTER = '234578acdefghijkmnprstuvwxyz';
-    const PREFIX_LENGTH = 2;
-    const ID_LENGTH = 5;
-
-    private static function createGuestId(string $guest_type, string $prefix = null): string {
-        do {
-            $guest_id = GuestFactory::createGuestId($guest_type, $prefix);
-        } while (Guest::find($guest_id));
-        return $guest_id;
-    }
-
     /* Check-In */
 
     /**
@@ -38,7 +27,7 @@ class CheckInOutTest extends TestCase {
     public function testCheckIn() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
-        $guest_id = $this->createGuestId($reservation->term->guest_type);
+        $guest_id = GuestFactory::createGuestId($reservation->term->guest_type);
         $this->actingAs($user)->post(
             '/guests/check-in',
             ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
@@ -69,7 +58,7 @@ class CheckInOutTest extends TestCase {
         $member_count = $reservation->member_all;
 
         for ($i = 1; $i <= $member_count; $i++) {
-            $guest_id = $this->createGuestId($reservation->term->guest_type);
+            $guest_id = GuestFactory::createGuestId($reservation->term->guest_type);
             $this->actingAs($user)->post(
                 '/guests/check-in',
                 ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
@@ -86,7 +75,7 @@ class CheckInOutTest extends TestCase {
     public function testReservationNotFound() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        $guest_id = $this->createGuestId($term->guest_type);
+        $guest_id = GuestFactory::createGuestId($term->guest_type);
         $this->actingAs($user)->post(
             '/guests/check-in',
             ['guest_id' => $guest_id, 'reservation_id' => 'R-' . Str::random(7)]
@@ -113,7 +102,7 @@ class CheckInOutTest extends TestCase {
             Guest::factory()->for($reservation)->count($member_count)->create();
 
             do {
-                $new_guest_id = $this->createGuestId($term->guest_type);
+                $new_guest_id = GuestFactory::createGuestId($term->guest_type);
             } while (Guest::find($new_guest_id));
 
             $this->actingAs($user)->post(
@@ -137,7 +126,7 @@ class CheckInOutTest extends TestCase {
 
         for ($i = 0; $i < 2; $i++) {
             $reservation = Reservation::factory()->for($term[$i])->create();
-            $guest_id = $this->createGuestId($term[$i]->guest_type);
+            $guest_id = GuestFactory::createGuestId($term[$i]->guest_type);
             $this->actingAs($user)->post(
                 '/guests/check-in',
                 ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
@@ -167,14 +156,14 @@ class CheckInOutTest extends TestCase {
                 $id = rand(1, 10);
             } while ($prefix === 2 && $id === 5);
             $code = '';
-            $character_count = strlen(self::ID_CHARACTER);
+            $character_count = strlen(Guest::VALID_CHARACTER);
             for ($i = 0; $i < $id; $i++) {
-                $code .= self::ID_CHARACTER[rand(0, $character_count - 1)];
+                $code .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
             }
             $invalid_codes[] = Str::random($prefix) . '-' . $code;
         }
         do {
-            $code = Str::random(self::PREFIX_LENGTH) . '-' . Str::random(self::ID_LENGTH);
+            $code = Str::random(Guest::PREFIX_LENGTH) . '-' . Str::random(Guest::ID_LENGTH);
         } while (preg_match(Guest::VALID_FORMAT, $code));
 
         $invalid_codes[] = $code;
@@ -196,7 +185,7 @@ class CheckInOutTest extends TestCase {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
 
-        $guest_id = self::createGuestId($reservation->term->guest_type, 'XX'); //存在しない Prefix
+        $guest_id = GuestFactory::createGuestId($reservation->term->guest_type, 'XX'); //存在しない Prefix
 
         $this->actingAs($user)->post(
             '/guests/check-in',
@@ -213,7 +202,7 @@ class CheckInOutTest extends TestCase {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
 
-        $guest_id = self::createGuestId($reservation->term->guest_type);
+        $guest_id = GuestFactory::createGuestId($reservation->term->guest_type);
 
         $guest_id = substr($guest_id, -1) . ($guest_id[-1] === '0' ? '1' : '0');
 
@@ -241,7 +230,7 @@ class CheckInOutTest extends TestCase {
         for ($i = 0; $i < $count; ++$i) {
             $reservation_1 = Reservation::factory()->for($term)->create();
             $reservation_2 = Reservation::factory()->for($term)->create();
-            $guest_id = $this->createGuestId($term->guest_type);
+            $guest_id = GuestFactory::createGuestId($term->guest_type);
             $used_id[] = $guest_id;
 
             $this->actingAs($user)->post(
@@ -292,7 +281,7 @@ class CheckInOutTest extends TestCase {
             $user = User::factory()->permission('admin', 'executive')->create();
             $member_count = rand(1, 10);
             $reservation = Reservation::factory()->state(['member_all' => $member_count]);
-            $guest_code = self::createGuestId('GuestBlue');
+            $guest_code = GuestFactory::createGuestId('GuestBlue');
 
             switch ($state[0]) {
                 case 'all_member_checked_in':
@@ -462,7 +451,7 @@ class CheckInOutTest extends TestCase {
     public function testCheckOutGuestNotFound() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        $guest_id = $this->createGuestId($term->guest_type);
+        $guest_id = GuestFactory::createGuestId($term->guest_type);
 
         $this->actingAs($user)->post(
             "/guests/$guest_id/check-out",
