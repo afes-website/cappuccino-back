@@ -59,9 +59,7 @@ class AuthController extends Controller {
         if (!$request->user()->hasPermission("admin") && $id !== $request->user()->id)
             abort(403);
 
-        $user = User::find($id);
-        if (!$user)
-            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
+        $user = User::findOrFail($id);
 
         return response()->json(new UserResource($user));
     }
@@ -74,9 +72,7 @@ class AuthController extends Controller {
             'password' => ['required', 'string', 'min:8']
         ]);
 
-        $user = User::find($id);
-        if (!$user)
-            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
+        $user = User::findOrFail($id);
 
         $user->update([
             'password' => Hash::make($request->input('password'))
@@ -85,9 +81,7 @@ class AuthController extends Controller {
     }
 
     public function regenerate($id) {
-        $user = User::find($id);
-        if (!$user)
-            throw new HttpExceptionWithErrorCode(404, "USER_NOT_FOUND");
+        $user = User::findOrFail($id);
 
         do {
             $key = Str::random(10);
