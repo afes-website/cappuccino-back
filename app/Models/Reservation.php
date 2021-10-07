@@ -6,6 +6,7 @@ use App\Exceptions\HttpExceptionWithErrorCode;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Reservation extends Model {
 
@@ -53,5 +54,15 @@ class Reservation extends Model {
         }
 
         return null;
+    }
+
+    public function revokeAllGuests() {
+        $modified = self::guest()->whereNull('revoked_at')->update([
+            'revoked_at' => Carbon::now(),
+            'is_force_revoked' => true
+        ]);
+        if ($modified) {
+            Log::info("{$modified} guest has revoked.");
+        }
     }
 }

@@ -399,6 +399,8 @@ class CheckInOutTest extends TestCase {
             );
             $data = Guest::find($guest->id);
         }
+        $this->assertJson($this->response->getContent());
+        $this->assertResponseOk();
         $this->assertTrue($data->is_force_revoked == 1);
         $this->assertNotNull($data->revoked_at);
 
@@ -434,6 +436,7 @@ class CheckInOutTest extends TestCase {
             );
             $data = Guest::find($guest->id);
         }
+        $this->assertResponseOk();
         $this->assertFalse($data->is_force_revoked == 1);
         $this->assertNull($data->revoked_at);
 
