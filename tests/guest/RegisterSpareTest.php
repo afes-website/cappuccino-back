@@ -20,7 +20,7 @@ class RegisterSpareTest extends TestCase {
 
     /**
      * RegisterSpare
-     * Guestオブジェクトが返ってきている
+     * Guest オブジェクトが返ってきている
      * is_spare = true
      */
     public function testRegister() {
@@ -105,7 +105,7 @@ class RegisterSpareTest extends TestCase {
     }
 
     /**
-     * GuestIdの形式の誤り
+     * GuestId の形式の誤り
      * INVALID_WRISTBAND_CODE
      * - {2文字でない}-{5文字でない} 形式のチェック
      * - 使用できない文字を使っていないかのチェック
