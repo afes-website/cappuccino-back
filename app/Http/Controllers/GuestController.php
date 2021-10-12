@@ -91,7 +91,6 @@ class GuestController extends Controller {
 
     public function checkOut($id) {
         return DB::transaction(function () use ($id) {
-            $id = strtoupper($id);
             $guest = Guest::FindOrFail($id);
             if ($guest->revoked_at !== null)
                 throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
@@ -118,7 +117,6 @@ class GuestController extends Controller {
         if (!$request->user()->hasPermission('admin') && $request->exhibition_id !== $request->user()->id)
             abort(403);
 
-        $id = strtoupper($id);
         $guest = Guest::FindOrFail($id);
         $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
@@ -150,7 +148,6 @@ class GuestController extends Controller {
         if (!$request->user()->hasPermission('admin') && $request->exhibition_id !== $request->user()->id)
             abort(403);
 
-        $id = strtoupper($id);
         $guest = Guest::FindOrFail($id);
         $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
