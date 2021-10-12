@@ -28,6 +28,7 @@ class GuestController extends Controller {
             'reservation_id' => ['string', 'required'],
             'guest_id' => ['string', 'required']
         ]);
+        // 作成時は大文字に統一する
         $guest_id = strtoupper($request->guest_id);
         $reservation = Reservation::findOrFail($request->reservation_id, 400);
         $term = $reservation->term;
@@ -60,6 +61,7 @@ class GuestController extends Controller {
             'reservation_id' => ['string', 'required'],
             'guest_id' => ['string', 'required']
         ]);
+        // 作成時は大文字に統一する
         $guest_id = strtoupper($request->guest_id);
         $reservation = Reservation::findOrFail($request->reservation_id, 400);
         $term = $reservation->term;
