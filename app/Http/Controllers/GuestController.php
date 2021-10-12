@@ -95,7 +95,7 @@ class GuestController extends Controller {
         return DB::transaction(function () use ($id) {
             $guest = Guest::FindOrFail($id);
             if ($guest->revoked_at !== null)
-                throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
+                throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_CHECKED_OUT');
 
             $guest->update(['revoked_at' => Carbon::now()]);
             ActivityLogEntry::create([
@@ -127,7 +127,7 @@ class GuestController extends Controller {
         if ($exhibition->capacity <= $exhibition->guests()->count())
             throw new HttpExceptionWithErrorCode(400, 'PEOPLE_LIMIT_EXCEEDED');
         if ($guest->revoked_at !== null)
-            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
+            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_CHECKED_OUT');
         if ($guest->term->exit_scheduled_time < Carbon::now())
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
@@ -154,7 +154,7 @@ class GuestController extends Controller {
         $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
         if ($guest->revoked_at !== null)
-            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
+            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_CHECKED_OUT');
 
         return DB::transaction(function () use ($guest, $exhibition) {
             $guest->update(['exhibition_id' => null]);
