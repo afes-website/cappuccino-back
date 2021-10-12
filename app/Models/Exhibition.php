@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,12 @@ class Exhibition extends Model {
 
     const UPDATED_AT = 'updated_at';
 
+    public static function findOrFail(string $id, $http_code = 404) {
+        $exhibition = self::find($id);
+        if (!$exhibition) throw new HttpExceptionWithErrorCode($http_code, 'EXHIBITION_NOT_FOUND');
+        return $exhibition;
+    }
+
     public function guests() {
         return $this->hasMany(Guest::class);
     }
@@ -39,7 +46,7 @@ class Exhibition extends Model {
     public function countGuest() {
         return $this
             ->guests()
-            ->whereNull('exited_at')
+            ->whereNull('revoked_at')
             ->select('term_id', DB::raw('count(1) as cnt'))
             ->groupBy('term_id')
             ->pluck('cnt', 'term_id');

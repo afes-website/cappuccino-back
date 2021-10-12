@@ -21,7 +21,7 @@ class ExhibitionController extends Controller {
             'exhibition' => $exh_status,
             'all' => [
                 'count' => Guest::query()
-                    ->whereNull('exited_at')
+                    ->whereNull('revoked_at')
                     ->select('term_id', DB::raw('count(1) as cnt'))
                     ->groupBy('term_id')
                     ->pluck('cnt', 'term_id'),
@@ -31,11 +31,6 @@ class ExhibitionController extends Controller {
     }
 
     public function show($id) {
-        $exhibition = Exhibition::find($id);
-        if (!$exhibition) {
-            throw new HttpExceptionWithErrorCode(404, 'EXHIBITION_NOT_FOUND');
-        }
-
-        return response()->json(new ExhibitionResource($exhibition));
+        return response()->json(new ExhibitionResource(Exhibition::findOrFail($id)));
     }
 }

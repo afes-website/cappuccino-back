@@ -10,15 +10,13 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\ActivityLogEntry;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GuestController extends Controller {
     public function show($id) {
-        $id = strtoupper($id);
-        $guest = Guest::find($id);
-        if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
-
-        return response()->json(new GuestResource($guest));
+        return response()->json(new GuestResource(Guest::FindOrFail($id)));
     }
 
     public function index() {
@@ -30,89 +28,106 @@ class GuestController extends Controller {
             'reservation_id' => ['string', 'required'],
             'guest_id' => ['string', 'required']
         ]);
-        if (!Guest::validate($request->guest_id)) {
-            throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
-        }
-
+        // 作成時は大文字に統一する
         $guest_id = strtoupper($request->guest_id);
-        $reservation_id = strtoupper($request->reservation_id);
-
-        $reservation = Reservation::find($reservation_id);
-
-        if (!$reservation) throw new HttpExceptionWithErrorCode(400, 'RESERVATION_NOT_FOUND');
-
-        if (($reservation_error_code = $reservation->getErrorCode()) !== null) {
-            throw new HttpExceptionWithErrorCode(400, $reservation_error_code);
-        }
-
-        if (Guest::find($guest_id)) {
-            throw new HttpExceptionWithErrorCode(400, 'ALREADY_USED_WRISTBAND');
-        }
-
+        $reservation = Reservation::findOrFail($request->reservation_id, 400);
         $term = $reservation->term;
 
-        if (strpos($guest_id, config('cappuccino.guest_types')[$term->guest_type]['prefix']) !== 0
-        ) {
-            throw new HttpExceptionWithErrorCode(400, 'WRONG_WRISTBAND_COLOR');
-        }
+        if (($reservation_error_code = $reservation->getErrorCode()) !== null)
+            throw new HttpExceptionWithErrorCode(400, $reservation_error_code);
+
+        Guest::assertCanBeRegistered($guest_id, $term->guest_type);
 
         return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
             $guest = Guest::create(
                 [
                     'id' => $guest_id,
                     'term_id' => $term->id,
-                    'reservation_id' => $reservation->id
+                    'reservation_id' => $reservation->id,
+                    'is_spare' => false
                 ]
             );
-            $reservation->update(['guest_id' => $guest->id]);
+            ActivityLogEntry::create([
+                'log_type' => 'check-in',
+                'guest_id' => $guest->id,
+                'exhibition_id' => null
+            ]);
             return response()->json(new GuestResource($guest));
         });
+    }
 
-        // TODO: 複数人で処理するときの扱いを考える (docsの編集待ち)
+    public function registerSpare(Request $request) {
+        $this->validate($request, [
+            'reservation_id' => ['string', 'required'],
+            'guest_id' => ['string', 'required']
+        ]);
+        // 作成時は大文字に統一する
+        $guest_id = strtoupper($request->guest_id);
+        $reservation = Reservation::findOrFail($request->reservation_id, 400);
+        $term = $reservation->term;
+
+        if ($reservation->guest()->count() === 0)
+            throw new HttpExceptionWithErrorCode(400, 'NO_MEMBER_CHECKED_IN');
+        if ($reservation->term->exit_scheduled_time < Carbon::now())
+            throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
+
+        Guest::assertCanBeRegistered($guest_id, $term->guest_type);
+
+        return DB::transaction(function () use ($request, $term, $guest_id, $reservation) {
+            $guest = Guest::create(
+                [
+                    'id' => $guest_id,
+                    'is_spare' => true,
+                    'term_id' => $term->id,
+                    'reservation_id' => $reservation->id,
+                ]
+            );
+            ActivityLogEntry::create([
+                'log_type' => 'register-spare',
+                'guest_id' => $guest->id,
+                'exhibition_id' => null
+            ]);
+            return response()->json(new GuestResource($guest));
+        });
     }
 
     public function checkOut($id) {
-        $id = strtoupper($id);
+        return DB::transaction(function () use ($id) {
+            $guest = Guest::FindOrFail($id);
+            if ($guest->revoked_at !== null)
+                throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
-        $guest = Guest::find($id);
-        if (!$guest) {
-            throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
-        }
+            $guest->update(['revoked_at' => Carbon::now()]);
+            ActivityLogEntry::create([
+                'log_type' => 'check-out',
+                'guest_id' => $guest->id,
+                'exhibition_id' => null
+            ]);
 
-        if ($guest->exited_at !== null) {
-            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
-        }
-
-        $guest->update(['exited_at' => Carbon::now()]);
-
-        return response()->json(new GuestResource($guest));
+            $reservation = $guest->reservation;
+            $guests = $reservation->guest();
+            if ($guests->whereNotNull('revoked_at')->count() === $reservation->member_all)
+                $reservation->revokeAllGuests();
+            return response()->json(new GuestResource($guest));
+        });
     }
 
     public function enter(Request $request, $id) {
         $this->validate($request, [
             'exhibition_id' => ['string', 'required']
         ]);
-        $id = strtoupper($id);
-
-        $guest = Guest::find($id);
-
         if (!$request->user()->hasPermission('admin') && $request->exhibition_id !== $request->user()->id)
             abort(403);
 
-        $exhibition = Exhibition::find($request->exhibition_id);
-
-        if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
-        if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
+        $guest = Guest::FindOrFail($id);
+        $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
         if ($guest->exhibition_id === $exhibition->id)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_ENTERED');
-
         if ($exhibition->capacity <= $exhibition->guests()->count())
             throw new HttpExceptionWithErrorCode(400, 'PEOPLE_LIMIT_EXCEEDED');
-
-        if ($guest->exited_at !== null)
+        if ($guest->revoked_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
-
         if ($guest->term->exit_scheduled_time < Carbon::now())
             throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
 
@@ -132,19 +147,13 @@ class GuestController extends Controller {
         $this->validate($request, [
             'exhibition_id' => ['string', 'required']
         ]);
-        $id = strtoupper($id);
-
-        $exhibition_id = $request->exhibition_id;
-        $guest = Guest::find($id);
-        $exhibition = Exhibition::find($exhibition_id);
-
         if (!$request->user()->hasPermission('admin') && $request->exhibition_id !== $request->user()->id)
             abort(403);
 
-        if (!$exhibition) throw new HttpExceptionWithErrorCode(400, 'EXHIBITION_NOT_FOUND');
-        if (!$guest) throw new HttpExceptionWithErrorCode(404, 'GUEST_NOT_FOUND');
+        $guest = Guest::FindOrFail($id);
+        $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
-        if ($guest->exited_at !== null)
+        if ($guest->revoked_at !== null)
             throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_EXITED');
 
         return DB::transaction(function () use ($guest, $exhibition) {
