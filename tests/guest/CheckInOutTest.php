@@ -477,7 +477,7 @@ class CheckInOutTest extends TestCase {
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
         );
-        $this->expectErrorResponse('GUEST_ALREADY_EXITED');
+        $this->expectErrorResponse('GUEST_ALREADY_CHECKED_OUT');
     }
 
     /**
