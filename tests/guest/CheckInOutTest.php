@@ -465,6 +465,23 @@ class CheckInOutTest extends TestCase {
     }
 
     /**
+     * 生徒のリストバンドでは退場できない
+     * CHECK_OUT_PROHIBITED
+     */
+
+    public function testCheckOutStudent() {
+        $user = User::factory()->permission('executive')->create();
+        $term = Term::factory()->inPeriod()->state(['guest_type' => 'StudentGray'])->create();
+        $guest_id = Guest::factory()->for($term)->create()->id;
+
+        $this->actingAs($user)->post(
+            "/guests/$guest_id/check-out",
+            ['guest_id' => $guest_id]
+        );
+        $this->expectErrorResponse('CHECK_OUT_PROHIBITED');
+    }
+
+    /**
      * すでに退場済み
      * 2回処理をしてチェック
      */
