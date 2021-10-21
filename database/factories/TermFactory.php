@@ -55,9 +55,9 @@ class TermFactory extends Factory {
     public function general() {
         do {
             $type = array_rand(config('cappuccino.guest_types'));
-        } while (config('cappuccino.guest_types')[$type]['class'] === 'General');
+        } while (config('cappuccino.guest_types')[$type]['class'] !== 'General');
         return $this->state([
-            'guest_type' => array_rand(config('cappuccino.guest_types'))
+            'guest_type' => $type
         ]);
     }
 }
