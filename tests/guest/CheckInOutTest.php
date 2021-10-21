@@ -359,7 +359,7 @@ class CheckInOutTest extends TestCase {
      */
     public function testCheckOut() {
         $user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
+        $guest = Guest::factory()->for(Term::factory()->general())->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
@@ -381,7 +381,7 @@ class CheckInOutTest extends TestCase {
      */
     public function testForceRevoke($to_revoke) {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->create();
+        $reservation = Reservation::factory()->for(Term::factory()->general())->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 1)->create(['revoked_at' => Carbon::now()]);
 
@@ -418,7 +418,7 @@ class CheckInOutTest extends TestCase {
      */
     public function testGuestRest($to_revoke) {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->create();
+        $reservation = Reservation::factory()->for(Term::factory()->general())->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 2)->create(['revoked_at' => Carbon::now()]);
         Guest::factory()->for($reservation)->create();
