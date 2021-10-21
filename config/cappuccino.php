@@ -18,7 +18,6 @@ return [
         'GuestRed' => [
             'prefix' => 'GR',
             'class' => 'General'
-
         ],
         'GuestYellow' => [
             'prefix' => 'GY',
