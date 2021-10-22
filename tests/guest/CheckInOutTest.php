@@ -135,20 +135,15 @@ class CheckInOutTest extends TestCase {
     }
 
     /**
-     * GuestIdの形式の誤り
-     * INVALID_WRISTBAND_CODE
-     * - {2文字でない}-{5文字でない} 形式のチェック
-     * - 使用できない文字を使っていないかのチェック
+     * - {2文字でない}-{5文字でない} 形式のコード
+     * - 使用できない文字を使っているコード
      */
-    public function testInvalidGuestCode() {
+    public static function invalidCodesProvider() {
+        $count = 3;
         $invalid_codes = [];
-        $count = 5;
-
-        $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->create();
-
-        for ($i = 0; $i < $count; ++$i) {
-            // $prefix !== 2 && $id !== 5 となるように変数の値を決定する
+        for ($case = 0; $case < $count; $case++) {
+            // コードの長さが違うケース
+            // $prefix !== 2 || $id !== 5 となるように変数の値を決定する
             do {
                 $prefix = rand(1, 10);
                 $id = rand(1, 10);
@@ -158,21 +153,31 @@ class CheckInOutTest extends TestCase {
             for ($i = 0; $i < $id; $i++) {
                 $code .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
             }
-            $invalid_codes[] = Str::random($prefix) . '-' . $code;
-        }
-        do {
-            $code = Str::random(Guest::PREFIX_LENGTH) . '-' . Str::random(Guest::ID_LENGTH);
-        } while (preg_match(Guest::VALID_FORMAT, $code));
+            $invalid_codes["Invalid Lengths ({$case})"] = [Str::random($prefix) . '-' . $code];
 
-        $invalid_codes[] = $code;
+            // 使用できない文字をコードに含んでいるケース
+            do {
+                $code = Str::random(Guest::PREFIX_LENGTH) . '-' . Str::random(Guest::ID_LENGTH);
+            } while (preg_match(Guest::VALID_FORMAT, $code));
 
-        foreach ($invalid_codes as $invalid_code) {
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
-            );
-            $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
+            $invalid_codes["Invalid Character ({$case})"] = [$code];
         }
+        return $invalid_codes;
+    }
+
+    /**
+     * GuestIdの形式の誤り
+     * INVALID_WRISTBAND_CODE
+     * @dataProvider invalidCodesProvider
+     */
+    public function testInvalidGuestCode($invalid_code) {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
+        );
+        $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
     }
 
     /**
