@@ -12,37 +12,48 @@ return [
 
     'guest_types' => [
         'GuestBlue' => [
-            'prefix' => 'GB'
+            'prefix' => 'GB',
+            'class' => 'General'
         ],
         'GuestRed' => [
-            'prefix' => 'GR'
+            'prefix' => 'GR',
+            'class' => 'General'
         ],
         'GuestYellow' => [
-            'prefix' => 'GY'
+            'prefix' => 'GY',
+            'class' => 'General'
         ],
         'GuestPurple' => [
-            'prefix' => 'GP'
+            'prefix' => 'GP',
+            'class' => 'General'
         ],
         'GuestOrange' => [
-            'prefix' => 'GO'
+            'prefix' => 'GO',
+            'class' => 'General'
         ],
         'GuestGreen' => [
-            'prefix' => 'GG'
+            'prefix' => 'GG',
+            'class' => 'General'
         ],
         'GuestWhite' => [
-            'prefix' => 'GW'
+            'prefix' => 'GW',
+            'class' => 'General'
         ],
         'StudentGray' => [
-            'prefix' => 'SG'
+            'prefix' => 'SG',
+            'class' => 'Student'
         ],
         'TestBlue' => [
-            'prefix' => 'TB'
+            'prefix' => 'TB',
+            'class' => 'General'
         ],
         'TestRed' => [
-            'prefix' => 'TR'
+            'prefix' => 'TR',
+            'class' => 'General'
         ],
         'TestYellow' => [
-            'prefix' => 'TY'
+            'prefix' => 'TY',
+            'class' => 'General'
         ]
     ]
 ];

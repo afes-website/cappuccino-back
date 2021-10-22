@@ -96,6 +96,8 @@ class GuestController extends Controller {
             $guest = Guest::FindOrFail($id);
             if ($guest->revoked_at !== null)
                 throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_CHECKED_OUT');
+            if ($guest->term->class === "Student")
+                throw new HttpExceptionWithErrorCode(400, "CHECK_OUT_PROHIBITED");
 
             $guest->update(['revoked_at' => Carbon::now()]);
             ActivityLogEntry::create([

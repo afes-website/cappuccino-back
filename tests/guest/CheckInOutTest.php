@@ -44,7 +44,8 @@ class CheckInOutTest extends TestCase {
                 'id' => $guest->term->id,
                 'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601String(),
                 'exit_scheduled_time' => $guest->term->exit_scheduled_time->toIso8601String(),
-                'guest_type' => $guest->term->guest_type
+                'guest_type' => $guest->term->guest_type,
+                'class' => $guest->term->class,
             ]
         ]);
     }
@@ -358,7 +359,7 @@ class CheckInOutTest extends TestCase {
      */
     public function testCheckOut() {
         $user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
+        $guest = Guest::factory()->for(Term::factory()->general())->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
@@ -380,13 +381,14 @@ class CheckInOutTest extends TestCase {
      */
     public function testForceRevoke($to_revoke) {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->create();
+        $term = Term::factory()->general()->create();
+        $reservation = Reservation::factory()->for($term)->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 1)->create(['revoked_at' => Carbon::now()]);
 
-        $guest = Guest::factory()->for($reservation)->create();
-        $spare = Guest::factory()->for($reservation)->create(['is_spare' => true]);
-        $other_spares = Guest::factory()->count(2)->for($reservation)->create(['is_spare' => true]);
+        $guest = Guest::factory()->for($reservation)->for($term)->create();
+        $spare = Guest::factory()->for($reservation)->for($term)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($term)->for($reservation)->create(['is_spare' => true]);
 
         if ($to_revoke === 'guest') {
             $this->actingAs($user)->post(
@@ -417,13 +419,14 @@ class CheckInOutTest extends TestCase {
      */
     public function testGuestRest($to_revoke) {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->create();
+        $term = Term::factory()->general()->create();
+        $reservation = Reservation::factory()->for($term)->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 2)->create(['revoked_at' => Carbon::now()]);
         Guest::factory()->for($reservation)->create();
-        $guest = Guest::factory()->for($reservation)->create();
-        $spare = Guest::factory()->for($reservation)->create(['is_spare' => true]);
-        $other_spares = Guest::factory()->count(2)->for($reservation)->create(['is_spare' => true]);
+        $guest = Guest::factory()->for($reservation)->for($term)->create();
+        $spare = Guest::factory()->for($reservation)->for($term)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($reservation)->for($term)->create(['is_spare' => true]);
 
         if ($to_revoke === 'guest') {
             $this->actingAs($user)->post(
@@ -461,6 +464,23 @@ class CheckInOutTest extends TestCase {
             ['guest_id' => $guest_id]
         );
         $this->assertResponseStatus(404);
+    }
+
+    /**
+     * 生徒のリストバンドでは退場できない
+     * CHECK_OUT_PROHIBITED
+     */
+
+    public function testCheckOutStudent() {
+        $user = User::factory()->permission('executive')->create();
+        $term = Term::factory()->inPeriod()->state(['guest_type' => 'StudentGray'])->create();
+        $guest_id = Guest::factory()->for($term)->create()->id;
+
+        $this->actingAs($user)->post(
+            "/guests/$guest_id/check-out",
+            ['guest_id' => $guest_id]
+        );
+        $this->expectErrorResponse('CHECK_OUT_PROHIBITED');
     }
 
     /**
