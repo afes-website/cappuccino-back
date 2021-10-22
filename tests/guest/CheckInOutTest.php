@@ -381,13 +381,14 @@ class CheckInOutTest extends TestCase {
      */
     public function testForceRevoke($to_revoke) {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->for(Term::factory()->general())->create();
+        $term = Term::factory()->general()->create();
+        $reservation = Reservation::factory()->for($term)->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 1)->create(['revoked_at' => Carbon::now()]);
 
-        $guest = Guest::factory()->for($reservation)->create();
-        $spare = Guest::factory()->for($reservation)->create(['is_spare' => true]);
-        $other_spares = Guest::factory()->count(2)->for($reservation)->create(['is_spare' => true]);
+        $guest = Guest::factory()->for($reservation)->for($term)->create();
+        $spare = Guest::factory()->for($reservation)->for($term)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($term)->for($reservation)->create(['is_spare' => true]);
 
         if ($to_revoke === 'guest') {
             $this->actingAs($user)->post(
@@ -418,13 +419,14 @@ class CheckInOutTest extends TestCase {
      */
     public function testGuestRest($to_revoke) {
         $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->for(Term::factory()->general())->create();
+        $term = Term::factory()->general()->create();
+        $reservation = Reservation::factory()->for($term)->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 2)->create(['revoked_at' => Carbon::now()]);
         Guest::factory()->for($reservation)->create();
-        $guest = Guest::factory()->for($reservation)->create();
-        $spare = Guest::factory()->for($reservation)->create(['is_spare' => true]);
-        $other_spares = Guest::factory()->count(2)->for($reservation)->create(['is_spare' => true]);
+        $guest = Guest::factory()->for($reservation)->for($term)->create();
+        $spare = Guest::factory()->for($reservation)->for($term)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($reservation)->for($term)->create(['is_spare' => true]);
 
         if ($to_revoke === 'guest') {
             $this->actingAs($user)->post(
