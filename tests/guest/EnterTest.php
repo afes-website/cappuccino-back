@@ -162,14 +162,7 @@ class EnterTest extends TestCase {
      */
     public function testAlreadyExited() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
-        $executive_user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
-
-        $this->actingAs($executive_user)->post(
-            "/guests/{$guest->id}/check-out",
-        );
-
-        $this->assertResponseOk();
+        $guest = Guest::factory()->revoked()->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/enter",
