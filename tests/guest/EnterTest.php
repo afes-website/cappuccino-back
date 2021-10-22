@@ -184,12 +184,7 @@ class EnterTest extends TestCase {
             ->permission('exhibition')
             ->has(Exhibition::factory())
             ->create();
-        $guest = Guest::factory()->create();
-        $this->actingAs($user)->post(
-            "/guests/{$guest->id}/enter",
-            ['exhibition_id' => $user->id]
-        );
-        $this->assertResponseOk();
+        $guest = Guest::factory()->state(['exhibition_id' => $user->id])->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/enter",
@@ -214,12 +209,7 @@ class EnterTest extends TestCase {
             ->create();
         $exhibition_id = Exhibition::factory()->create()->id;
 
-        $guest = Guest::factory()->create();
-        $this->actingAs($user)->post(
-            "/guests/{$guest->id}/enter",
-            ['exhibition_id' => $exhibition_id]
-        );
-        $this->assertResponseOk();
+        $guest = Guest::factory()->state(['exhibition_id' => $exhibition_id])->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/enter",
