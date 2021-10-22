@@ -489,7 +489,7 @@ class CheckInOutTest extends TestCase {
      */
     public function testAlreadyExited() {
         $user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
+        $guest = Guest::factory()->for(Term::factory()->general())->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
