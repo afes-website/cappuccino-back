@@ -487,15 +487,14 @@ class CheckInOutTest extends TestCase {
 
     /**
      * すでに退場済み
-     * 2回処理をしてチェック
+     * GUEST_ALREADY_CHECKED_OUT
      */
     public function testAlreadyExited() {
         $user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->for(Term::factory()->general())->create();
+        $guest = Guest::factory()->for(Term::factory()->general())->state([
+            'revoked_at' => Carbon::now()
+        ])->create();
 
-        $this->actingAs($user)->post(
-            "/guests/{$guest->id}/check-out",
-        );
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
         );
