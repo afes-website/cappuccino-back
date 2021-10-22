@@ -92,26 +92,23 @@ class CheckInOutTest extends TestCase {
      * 入場処理を2回行ってチェック
      */
     public function testAlreadyEnteredReservation() {
-        $count = 5;
 
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        for ($i = 0; $i < $count; ++$i) {
-            $member_count = rand(1, 10);
-            $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
+        $member_count = rand(1, 10);
+        $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
 
-            Guest::factory()->for($reservation)->count($member_count)->create();
+        Guest::factory()->for($reservation)->count($member_count)->create();
 
-            do {
-                $new_guest_id = GuestFactory::createGuestId($term->guest_type);
-            } while (Guest::find($new_guest_id));
+        do {
+            $new_guest_id = GuestFactory::createGuestId($term->guest_type);
+        } while (Guest::find($new_guest_id));
 
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
-            );
-            $this->expectErrorResponse('ALL_MEMBER_CHECKED_IN');
-        }
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
+        );
+        $this->expectErrorResponse('ALL_MEMBER_CHECKED_IN');
     }
 
     /**
