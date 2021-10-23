@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -59,7 +58,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     public static function findOrFail(string $id, $http_code = 404) {
         $user = self::find($id);
-        if (!$user) throw new HttpExceptionWithErrorCode($http_code, 'USER_NOT_FOUND');
+        if (!$user) abort($http_code, 'USER_NOT_FOUND');
         return $user;
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,7 +30,7 @@ class Guest extends Model {
 
     public static function findOrFail(string $id, $http_code = 404) {
         $guest = self::find($id);
-        if (!$guest) throw new HttpExceptionWithErrorCode($http_code, 'GUEST_NOT_FOUND');
+        if (!$guest) abort($http_code, 'GUEST_NOT_FOUND');
         return $guest;
     }
 
@@ -52,11 +51,11 @@ class Guest extends Model {
 
     public static function assertCanBeRegistered(string $guest_id, string $guest_type): void {
         if (!self::validate($guest_id))
-            throw new HttpExceptionWithErrorCode(400, 'INVALID_WRISTBAND_CODE');
+            abort(400, 'INVALID_WRISTBAND_CODE');
         if (strpos($guest_id, config('cappuccino.guest_types')[$guest_type]['prefix']) !== 0)
-            throw new HttpExceptionWithErrorCode(400, 'WRONG_WRISTBAND_COLOR');
+            abort(400, 'WRONG_WRISTBAND_COLOR');
         if (self::find($guest_id))
-            throw new HttpExceptionWithErrorCode(400, 'ALREADY_USED_WRISTBAND');
+            abort(400, 'ALREADY_USED_WRISTBAND');
     }
 
 
