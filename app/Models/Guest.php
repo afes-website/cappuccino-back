@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Guest extends Model {
 
@@ -30,7 +31,10 @@ class Guest extends Model {
 
     public static function findOrFail(string $id, $http_code = 404) {
         $guest = self::find($id);
-        if (!$guest) abort($http_code, 'GUEST_NOT_FOUND');
+        if (!$guest) {
+            Log::notice('GUEST_NOT_FOUND', ['id' => $id]);
+            abort($http_code, 'GUEST_NOT_FOUND');
+        }
         return $guest;
     }
 
@@ -50,12 +54,18 @@ class Guest extends Model {
     }
 
     public static function assertCanBeRegistered(string $guest_id, string $guest_type): void {
-        if (!self::validate($guest_id))
+        if (!self::validate($guest_id)) {
+            Log::notice('INVALID_WRISTBAND_CODE', ['guest_id' => $guest_id]);
             abort(400, 'INVALID_WRISTBAND_CODE');
-        if (strpos($guest_id, config('cappuccino.guest_types')[$guest_type]['prefix']) !== 0)
+        }
+        if (strpos($guest_id, config('cappuccino.guest_types')[$guest_type]['prefix']) !== 0) {
+            Log::notice('WRONG_WRISTBAND_COLOR', ['guest_id' => $guest_id, 'type' => $guest_type]);
             abort(400, 'WRONG_WRISTBAND_COLOR');
-        if (self::find($guest_id))
+        }
+        if (self::find($guest_id)) {
+            Log::notice('ALREADY_USED_WRISTBAND', ['guest_id' => $guest_id]);
             abort(400, 'ALREADY_USED_WRISTBAND');
+        }
     }
 
 

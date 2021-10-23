@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class Authenticate {
 
@@ -52,8 +53,10 @@ class Authenticate {
             $passed = true;
         }
 
-        if (!$passed)
+        if (!$passed) {
+            Log::info('Forbidden.', ['user_id' => $user->id, 'path' => $request->path()]);
             abort(403, 'Forbidden.');
+        }
 
         return $next($request);
     }
