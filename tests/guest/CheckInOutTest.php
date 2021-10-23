@@ -92,26 +92,23 @@ class CheckInOutTest extends TestCase {
      * 入場処理を2回行ってチェック
      */
     public function testAlreadyEnteredReservation() {
-        $count = 5;
 
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        for ($i = 0; $i < $count; ++$i) {
-            $member_count = rand(1, 10);
-            $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
+        $member_count = rand(1, 10);
+        $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
 
-            Guest::factory()->for($reservation)->count($member_count)->create();
+        Guest::factory()->for($reservation)->count($member_count)->create();
 
-            do {
-                $new_guest_id = GuestFactory::createGuestId($term->guest_type);
-            } while (Guest::find($new_guest_id));
+        do {
+            $new_guest_id = GuestFactory::createGuestId($term->guest_type);
+        } while (Guest::find($new_guest_id));
 
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
-            );
-            $this->expectErrorResponse('ALL_MEMBER_CHECKED_IN');
-        }
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
+        );
+        $this->expectErrorResponse('ALL_MEMBER_CHECKED_IN');
     }
 
     /**
@@ -138,20 +135,15 @@ class CheckInOutTest extends TestCase {
     }
 
     /**
-     * GuestIdの形式の誤り
-     * INVALID_WRISTBAND_CODE
-     * - {2文字でない}-{5文字でない} 形式のチェック
-     * - 使用できない文字を使っていないかのチェック
+     * - {2文字でない}-{5文字でない} 形式のコード
+     * - 使用できない文字を使っているコード
      */
-    public function testInvalidGuestCode() {
+    public static function invalidCodesProvider() {
+        $count = 3;
         $invalid_codes = [];
-        $count = 5;
-
-        $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->create();
-
-        for ($i = 0; $i < $count; ++$i) {
-            // $prefix !== 2 && $id !== 5 となるように変数の値を決定する
+        for ($case = 0; $case < $count; $case++) {
+            // コードの長さが違うケース
+            // $prefix !== 2 || $id !== 5 となるように変数の値を決定する
             do {
                 $prefix = rand(1, 10);
                 $id = rand(1, 10);
@@ -161,21 +153,31 @@ class CheckInOutTest extends TestCase {
             for ($i = 0; $i < $id; $i++) {
                 $code .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
             }
-            $invalid_codes[] = Str::random($prefix) . '-' . $code;
-        }
-        do {
-            $code = Str::random(Guest::PREFIX_LENGTH) . '-' . Str::random(Guest::ID_LENGTH);
-        } while (preg_match(Guest::VALID_FORMAT, $code));
+            $invalid_codes["Invalid Lengths ({$case})"] = [Str::random($prefix) . '-' . $code];
 
-        $invalid_codes[] = $code;
+            // 使用できない文字をコードに含んでいるケース
+            do {
+                $code = Str::random(Guest::PREFIX_LENGTH) . '-' . Str::random(Guest::ID_LENGTH);
+            } while (preg_match(Guest::VALID_FORMAT, $code));
 
-        foreach ($invalid_codes as $invalid_code) {
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
-            );
-            $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
+            $invalid_codes["Invalid Character ({$case})"] = [$code];
         }
+        return $invalid_codes;
+    }
+
+    /**
+     * GuestIdの形式の誤り
+     * INVALID_WRISTBAND_CODE
+     * @dataProvider invalidCodesProvider
+     */
+    public function testInvalidGuestCode($invalid_code) {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
+        );
+        $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
     }
 
     /**
@@ -420,7 +422,7 @@ class CheckInOutTest extends TestCase {
     public function testGuestRest($to_revoke) {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->general()->create();
-        $reservation = Reservation::factory()->for($term)->create();
+        $reservation = Reservation::factory()->for($term)->state(['member_all' => rand(2, 100)])->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 2)->create(['revoked_at' => Carbon::now()]);
         Guest::factory()->for($reservation)->create();
@@ -485,15 +487,14 @@ class CheckInOutTest extends TestCase {
 
     /**
      * すでに退場済み
-     * 2回処理をしてチェック
+     * GUEST_ALREADY_CHECKED_OUT
      */
     public function testAlreadyExited() {
         $user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->for(Term::factory()->general())->create();
+        $guest = Guest::factory()->for(Term::factory()->general())->state([
+            'revoked_at' => Carbon::now()
+        ])->create();
 
-        $this->actingAs($user)->post(
-            "/guests/{$guest->id}/check-out",
-        );
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
         );

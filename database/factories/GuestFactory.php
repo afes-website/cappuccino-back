@@ -53,4 +53,11 @@ class GuestFactory extends Factory {
             'exhibition_id'=>Exhibition::factory(),
         ];
     }
+
+    public function revoked($is_force_revoked = false) {
+        return $this->state([
+            'revoked_at' => $this->faker->dateTimeBetween('-1 days', '-1 minutes'),
+            'is_force_revoked' => $is_force_revoked,
+        ]);
+    }
 }

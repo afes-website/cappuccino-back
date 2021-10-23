@@ -105,46 +105,25 @@ class RegisterSpareTest extends TestCase {
         $this->expectErrorResponse('EXIT_TIME_EXCEEDED');
     }
 
+    public static function invalidCodesProvider() {
+        return CheckInOutTest::invalidCodesProvider();
+    }
     /**
      * GuestId の形式の誤り
      * INVALID_WRISTBAND_CODE
      * - {2文字でない}-{5文字でない} 形式のチェック
      * - 使用できない文字を使っていないかのチェック
+     * @dataProvider invalidCodesProvider
      */
-    public function testInvalidGuestCode() {
-        $invalid_codes = [];
-        $count = 5;
-
+    public function testInvalidGuestCode($invalid_code) {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
         Guest::factory()->for($reservation)->create();
-
-        for ($i = 0; $i < $count; ++$i) {
-            // $prefix !== 2 && $id !== 5 となるように変数の値を決定する
-            do {
-                $prefix = rand(1, 10);
-                $id = rand(1, 10);
-            } while ($prefix === 2 && $id === 5);
-            $code = '';
-            $character_count = strlen(Guest::VALID_CHARACTER);
-            for ($i = 0; $i < $id; $i++) {
-                $code .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
-            }
-            $invalid_codes[] = Str::random($prefix) . '-' . $code;
-        }
-        do {
-            $code = Str::random(Guest::PREFIX_LENGTH) . '-' . Str::random(Guest::ID_LENGTH);
-        } while (preg_match(Guest::VALID_FORMAT, $code));
-
-        $invalid_codes[] = $code;
-
-        foreach ($invalid_codes as $invalid_code) {
-            $this->actingAs($user)->post(
-                '/guests/register-spare',
-                ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
-            );
-            $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
-        }
+        $this->actingAs($user)->post(
+            '/guests/register-spare',
+            ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
+        );
+        $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
     }
 
     /**
