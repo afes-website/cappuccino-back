@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Resources\ExhibitionResource;
 use App\Models\Exhibition;
 use App\Models\Guest;

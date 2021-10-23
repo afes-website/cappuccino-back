@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +26,7 @@ class Exhibition extends Model {
 
     public static function findOrFail(string $id, $http_code = 404) {
         $exhibition = self::find($id);
-        if (!$exhibition) throw new HttpExceptionWithErrorCode($http_code, 'EXHIBITION_NOT_FOUND');
+        if (!$exhibition) abort($http_code, 'EXHIBITION_NOT_FOUND');
         return $exhibition;
     }
 

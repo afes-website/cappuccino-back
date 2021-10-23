@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -10,7 +9,6 @@ use App\Models\User;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Resources\UserResource;
 
 class AuthController extends Controller {
@@ -40,11 +38,11 @@ class AuthController extends Controller {
         $user = User::find($request->input('id'));
 
         if (!$user)
-            throw new HttpException(401);
+            abort(401);
 
         if (Hash::check($request->input('password'), $user->password))
             return ['token' => $this->jwt($user)->toString()];
-        else throw new HttpException(401);
+        else abort(401);
     }
 
     public function currentUserInfo(Request $request) {

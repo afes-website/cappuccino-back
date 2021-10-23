@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Models\Image;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class ImageController extends Controller {
     public function show(Request $request, $id) {

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Resources\ReservationResource;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
