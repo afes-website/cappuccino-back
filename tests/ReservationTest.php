@@ -34,6 +34,13 @@ class ReservationTest extends TestCase {
         ]);
     }
 
+    public function testNotFound() {
+        $user = User::factory()->permission('reservation')->create();
+        $this->actingAs($user)->get("/reservations/R-00000000");
+        $this->assertJson($this->response->getContent());
+        $this->expectErrorResponse("RESERVATION_NOT_FOUND", 404);
+    }
+
     /**
      * /reservation/{id}/check:get
      */
@@ -47,6 +54,12 @@ class ReservationTest extends TestCase {
             'error_code' => null,
             'reservation' => new ReservationResource($reservation)
         ]);
+    }
+
+    public function testCheckNotFound() {
+        $this->get("/reservations/R-00000000/check");
+        $this->assertJson($this->response->getContent());
+        $this->expectErrorResponse("RESERVATION_NOT_FOUND", 404);
     }
 
     /**

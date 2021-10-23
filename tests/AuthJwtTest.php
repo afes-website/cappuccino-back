@@ -275,6 +275,7 @@ class AuthJwtTest extends TestCase {
 
         $this->actingAs($admin_user)->get("/auth/users/$id");
         $this->assertResponseStatus(404);
+        $this->expectErrorResponse("USER_NOT_FOUND", 404);
     }
 
     // ======== change password =========
@@ -414,6 +415,16 @@ class AuthJwtTest extends TestCase {
         );
         $response->assertResponseStatus(403);
 
+        // [404] user changes non-existing user's password
+        $response = $this->actingAs($admin_user)->json(
+            'POST',
+            "/auth/users/123456/change_password",
+            ['password' => $new_password],
+        );
+        $response->assertResponseStatus(404);
+        $this->expectErrorResponse("USER_NOT_FOUND", 404);
+
+
         // old password is no longer valid
         $response = $this->json(
             'POST',
@@ -485,5 +496,19 @@ class AuthJwtTest extends TestCase {
 
         $this->get("/auth/me", $admin_user["auth_hdr"]);
         $this->assertResponseStatus(401);
+    }
+
+    public function testRegenerateNonExistingUserSessionKey() {
+        $admin_user = $this->getToken($this, ["admin"]);
+
+        $this->get("/auth/me", $admin_user["auth_hdr"]);
+        $this->assertResponseOk();
+
+        $this->resetAuth();
+
+        $this->post("/auth/users/123456/regenerate", [], $admin_user["auth_hdr"]);
+
+        $this->assertResponseStatus(404);
+        $this->expectErrorResponse("USER_NOT_FOUND", 404);
     }
 }

@@ -23,4 +23,8 @@ class Term extends Model {
         'enter_scheduled_time',
         'exit_scheduled_time',
     ];
+
+    public function getClassAttribute() {
+        return config('cappuccino.guest_types')[$this->guest_type]['class'];
+    }
 }

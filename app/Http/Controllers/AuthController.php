@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -58,11 +59,7 @@ class AuthController extends Controller {
         if (!$request->user()->hasPermission("admin") && $id !== $request->user()->id)
             abort(403);
 
-        $user = User::find($id);
-        if (!$user)
-            abort(404);
-
-        return response()->json(new UserResource($user));
+        return response()->json(new UserResource(User::findOrFail($id)));
     }
 
     public function changePassword(Request $request, $id) {
@@ -73,9 +70,7 @@ class AuthController extends Controller {
             'password' => ['required', 'string', 'min:8']
         ]);
 
-        $user = User::find($id);
-        if (!$user)
-            abort(404);
+        $user = User::findOrFail($id);
 
         $user->update([
             'password' => Hash::make($request->input('password'))
@@ -84,9 +79,7 @@ class AuthController extends Controller {
     }
 
     public function regenerate($id) {
-        $user = User::find($id);
-        if (!$user)
-            abort(404);
+        $user = User::findOrFail($id);
 
         do {
             $key = Str::random(10);

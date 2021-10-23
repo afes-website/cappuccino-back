@@ -121,6 +121,6 @@ class ImageTest extends TestCase {
 
         $id = Str::random();
         $this->get("/images/$id");
-        $this->assertResponseStatus(404);
+        $this->expectErrorResponse("IMAGE_NOT_FOUND", 404);
     }
 }

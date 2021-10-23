@@ -51,4 +51,13 @@ class TermFactory extends Factory {
             'exit_scheduled_time' => $exit,
         ]);
     }
+
+    public function general() {
+        do {
+            $type = array_rand(config('cappuccino.guest_types'));
+        } while (config('cappuccino.guest_types')[$type]['class'] !== 'General');
+        return $this->state([
+            'guest_type' => $type
+        ]);
+    }
 }

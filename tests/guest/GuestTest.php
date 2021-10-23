@@ -47,14 +47,16 @@ class GuestTest extends TestCase {
 
         $this->seeJsonEquals([
             'id' => $guest->id,
-            'entered_at' => $guest->entered_at,
-            'exited_at' => $guest->exited_at,
+            'is_spare' => $guest->is_spare,
+            'registered_at' => $guest->registered_at,
+            'revoked_at' => $guest->revoked_at,
             'exhibition_id' => $guest->exhibition_id,
             'term' => [
                 'id' => $guest->term->id,
                 'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601String(),
                 'exit_scheduled_time' => $guest->term->exit_scheduled_time->toIso8601String(),
-                'guest_type' => $guest->term->guest_type
+                'guest_type' => $guest->term->guest_type,
+                'class' => $guest->term->class,
             ]
         ]);
     }

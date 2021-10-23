@@ -144,7 +144,7 @@ class ExhibitionTest extends TestCase {
                 Guest::factory()
                     ->for($term)
                     ->count($guest_count*2)
-                    ->state(new Sequence([], ['exited_at' => Carbon::now()]))
+                    ->state(new Sequence([], ['revoked_at' => Carbon::now()]))
             )
             ->for($user)
             ->create();
@@ -186,6 +186,6 @@ class ExhibitionTest extends TestCase {
         Guest::factory()->create();
         $this->actingAs($user)->get("/exhibitions/$id");
 
-        $this->assertResponseStatus(404);
+        $this->expectErrorResponse("EXHIBITION_NOT_FOUND", 404);
     }
 }

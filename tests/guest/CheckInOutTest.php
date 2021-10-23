@@ -2,6 +2,7 @@
 namespace Tests\guest;
 
 use Database\Factories\GuestFactory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use App\Models\Guest;
@@ -17,28 +18,16 @@ use Tests\Common;
  */
 class CheckInOutTest extends TestCase {
 
-    const ID_CHARACTER = '234578acdefghijkmnprstuvwxyz';
-    const PREFIX_LENGTH = 2;
-    const ID_LENGTH = 5;
-
-    private static function createGuestId(string $guest_type, string $prefix = null): string {
-        do {
-            $guest_id = GuestFactory::createGuestId($guest_type, $prefix);
-        } while (Guest::find($guest_id));
-        return $guest_id;
-    }
-
     /* Check-In */
 
     /**
      * CheckIn
      * Guestオブジェクトが返ってきている
-     * @todo 返ってくるようにする
      */
     public function testCheckIn() {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
-        $guest_id = $this->createGuestId($reservation->term->guest_type);
+        $guest_id = GuestFactory::createGuestId($reservation->term->guest_type);
         $this->actingAs($user)->post(
             '/guests/check-in',
             ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
@@ -47,14 +36,16 @@ class CheckInOutTest extends TestCase {
         $guest = Guest::find($guest_id);
         $this->seeJsonEquals([
             'id' => $guest->id,
-            'entered_at' => $guest->entered_at,
-            'exited_at' => $guest->exited_at,
+            'registered_at' => $guest->registered_at,
+            'revoked_at' => $guest->revoked_at,
             'exhibition_id' => $guest->exhibition_id,
+            'is_spare' => false,
             'term' => [
                 'id' => $guest->term->id,
                 'enter_scheduled_time' => $guest->term->enter_scheduled_time->toIso8601String(),
                 'exit_scheduled_time' => $guest->term->exit_scheduled_time->toIso8601String(),
-                'guest_type' => $guest->term->guest_type
+                'guest_type' => $guest->term->guest_type,
+                'class' => $guest->term->class,
             ]
         ]);
     }
@@ -68,7 +59,7 @@ class CheckInOutTest extends TestCase {
         $member_count = $reservation->member_all;
 
         for ($i = 1; $i <= $member_count; $i++) {
-            $guest_id = $this->createGuestId($reservation->term->guest_type);
+            $guest_id = GuestFactory::createGuestId($reservation->term->guest_type);
             $this->actingAs($user)->post(
                 '/guests/check-in',
                 ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
@@ -85,16 +76,12 @@ class CheckInOutTest extends TestCase {
     public function testReservationNotFound() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        $guest_id = $this->createGuestId($term->guest_type);
+        $guest_id = GuestFactory::createGuestId($term->guest_type);
         $this->actingAs($user)->post(
             '/guests/check-in',
             ['guest_id' => $guest_id, 'reservation_id' => 'R-' . Str::random(7)]
         );
-
-        $this->assertResponseStatus(400);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('RESERVATION_NOT_FOUND', $code);
+        $this->expectErrorResponse('RESERVATION_NOT_FOUND');
     }
 
     //   INVALID_RESERVATION_INFO: NO TEST
@@ -105,30 +92,23 @@ class CheckInOutTest extends TestCase {
      * 入場処理を2回行ってチェック
      */
     public function testAlreadyEnteredReservation() {
-        $count = 5;
 
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        for ($i = 0; $i < $count; ++$i) {
-            $member_count = rand(1, 10);
-            $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
+        $member_count = rand(1, 10);
+        $reservation = Reservation::factory()->for($term)->state(['member_all' => $member_count])->create();
 
-            Guest::factory()->for($reservation)->count($member_count)->create();
+        Guest::factory()->for($reservation)->count($member_count)->create();
 
-            do {
-                $new_guest_id = $this->createGuestId($term->guest_type);
-            } while (Guest::find($new_guest_id));
+        do {
+            $new_guest_id = GuestFactory::createGuestId($term->guest_type);
+        } while (Guest::find($new_guest_id));
 
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
-            );
-
-            $this->assertResponseStatus(400);
-            $this->assertJson($this->response->getContent());
-            $code = json_decode($this->response->getContent())->error_code;
-            $this->assertEquals('ALL_MEMBER_CHECKED_IN', $code);
-        }
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $new_guest_id, 'reservation_id' => $reservation->id]
+        );
+        $this->expectErrorResponse('ALL_MEMBER_CHECKED_IN');
     }
 
     /**
@@ -144,61 +124,60 @@ class CheckInOutTest extends TestCase {
 
         for ($i = 0; $i < 2; $i++) {
             $reservation = Reservation::factory()->for($term[$i])->create();
-            $guest_id = $this->createGuestId($term[$i]->guest_type);
+            $guest_id = GuestFactory::createGuestId($term[$i]->guest_type);
             $this->actingAs($user)->post(
                 '/guests/check-in',
                 ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
             );
 
-            $this->assertResponseStatus(400);
-            $this->assertJson($this->response->getContent());
-            $code = json_decode($this->response->getContent())->error_code;
-            $this->assertEquals('OUT_OF_RESERVATION_TIME', $code);
+            $this->expectErrorResponse('OUT_OF_RESERVATION_TIME');
         }
     }
 
     /**
-     * GuestIdの形式の誤り
-     * INVALID_WRISTBAND_CODE
-     * - {2文字でない}-{5文字でない} 形式のチェック
-     * - 使用できない文字を使っていないかのチェック
+     * - {2文字でない}-{5文字でない} 形式のコード
+     * - 使用できない文字を使っているコード
      */
-    public function testInvalidGuestCode() {
+    public static function invalidCodesProvider() {
+        $count = 3;
         $invalid_codes = [];
-        $count = 5;
-
-        $user = User::factory()->permission('executive')->create();
-        $reservation = Reservation::factory()->create();
-
-        for ($i = 0; $i < $count; ++$i) {
-            // $prefix !== 2 && $id !== 5 となるように変数の値を決定する
+        for ($case = 0; $case < $count; $case++) {
+            // コードの長さが違うケース
+            // $prefix !== 2 || $id !== 5 となるように変数の値を決定する
             do {
                 $prefix = rand(1, 10);
                 $id = rand(1, 10);
             } while ($prefix === 2 && $id === 5);
             $code = '';
-            $character_count = strlen(self::ID_CHARACTER);
+            $character_count = strlen(Guest::VALID_CHARACTER);
             for ($i = 0; $i < $id; $i++) {
-                $code .= self::ID_CHARACTER[rand(0, $character_count - 1)];
+                $code .= Guest::VALID_CHARACTER[rand(0, $character_count - 1)];
             }
-            $invalid_codes[] = Str::random($prefix) . '-' . $code;
-        }
-        do {
-            $code = Str::random(self::PREFIX_LENGTH) . '-' . Str::random(self::ID_LENGTH);
-        } while (preg_match(Guest::VALID_FORMAT, $code));
+            $invalid_codes["Invalid Lengths ({$case})"] = [Str::random($prefix) . '-' . $code];
 
-        $invalid_codes[] = $code;
+            // 使用できない文字をコードに含んでいるケース
+            do {
+                $code = Str::random(Guest::PREFIX_LENGTH) . '-' . Str::random(Guest::ID_LENGTH);
+            } while (preg_match(Guest::VALID_FORMAT, $code));
 
-        foreach ($invalid_codes as $invalid_code) {
-            $this->actingAs($user)->post(
-                '/guests/check-in',
-                ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
-            );
-            $this->assertResponseStatus(400);
-            $this->assertJson($this->response->getContent());
-            $code = json_decode($this->response->getContent())->error_code;
-            $this->assertEquals('INVALID_WRISTBAND_CODE', $code);
+            $invalid_codes["Invalid Character ({$case})"] = [$code];
         }
+        return $invalid_codes;
+    }
+
+    /**
+     * GuestIdの形式の誤り
+     * INVALID_WRISTBAND_CODE
+     * @dataProvider invalidCodesProvider
+     */
+    public function testInvalidGuestCode($invalid_code) {
+        $user = User::factory()->permission('executive')->create();
+        $reservation = Reservation::factory()->create();
+        $this->actingAs($user)->post(
+            '/guests/check-in',
+            ['guest_id' => $invalid_code, 'reservation_id' => $reservation->id]
+        );
+        $this->expectErrorResponse('INVALID_WRISTBAND_CODE');
     }
 
     /**
@@ -209,17 +188,14 @@ class CheckInOutTest extends TestCase {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
 
-        $guest_id = self::createGuestId($reservation->term->guest_type, 'XX'); //存在しない Prefix
+        $guest_id = GuestFactory::createGuestId($reservation->term->guest_type, 'XX'); //存在しない Prefix
 
         $this->actingAs($user)->post(
             '/guests/check-in',
             ['guest_id' => $guest_id, 'reservation_id' => $reservation->id]
         );
 
-        $this->assertResponseStatus(400);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('WRONG_WRISTBAND_COLOR', $code);
+        $this->expectErrorResponse('WRONG_WRISTBAND_COLOR');
     }
 
     /**
@@ -229,7 +205,7 @@ class CheckInOutTest extends TestCase {
         $user = User::factory()->permission('executive')->create();
         $reservation = Reservation::factory()->create();
 
-        $guest_id = self::createGuestId($reservation->term->guest_type);
+        $guest_id = GuestFactory::createGuestId($reservation->term->guest_type);
 
         $guest_id = substr($guest_id, -1) . ($guest_id[-1] === '0' ? '1' : '0');
 
@@ -257,7 +233,7 @@ class CheckInOutTest extends TestCase {
         for ($i = 0; $i < $count; ++$i) {
             $reservation_1 = Reservation::factory()->for($term)->create();
             $reservation_2 = Reservation::factory()->for($term)->create();
-            $guest_id = $this->createGuestId($term->guest_type);
+            $guest_id = GuestFactory::createGuestId($term->guest_type);
             $used_id[] = $guest_id;
 
             $this->actingAs($user)->post(
@@ -272,104 +248,108 @@ class CheckInOutTest extends TestCase {
                 ['guest_id' => $guest_id, 'reservation_id' => $reservation_2->id]
             );
 
-            $this->assertResponseStatus(400);
-            $this->assertJson($this->response->getContent());
-            $code = json_decode($this->response->getContent())->error_code;
-            $this->assertEquals('ALREADY_USED_WRISTBAND', $code);
+            $this->expectErrorResponse('ALREADY_USED_WRISTBAND');
         }
     }
 
-    public function testMultipleError() {
-        foreach (Common::multipleArray(
+    public function multipleCase() {
+        return Common::multipleArray(
             ['all_member_checked_in', 'no_member_checked_in'],
             ['after_period', 'before_period', 'in_period'],
             ['character_invalid', 'character_valid'],
             ['length_invalid', 'length_valid'],
             ['guest_used', 'guest_unused'],
             ['wrong_term', 'right_term']
-        ) as $state
-        ) {
-            if ($state === [
-                'no_member_checked_in',
-                'in_period',
-                'character_valid',
-                'length_valid',
-                'guest_unused',
-                'right_term',
-            ]) continue;
+        );
+    }
+
+    /**
+     * @dataProvider multipleCase
+     */
+    public function testMultipleError(...$state) {
+        if ($state === [
+            'no_member_checked_in',
+            'in_period',
+            'character_valid',
+            'length_valid',
+            'guest_unused',
+            'right_term',
+        ]) {
+            $this->assertTrue(true);
+            return;
+        }
 
             DB::beginTransaction();
-            try {
-                $user = User::factory()->permission('admin', 'executive')->create();
-                $member_count = rand(1, 10);
-                $reservation = Reservation::factory()->state(['member_all' => $member_count]);
-                $guest_code = self::createGuestId('GuestBlue');
+        try {
+            $user = User::factory()->permission('admin', 'executive')->create();
+            $member_count = rand(1, 10);
+            $reservation = Reservation::factory()->state(['member_all' => $member_count]);
+            $guest_code = GuestFactory::createGuestId('GuestBlue');
 
-                switch ($state[0]) {
-                    case 'all_member_checked_in':
-                        $reservation = $reservation
-                            ->has(Guest::factory()
-                                ->for(Term::factory()->create())
-                                ->count($member_count));
-                        break;
-                    case 'no_member_checked_in':
-                        break;
-                }
-                $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
-                switch ($state[1]) {
-                    case 'after_period':
-                        $term = $term->afterPeriod();
-                        break;
-                    case 'before_period':
-                        $term = $term->beforePeriod();
-                        break;
-                    case 'in_period':
-                        $term = $term->inPeriod();
-                        break;
-                }
-                $term = $term->create();
-                switch ($state[2]) {
-                    case 'character_invalid':
-                        $guest_code[-1] = 'z';
-                        break;
-                    case 'character_valid':
-                        break;
-                }
-                switch ($state[3]) {
-                    case 'length_invalid':
-                        $guest_code .= '2';
-                        break;
-                    case 'length_valid':
-                        break;
-                }
-                switch ($state[4]) {
-                    case 'guest_used':
-                        Guest::factory()->state(['id' => $guest_code])->for(Term::factory()->create())->create();
-                        break;
-                    case 'guest_unused':
-                        break;
-                }
-                switch ($state[5]) {
-                    case 'wrong_term':
-                        $guest_code[1] = 'X';
-                        break;
-                    case 'right_term':
-                        break;
-                }
-
-                $reservation = $reservation->for($term)->create();
-
-                $this->actingAs($user)->post(
-                    '/guests/check-in',
-                    ['guest_id' => $guest_code, 'reservation_id' => $reservation->id]
-                );
-                $this->assertResponseStatus(400);
-            } catch (\Exception $e) {
-                var_dump($state);
-                throw $e;
-            } finally {
-                DB::rollBack();
+            switch ($state[0]) {
+                case 'all_member_checked_in':
+                    $reservation = $reservation
+                        ->has(Guest::factory()
+                            ->for(Term::factory()->create())
+                            ->count($member_count));
+                    break;
+                case 'no_member_checked_in':
+                    break;
             }
+            $term = Term::factory()->state(['guest_type' => 'GuestBlue']);
+            switch ($state[1]) {
+                case 'after_period':
+                    $term = $term->afterPeriod();
+                    break;
+                case 'before_period':
+                    $term = $term->beforePeriod();
+                    break;
+                case 'in_period':
+                    $term = $term->inPeriod();
+                    break;
+            }
+            $term = $term->create();
+            switch ($state[2]) {
+                case 'character_invalid':
+                    $guest_code[-1] = 'z';
+                    break;
+                case 'character_valid':
+                    break;
+            }
+            switch ($state[3]) {
+                case 'length_invalid':
+                    $guest_code .= '2';
+                    break;
+                case 'length_valid':
+                    break;
+            }
+            switch ($state[4]) {
+                case 'guest_used':
+                    Guest::factory()->state(['id' => $guest_code])->for(Term::factory()->create())->create();
+                    break;
+                case 'guest_unused':
+                    break;
+            }
+            switch ($state[5]) {
+                case 'wrong_term':
+                    $guest_code[1] = 'X';
+                    break;
+                case 'right_term':
+                    break;
+            }
+
+            $reservation = $reservation->for($term)->create();
+
+            $this->actingAs($user)->post(
+                '/guests/check-in',
+                ['guest_id' => $guest_code, 'reservation_id' => $reservation->id]
+            );
+            $this->expectErrorResponse();
+        } catch (\Exception $e) {
+            var_dump($state);
+            throw $e;
+        } finally {
+            DB::rollBack();
         }
     }
 
@@ -381,12 +361,95 @@ class CheckInOutTest extends TestCase {
      */
     public function testCheckOut() {
         $user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
+        $guest = Guest::factory()->for(Term::factory()->general())->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
         );
         $this->assertResponseOk();
+    }
+
+    public function guestSpareProvider(): array {
+        return [['guest'], ['spare']];
+    }
+
+    /**
+     * Force Revoke のテスト
+     * - 予約人数分に退場した時に余分数が ForceRevoke される
+     *  - Spare かどうかを問わない
+     *  - revoked_at に時刻が入る
+     *  - is_force_revoked = true
+     * @dataProvider guestSpareProvider
+     */
+    public function testForceRevoke($to_revoke) {
+        $user = User::factory()->permission('executive')->create();
+        $term = Term::factory()->general()->create();
+        $reservation = Reservation::factory()->for($term)->create();
+        $member_all = $reservation->member_all;
+        Guest::factory()->for($reservation)->count($member_all - 1)->create(['revoked_at' => Carbon::now()]);
+
+        $guest = Guest::factory()->for($reservation)->for($term)->create();
+        $spare = Guest::factory()->for($reservation)->for($term)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($term)->for($reservation)->create(['is_spare' => true]);
+
+        if ($to_revoke === 'guest') {
+            $this->actingAs($user)->post(
+                "/guests/{$guest->id}/check-out",
+            );
+            $data = Guest::find($spare->id);
+        } else {
+            $this->actingAs($user)->post(
+                "/guests/{$spare->id}/check-out",
+            );
+            $data = Guest::find($guest->id);
+        }
+        $this->assertJson($this->response->getContent());
+        $this->assertResponseOk();
+        $this->assertTrue($data->is_force_revoked == 1);
+        $this->assertNotNull($data->revoked_at);
+
+        foreach ($other_spares as $i) {
+            $data = Guest::find($i->id);
+            $this->assertTrue($data->is_force_revoked == 1);
+            $this->assertNotNull($data->revoked_at);
+        }
+    }
+
+    /**
+     * まだ 場内に人が残っていなるなら Force Revoke は行わない
+     * @dataProvider guestSpareProvider
+     */
+    public function testGuestRest($to_revoke) {
+        $user = User::factory()->permission('executive')->create();
+        $term = Term::factory()->general()->create();
+        $reservation = Reservation::factory()->for($term)->state(['member_all' => rand(2, 100)])->create();
+        $member_all = $reservation->member_all;
+        Guest::factory()->for($reservation)->count($member_all - 2)->create(['revoked_at' => Carbon::now()]);
+        Guest::factory()->for($reservation)->create();
+        $guest = Guest::factory()->for($reservation)->for($term)->create();
+        $spare = Guest::factory()->for($reservation)->for($term)->create(['is_spare' => true]);
+        $other_spares = Guest::factory()->count(2)->for($reservation)->for($term)->create(['is_spare' => true]);
+
+        if ($to_revoke === 'guest') {
+            $this->actingAs($user)->post(
+                "/guests/{$guest->id}/check-out",
+            );
+            $data = Guest::find($spare->id);
+        } else {
+            $this->actingAs($user)->post(
+                "/guests/{$spare->id}/check-out",
+            );
+            $data = Guest::find($guest->id);
+        }
+        $this->assertResponseOk();
+        $this->assertFalse($data->is_force_revoked == 1);
+        $this->assertNull($data->revoked_at);
+
+        foreach ($other_spares as $i) {
+            $data = Guest::find($i->id);
+            $this->assertFalse($data->is_force_revoked == 1);
+            $this->assertNull($data->revoked_at);
+        }
     }
 
     /**
@@ -396,7 +459,7 @@ class CheckInOutTest extends TestCase {
     public function testCheckOutGuestNotFound() {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->inPeriod()->create();
-        $guest_id = $this->createGuestId($term->guest_type);
+        $guest_id = GuestFactory::createGuestId($term->guest_type);
 
         $this->actingAs($user)->post(
             "/guests/$guest_id/check-out",
@@ -406,23 +469,36 @@ class CheckInOutTest extends TestCase {
     }
 
     /**
+     * 生徒のリストバンドでは退場できない
+     * CHECK_OUT_PROHIBITED
+     */
+
+    public function testCheckOutStudent() {
+        $user = User::factory()->permission('executive')->create();
+        $term = Term::factory()->inPeriod()->state(['guest_type' => 'StudentGray'])->create();
+        $guest_id = Guest::factory()->for($term)->create()->id;
+
+        $this->actingAs($user)->post(
+            "/guests/$guest_id/check-out",
+            ['guest_id' => $guest_id]
+        );
+        $this->expectErrorResponse('CHECK_OUT_PROHIBITED');
+    }
+
+    /**
      * すでに退場済み
-     * 2回処理をしてチェック
+     * GUEST_ALREADY_CHECKED_OUT
      */
     public function testAlreadyExited() {
         $user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
+        $guest = Guest::factory()->for(Term::factory()->general())->state([
+            'revoked_at' => Carbon::now()
+        ])->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/check-out",
         );
-        $this->actingAs($user)->post(
-            "/guests/{$guest->id}/check-out",
-        );
-        $this->assertResponseStatus(400);
-        $this->assertJson($this->response->getContent());
-        $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('GUEST_ALREADY_EXITED', $code);
+        $this->expectErrorResponse('GUEST_ALREADY_CHECKED_OUT');
     }
 
     /**

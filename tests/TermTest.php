@@ -8,7 +8,7 @@ use App\Models\User;
  * - /terms:get
  */
 class TermTest extends TestCase {
-    
+
     /**
      * Term についてのデータの中身が正しい
      */
@@ -26,6 +26,7 @@ class TermTest extends TestCase {
                 'enter_scheduled_time' => $term->enter_scheduled_time->toIso8601String(),
                 'exit_scheduled_time' => $term->exit_scheduled_time->toIso8601String(),
                 'guest_type' => $term->guest_type,
+                'class' => $term->class,
             ],
         ]);
     }

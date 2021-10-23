@@ -41,4 +41,11 @@ abstract class TestCase extends \Laravel\Lumen\Testing\TestCase {
         DB::connection(null)->rollBack();
         parent::tearDown();
     }
+
+    public function expectErrorResponse($expected = null, $status = 400) {
+        $this->assertResponseStatus($status);
+        $this->assertJson($this->response->getContent());
+        $code = json_decode($this->response->getContent())->error_code;
+        if ($expected) $this->assertEquals($expected, $code);
+    }
 }

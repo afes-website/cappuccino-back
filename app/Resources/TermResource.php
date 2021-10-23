@@ -17,7 +17,8 @@ class TermResource extends JsonResource {
             "id" => $this->id,
             "enter_scheduled_time" => $this->enter_scheduled_time->toIso8601String(),
             "exit_scheduled_time" => $this->exit_scheduled_time->toIso8601String(),
-            "guest_type" => $this->guest_type
+            "guest_type" => $this->guest_type,
+            "class" => $this->class
         ];
     }
 }

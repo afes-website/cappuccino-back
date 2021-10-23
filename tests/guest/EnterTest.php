@@ -158,18 +158,11 @@ class EnterTest extends TestCase {
 
     /**
      * Guest が既に退場処理をしているとき
-     * GUEST_ALREADY_EXITED
+     * GUEST_ALREADY_CHECKED_OUT
      */
     public function testAlreadyExited() {
         $user = User::factory()->permission('exhibition')->has(Exhibition::factory())->create();
-        $executive_user = User::factory()->permission('executive')->create();
-        $guest = Guest::factory()->create();
-
-        $this->actingAs($executive_user)->post(
-            "/guests/{$guest->id}/check-out",
-        );
-
-        $this->assertResponseOk();
+        $guest = Guest::factory()->revoked()->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/enter",
@@ -179,7 +172,7 @@ class EnterTest extends TestCase {
         $this->assertResponseStatus(400);
         $this->assertJson($this->response->getContent());
         $code = json_decode($this->response->getContent())->error_code;
-        $this->assertEquals('GUEST_ALREADY_EXITED', $code);
+        $this->assertEquals('GUEST_ALREADY_CHECKED_OUT', $code);
     }
 
     /**
@@ -191,12 +184,7 @@ class EnterTest extends TestCase {
             ->permission('exhibition')
             ->has(Exhibition::factory())
             ->create();
-        $guest = Guest::factory()->create();
-        $this->actingAs($user)->post(
-            "/guests/{$guest->id}/enter",
-            ['exhibition_id' => $user->id]
-        );
-        $this->assertResponseOk();
+        $guest = Guest::factory()->state(['exhibition_id' => $user->id])->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/enter",
@@ -221,12 +209,7 @@ class EnterTest extends TestCase {
             ->create();
         $exhibition_id = Exhibition::factory()->create()->id;
 
-        $guest = Guest::factory()->create();
-        $this->actingAs($user)->post(
-            "/guests/{$guest->id}/enter",
-            ['exhibition_id' => $exhibition_id]
-        );
-        $this->assertResponseOk();
+        $guest = Guest::factory()->state(['exhibition_id' => $exhibition_id])->create();
 
         $this->actingAs($user)->post(
             "/guests/{$guest->id}/enter",

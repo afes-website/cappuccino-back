@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Resources\ReservationResource;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
@@ -21,16 +22,11 @@ class ReservationController extends Controller {
     }
 
     public function show($id) {
-        $reservation = Reservation::find(strtoupper($id));
-        if (!$reservation) abort(404);
-
-        return response()->json(new ReservationResource($reservation));
+        return response()->json(new ReservationResource(Reservation::findOrFail($id)));
     }
 
     public function check($id) {
-        $reservation = Reservation::find($id);
-        if (!$reservation) abort(404);
-
+        $reservation = Reservation::findOrFail($id);
         $status_code = $reservation->getErrorCode();
         if ($status_code !== null) {
             $valid = false;

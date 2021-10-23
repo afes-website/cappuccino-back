@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -11,6 +12,12 @@ class Image extends Model {
     use HasFactory;
 
     protected $guarded = [];
+
+    public static function findOrFail(string $id, $http_code = 404) {
+        $image = self::find($id);
+        if (!$image) throw new HttpExceptionWithErrorCode($http_code, 'IMAGE_NOT_FOUND');
+        return $image;
+    }
 
     public static function imageCreate($content, $user_id, $mime_type) {
         $content_medium = \Intervention\Image\Facades\Image::make($content);

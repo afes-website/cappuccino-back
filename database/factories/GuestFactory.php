@@ -43,13 +43,21 @@ class GuestFactory extends Factory {
         return [
             'term_id'=>Term::factory()->inPeriod(),
             'reservation_id'=>Reservation::factory(),
+            'is_spare'=>false,
             'id'=> function (array $attributes) {
                 $guest_type = Term::find($attributes['term_id'])->guest_type;
                 return $this->createGuestId($guest_type);
             },
-            'entered_at'=>$this->faker->dateTime,
-            'exited_at'=>null,
+            'registered_at'=>$this->faker->dateTime,
+            'revoked_at'=>null,
             'exhibition_id'=>Exhibition::factory(),
         ];
+    }
+
+    public function revoked($is_force_revoked = false) {
+        return $this->state([
+            'revoked_at' => $this->faker->dateTimeBetween('-1 days', '-1 minutes'),
+            'is_force_revoked' => $is_force_revoked,
+        ]);
     }
 }
