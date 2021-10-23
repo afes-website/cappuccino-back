@@ -422,7 +422,7 @@ class CheckInOutTest extends TestCase {
     public function testGuestRest($to_revoke) {
         $user = User::factory()->permission('executive')->create();
         $term = Term::factory()->general()->create();
-        $reservation = Reservation::factory()->for($term)->create();
+        $reservation = Reservation::factory()->for($term)->state(['member_all' => rand(2, 100)])->create();
         $member_all = $reservation->member_all;
         Guest::factory()->for($reservation)->count($member_all - 2)->create(['revoked_at' => Carbon::now()]);
         Guest::factory()->for($reservation)->create();
