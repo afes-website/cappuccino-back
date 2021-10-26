@@ -133,13 +133,16 @@ class GuestController extends Controller {
         if ($guest->exhibition_id === $exhibition->id) {
             Log::info('GUEST_ALREADY_ENTERED', ['guest_id' => $guest->id, 'exhibition_id' => $exhibition->id]);
             abort(400, 'GUEST_ALREADY_ENTERED');
-        }        if ($exhibition->capacity <= $exhibition->guests()->count()) {
+        }
+        if ($exhibition->capacity <= $exhibition->guests()->count()) {
             Log::info('PEOPLE_LIMIT_EXCEEDED', ['guest_id' => $guest->id, 'exhibition_id' => $exhibition->id]);
             abort(400, 'PEOPLE_LIMIT_EXCEEDED');
-        }        if ($guest->revoked_at !== null) {
+        }
+        if ($guest->revoked_at !== null) {
             Log::notice('GUEST_ALREADY_CHECKED_OUT', ['guest_id' => $guest->id, 'exhibition_id' => $exhibition->id]);
             abort(400, 'GUEST_ALREADY_CHECKED_OUT');
-        }        if ($guest->term->exit_scheduled_time < Carbon::now()) {
+        }
+        if ($guest->term->exit_scheduled_time < Carbon::now()) {
             Log::info('EXIT_TIME_EXCEEDED', [
                 'guest_id' => $guest->id,
                 'exhibition_id' => $exhibition->id,
