@@ -140,7 +140,7 @@ class GuestController extends Controller {
             Log::notice('GUEST_ALREADY_CHECKED_OUT', ['guest_id' => $guest->id, 'exhibition_id' => $exhibition->id]);
             abort(400, 'GUEST_ALREADY_CHECKED_OUT');
         }        if ($guest->term->exit_scheduled_time < Carbon::now()) {
-            Log::notice('EXIT_TIME_EXCEEDED', [
+            Log::info('EXIT_TIME_EXCEEDED', [
                 'guest_id' => $guest->id,
                 'exhibition_id' => $exhibition->id,
                 'term_id' => $guest->term->id,
