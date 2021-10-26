@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Image extends Model {
@@ -15,7 +15,10 @@ class Image extends Model {
 
     public static function findOrFail(string $id, $http_code = 404) {
         $image = self::find($id);
-        if (!$image) throw new HttpExceptionWithErrorCode($http_code, 'IMAGE_NOT_FOUND');
+        if (!$image) {
+            Log::info('IMAGE_NOT_FOUND', ['image_id' => $id]);
+            abort($http_code, 'IMAGE_NOT_FOUND');
+        }
         return $image;
     }
 

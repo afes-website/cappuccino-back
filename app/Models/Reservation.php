@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +25,10 @@ class Reservation extends Model {
 
     public static function findOrFail(string $id, $http_code = 404) {
         $reservation = self::find($id);
-        if (!$reservation) throw new HttpExceptionWithErrorCode($http_code, 'RESERVATION_NOT_FOUND');
+        if (!$reservation) {
+            Log::notice('RESERVATION_NOT_FOUND', ['reservation_id' => $id]);
+            abort($http_code, 'RESERVATION_NOT_FOUND');
+        }
         return $reservation;
     }
 
@@ -46,10 +48,12 @@ class Reservation extends Model {
         $current = Carbon::now();
 
         if ($term->enter_scheduled_time >= $current || $term->exit_scheduled_time < $current) {
+            Log::notice('OUT_OF_RESERVATION_TIME', ['reservation_id' => $this->id, 'term_id' => $term->id]);
             return 'OUT_OF_RESERVATION_TIME';
         }
 
         if ($this->guest()->count() >= $this->member_all) {
+            Log::notice('ALL_MEMBER_CHECKED_IN', ['reservation_id' => $this->id]);
             return 'ALL_MEMBER_CHECKED_IN';
         }
 

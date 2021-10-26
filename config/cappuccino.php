@@ -23,14 +23,6 @@ return [
             'prefix' => 'GY',
             'class' => 'General'
         ],
-        'GuestPurple' => [
-            'prefix' => 'GP',
-            'class' => 'General'
-        ],
-        'GuestOrange' => [
-            'prefix' => 'GO',
-            'class' => 'General'
-        ],
         'GuestGreen' => [
             'prefix' => 'GG',
             'class' => 'General'
@@ -38,6 +30,10 @@ return [
         'GuestWhite' => [
             'prefix' => 'GW',
             'class' => 'General'
+        ],
+        'ParentPurple' => [
+            'prefix' => 'PP',
+            'class' => 'Parent'
         ],
         'StudentGray' => [
             'prefix' => 'SG',

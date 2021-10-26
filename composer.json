@@ -4,7 +4,7 @@
     "keywords": ["festival", "lumen"],
     "license": "MIT",
     "type": "project",
-    "version": "3.3.0",
+    "version": "3.3.1",
     "homepage": "https://afes.info/",
     "require": {
         "php": "^7.4|^8.0",

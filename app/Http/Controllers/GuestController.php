@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\HttpExceptionWithErrorCode;
 use App\Models\Exhibition;
 use App\Resources\GuestResource;
 use App\Models\Guest;
@@ -10,7 +9,6 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\ActivityLogEntry;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +32,7 @@ class GuestController extends Controller {
         $term = $reservation->term;
 
         if (($reservation_error_code = $reservation->getErrorCode()) !== null)
-            throw new HttpExceptionWithErrorCode(400, $reservation_error_code);
+            abort(400, $reservation_error_code);
 
         Guest::assertCanBeRegistered($guest_id, $term->guest_type);
 
@@ -66,10 +64,15 @@ class GuestController extends Controller {
         $reservation = Reservation::findOrFail($request->reservation_id, 400);
         $term = $reservation->term;
 
-        if ($reservation->guest()->count() === 0)
-            throw new HttpExceptionWithErrorCode(400, 'NO_MEMBER_CHECKED_IN');
-        if ($reservation->term->exit_scheduled_time < Carbon::now())
-            throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
+        if ($reservation->guest()->count() === 0) {
+            Log::notice('NO_MEMBER_CHECKED_IN', ['reservation_id' => $reservation->id]);
+            abort(400, 'NO_MEMBER_CHECKED_IN');
+        }
+
+        if ($reservation->term->exit_scheduled_time < Carbon::now()) {
+            Log::info('EXIT_TIME_EXCEEDED', ['reservation_id' => $reservation->id, 'term_id' => $term->id]);
+            abort(400, 'EXIT_TIME_EXCEEDED');
+        }
 
         Guest::assertCanBeRegistered($guest_id, $term->guest_type);
 
@@ -94,11 +97,14 @@ class GuestController extends Controller {
     public function checkOut($id) {
         return DB::transaction(function () use ($id) {
             $guest = Guest::FindOrFail($id);
-            if ($guest->revoked_at !== null)
-                throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_CHECKED_OUT');
-            if ($guest->term->class === "Student")
-                throw new HttpExceptionWithErrorCode(400, "CHECK_OUT_PROHIBITED");
-
+            if ($guest->revoked_at !== null) {
+                Log::notice('GUEST_ALREADY_CHECKED_OUT', ['guest_id' => $guest->id]);
+                abort(400, 'GUEST_ALREADY_CHECKED_OUT');
+            }
+            if ($guest->term->class === "Student") {
+                Log::notice('CHECK_OUT_PROHIBITED', ['guest_id' => $guest->id]);
+                abort(400, "CHECK_OUT_PROHIBITED");
+            }
             $guest->update(['revoked_at' => Carbon::now()]);
             ActivityLogEntry::create([
                 'log_type' => 'check-out',
@@ -124,15 +130,26 @@ class GuestController extends Controller {
         $guest = Guest::FindOrFail($id);
         $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
-        if ($guest->exhibition_id === $exhibition->id)
-            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_ENTERED');
-        if ($exhibition->capacity <= $exhibition->guests()->count())
-            throw new HttpExceptionWithErrorCode(400, 'PEOPLE_LIMIT_EXCEEDED');
-        if ($guest->revoked_at !== null)
-            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_CHECKED_OUT');
-        if ($guest->term->exit_scheduled_time < Carbon::now())
-            throw new HttpExceptionWithErrorCode(400, 'EXIT_TIME_EXCEEDED');
-
+        if ($guest->exhibition_id === $exhibition->id) {
+            Log::info('GUEST_ALREADY_ENTERED', ['guest_id' => $guest->id, 'exhibition_id' => $exhibition->id]);
+            abort(400, 'GUEST_ALREADY_ENTERED');
+        }
+        if ($exhibition->capacity <= $exhibition->guests()->count()) {
+            Log::info('PEOPLE_LIMIT_EXCEEDED', ['guest_id' => $guest->id, 'exhibition_id' => $exhibition->id]);
+            abort(400, 'PEOPLE_LIMIT_EXCEEDED');
+        }
+        if ($guest->revoked_at !== null) {
+            Log::notice('GUEST_ALREADY_CHECKED_OUT', ['guest_id' => $guest->id, 'exhibition_id' => $exhibition->id]);
+            abort(400, 'GUEST_ALREADY_CHECKED_OUT');
+        }
+        if ($guest->term->exit_scheduled_time < Carbon::now()) {
+            Log::info('EXIT_TIME_EXCEEDED', [
+                'guest_id' => $guest->id,
+                'exhibition_id' => $exhibition->id,
+                'term_id' => $guest->term->id,
+            ]);
+            abort(400, 'EXIT_TIME_EXCEEDED');
+        }
         return DB::transaction(function () use ($guest, $exhibition) {
             $guest->update(['exhibition_id' => $exhibition->id]);
             ActivityLogEntry::create([
@@ -156,7 +173,7 @@ class GuestController extends Controller {
         $exhibition = Exhibition::findOrFail($request->exhibition_id, 400);
 
         if ($guest->revoked_at !== null)
-            throw new HttpExceptionWithErrorCode(400, 'GUEST_ALREADY_CHECKED_OUT');
+            abort(400, 'GUEST_ALREADY_CHECKED_OUT');
 
         return DB::transaction(function () use ($guest, $exhibition) {
             $guest->update(['exhibition_id' => null]);
