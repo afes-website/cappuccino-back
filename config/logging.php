@@ -56,8 +56,8 @@ return [
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
-            'username' => 'Cappuccino Backend Log',
-            'emoji' => ':boom:',
+            'username' => env('LOG_SLACK_WEBHOOK_USERNAME'),
+            'emoji' => env('LOG_SLACK_WEBHOOK_EMOJI'),
             'level' => 'notice',
         ],
 
