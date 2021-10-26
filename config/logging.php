@@ -37,7 +37,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['daily', 'slack'],
+            'channels' => env('LOG_SLACK_WEBHOOK_URL') ? ['daily', 'slack'] : ['daily'],
         ],
 
         'single' => [
@@ -56,7 +56,7 @@ return [
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
-            'username' => env('LOG_SLACK_WEBHOOK_USERNAME'),
+            'username' => env('LOG_SLACK_WEBHOOK_USERNAME', 'Cappuccino Backend Log'),
             'emoji' => env('LOG_SLACK_WEBHOOK_EMOJI'),
             'level' => 'notice',
         ],
