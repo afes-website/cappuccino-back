@@ -16,7 +16,7 @@ class Image extends Model {
     public static function findOrFail(string $id, $http_code = 404) {
         $image = self::find($id);
         if (!$image) {
-            Log::info('IMAGE_NOT_FOUND', ['id' => $id]);
+            Log::info('IMAGE_NOT_FOUND', ['image_id' => $id]);
             abort($http_code, 'IMAGE_NOT_FOUND');
         }
         return $image;

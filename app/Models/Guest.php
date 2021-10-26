@@ -32,7 +32,7 @@ class Guest extends Model {
     public static function findOrFail(string $id, $http_code = 404) {
         $guest = self::find($id);
         if (!$guest) {
-            Log::notice('GUEST_NOT_FOUND', ['id' => $id]);
+            Log::notice('GUEST_NOT_FOUND', ['guest_id' => $id]);
             abort($http_code, 'GUEST_NOT_FOUND');
         }
         return $guest;

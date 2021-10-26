@@ -26,7 +26,7 @@ class Reservation extends Model {
     public static function findOrFail(string $id, $http_code = 404) {
         $reservation = self::find($id);
         if (!$reservation) {
-            Log::notice('RESERVATION_NOT_FOUND', ['id' => $id]);
+            Log::notice('RESERVATION_NOT_FOUND', ['reservation_id' => $id]);
             abort($http_code, 'RESERVATION_NOT_FOUND');
         }
         return $reservation;
