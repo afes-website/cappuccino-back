@@ -23,6 +23,10 @@ return [
             'prefix' => 'GY',
             'class' => 'General'
         ],
+        'GuestGreen' => [
+            'prefix' => 'GG',
+            'class' => 'General'
+        ],
         'GuestWhite' => [
             'prefix' => 'GW',
             'class' => 'General'
