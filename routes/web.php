@@ -53,7 +53,7 @@ $router->get(
 
 $router->group(['prefix' => 'reservations'], function () use ($router) {
     $router->get('search', ['uses' => 'ReservationController@search', 'middleware' => 'auth:reservation']);
-    $router->get('{id}', ['uses' => 'ReservationController@show', 'middleware'=>'throttle:5, 1']);
+    $router->get('{id}', ['uses' => 'ReservationController@show', 'middleware' => 'throttle:5, 1']);
     $router->get('{id}/check', ['uses' => 'ReservationController@check', 'middleware' => 'auth:reservation']);
 });
 
