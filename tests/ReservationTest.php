@@ -18,12 +18,11 @@ class ReservationTest extends TestCase {
      * /reservation/{id}:get
      */
     public function testShow() {
-        $user = User::factory()->permission('reservation')->create();
         $reservation = Reservation::factory()->create();
         $member_count = rand(1, $reservation->member_all);
         Guest::factory()->for($reservation)->count($member_count)->create();
 
-        $this->actingAs($user)->get("/reservations/{$reservation->id}");
+        $this->get("/reservations/{$reservation->id}");
         $this->assertResponseOk();
         $this->assertJson($this->response->getContent());
         $this->seeJsonEquals([
@@ -35,8 +34,7 @@ class ReservationTest extends TestCase {
     }
 
     public function testNotFound() {
-        $user = User::factory()->permission('reservation')->create();
-        $this->actingAs($user)->get("/reservations/R-00000000");
+        $this->get("/reservations/R-00000000");
         $this->assertJson($this->response->getContent());
         $this->expectErrorResponse("RESERVATION_NOT_FOUND", 404);
     }
@@ -45,9 +43,10 @@ class ReservationTest extends TestCase {
      * /reservation/{id}/check:get
      */
     public function testCheck() {
+        $user = User::factory()->permission('reservation')->create();
         $reservation = Reservation::factory()->create();
 
-        $this->get("/reservations/{$reservation->id}/check");
+        $this->actingAs($user)->get("/reservations/{$reservation->id}/check");
         $this->assertJson($this->response->getContent());
         $this->seeJsonEquals([
             'valid' => true,
@@ -57,7 +56,8 @@ class ReservationTest extends TestCase {
     }
 
     public function testCheckNotFound() {
-        $this->get("/reservations/R-00000000/check");
+        $user = User::factory()->permission('reservation')->create();
+        $this->actingAs($user)->get("/reservations/R-00000000/check");
         $this->assertJson($this->response->getContent());
         $this->expectErrorResponse("RESERVATION_NOT_FOUND", 404);
     }
