@@ -28,6 +28,7 @@ class LogTest extends TestCase {
                 'exhibition_id' => $log->exhibition->id,
                 'guest' => new GuestResource($log->guest),
                 'log_type' => $log->log_type,
+                'verified' => $log->verified,
             ],
         ]);
     }
