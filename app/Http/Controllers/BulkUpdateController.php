@@ -46,7 +46,7 @@ class BulkUpdateController extends Controller {
 
         // Timestamp check
         $timestamp = strtotime($data['timestamp']);
-        if ($timestamp === -1) return ('INVALID_TIMESTAMP');
+        if (!$timestamp || $timestamp === -1) return ('INVALID_TIMESTAMP');
 
         return null;
     }
