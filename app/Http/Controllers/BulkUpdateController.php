@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exhibition;
+use App\Models\User;
 use App\Resources\GuestResource;
 use App\Models\Guest;
 use App\Models\Reservation;
@@ -15,7 +16,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
 class BulkUpdateController extends Controller {
-    private function handleRequest(Request $request, $data): array {
+    private function handleRequest($data, User $user): array {
         // Validation
         if (!is_array($data)) return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
         $validator = Validator::make($data, [
@@ -41,11 +42,11 @@ class BulkUpdateController extends Controller {
             case 'check-in':
             case 'check-out':
             case 'register-spare':
-                $permission_check = $request->user()->hasPermission('executive');
+                $permission_check = $user->hasPermission('executive');
                 break;
             case 'enter':
             case 'exit':
-                $permission_check = $request->user()->hasPermission('exhibition');
+                $permission_check = $user->hasPermission('exhibition');
                 break;
         }
         if (!$permission_check) return ['is_applied' => false, 'code' => 'FORBIDDEN'];
@@ -64,9 +65,9 @@ class BulkUpdateController extends Controller {
             case 'check-out':
                 return self::checkOut($data['guest_id'], $data['timestamp']);
             case 'enter':
-                return self::enter($data['guest_id'], $request->user()->id, $data['timestamp']);
+                return self::enter($data['guest_id'], $user->id, $data['timestamp']);
             case 'exit':
-                return self::exit($data['guest_id'], $request->user()->id, $data['timestamp']);
+                return self::exit($data['guest_id'], $user->id, $data['timestamp']);
             case 'register-spare':
                 return self::registerSpare($data['guest_id'], $data['reservation_id'], $data['timestamp']);
             default:
@@ -79,7 +80,7 @@ class BulkUpdateController extends Controller {
         $content = $request->input();
         $response = [];
         foreach ($content as $item) {
-            $response[] = $this->handleRequest($request, $item);
+            $response[] = $this->handleRequest($item, $request->user());
         }
         return response()->json($response);
     }
