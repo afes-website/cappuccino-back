@@ -87,11 +87,10 @@ class BulkUpdateController extends Controller {
     }
 
     public function post(Request $request) {
-        $content = $request->getContent();
-        $json = json_decode($content, true);
-        if (!$json) abort(400, $content);
+        if (!$request->isJson()) abort(400);
+        $content = $request->input();
         $response = [];
-        foreach ($json as $item) {
+        foreach ($content as $item) {
             $check = $this->handleRequest($request, $item);
             if ($check) {
                 $response[] = ['is_applied' => false, 'code' => $check];
