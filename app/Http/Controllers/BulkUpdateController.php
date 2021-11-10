@@ -51,8 +51,11 @@ class BulkUpdateController extends Controller {
         if (!$permission_check) return 'FORBIDDEN';
 
         // Timestamp check
-        $timestamp = strtotime($data['timestamp']);
-        if (!$timestamp || $timestamp === -1) return ('INVALID_TIMESTAMP');
+        try {
+            $timestamp = Carbon::createFromTimeString($data['timestamp']);
+        } catch (\Exception $e) {
+            return 'INVALID_TIMESTAMP';
+        }
 
         $guest_id = $data['guest_id'];
         $rsv_id = $data['reservation_id'];
