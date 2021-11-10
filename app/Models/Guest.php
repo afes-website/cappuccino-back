@@ -68,6 +68,21 @@ class Guest extends Model {
         }
     }
 
+    public function updateLocation() {
+        $latest_log = $this->logs()->whereNotNull('exhibition_id')->orderByDesc('timestamp')->first();
+        if (!$latest_log) return;
+        $exh_id = $latest_log->exhibition_id;
+        $log_type = $latest_log->log_type;
+
+        switch ($log_type) {
+            case 'enter':
+                $this->update(['exhibition_id' => $exh_id]);
+                break;
+            case 'exit':
+                $this->update(['exhibition_id' => null]);
+                break;
+        }
+    }
 
     public function reservation() {
         return $this->belongsTo(Reservation::class);
