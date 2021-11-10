@@ -31,7 +31,7 @@ class BulkUpdateController extends Controller {
         if ($validator->fails()) return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
 
         if (($data['command'] === 'check-in' || $data['command']  ===  'register-spare')
-            && array_key_exists('reservation_id', $data)
+            && (!array_key_exists('reservation_id', $data))
         ) {
             return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
         }
