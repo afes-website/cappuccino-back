@@ -130,6 +130,19 @@ class BulkUpdateController extends Controller {
         return ['is_applied' => true, 'code' => null];
     }
     private function enter($guest_id, $exh_id, $timestamp): array {
+        ActivityLogEntry::create([
+            'log_type' => 'enter',
+            'guest_id' => $guest_id,
+            'exhibition_id' => $exh_id,
+            'timestamp' => $timestamp,
+            'verified' => false,
+        ]);
+
+        $guest = Guest::find($guest_id);
+        if (!$guest)
+            return ['is_applied' => false, 'code' => 'GUEST_NOT_FOUND'];
+
+        $guest->updateLocation();
         return ['is_applied' => true, 'code' => null];
     }
     private function exit($guest_id, $exh_id, $timestamp): array {
