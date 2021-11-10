@@ -15,9 +15,9 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
 class BulkUpdateController extends Controller {
-    private function handleRequest(Request $request, $data): ?string {
+    private function handleRequest(Request $request, $data): array {
         // Validation
-        if (!is_array($data)) return 'BAD_REQUEST';
+        if (!is_array($data)) return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
         $validator = Validator::make($data, [
             'command' => [
                 'required',
@@ -27,12 +27,12 @@ class BulkUpdateController extends Controller {
             'reservation_id' => ['string'],
             'timestamp' => ['string', 'required'],
         ]);
-        if ($validator->fails()) return 'BAD_REQUEST';
+        if ($validator->fails()) return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
 
         if (($data['command'] === 'check-in' || $data['command']  ===  'register-spare')
             && array_key_exists('reservation_id', $data)
         ) {
-            return 'BAD_REQUEST';
+            return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
         }
 
         // Permission
@@ -48,15 +48,15 @@ class BulkUpdateController extends Controller {
                 $permission_check = $request->user()->hasPermission('exhibition');
                 break;
         }
-        if (!$permission_check) return 'FORBIDDEN';
+        if (!$permission_check) return ['is_applied' => false, 'code' => 'FORBIDDEN'];
 
         // Timestamp check
         try {
             $timestamp = Carbon::createFromTimeString($data['timestamp']);
         } catch (\Exception $e) {
-            return 'INVALID_TIMESTAMP';
+            return ['is_applied' => false, 'code' => 'INVALID_TIMESTAMP'];
         }
-        if ($timestamp->isFuture()) return 'INVALID_TIMESTAMP';
+        if ($timestamp->isFuture()) return ['is_applied' => false, 'code' => 'INVALID_TIMESTAMP'];
 
         switch ($data['command']) {
             case 'check-in':
@@ -70,7 +70,7 @@ class BulkUpdateController extends Controller {
             case 'register-spare':
                 return self::registerSpare($data['guest_id'], $data['reservation_id'], $data['timestamp']);
             default:
-                return 'BAD_REQUEST';
+                return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
         }
     }
 
@@ -79,29 +79,24 @@ class BulkUpdateController extends Controller {
         $content = $request->input();
         $response = [];
         foreach ($content as $item) {
-            $check = $this->handleRequest($request, $item);
-            if ($check) {
-                $response[] = ['is_applied' => false, 'code' => $check];
-            } else {
-                $response[] = ['is_applied' => true, 'code' => null];
-            }
+            $response[] = $this->handleRequest($request, $item);
         }
         return response()->json($response);
     }
 
-    private function checkIn($guest_id, $rsv_id, $timestamp): ?string {
-        return null;
+    private function checkIn($guest_id, $rsv_id, $timestamp): array {
+        return ['is_applied' => true, 'code' => null];
     }
-    private function checkOut($guest_id, $timestamp): ?string {
-        return null;
+    private function checkOut($guest_id, $timestamp): array {
+        return ['is_applied' => true, 'code' => null];
     }
-    private function enter($guest_id, $exh_id, $timestamp): ?string {
-        return null;
+    private function enter($guest_id, $exh_id, $timestamp): array {
+        return ['is_applied' => true, 'code' => null];
     }
-    private function exit($guest_id, $exh_id, $timestamp): ?string {
-        return null;
+    private function exit($guest_id, $exh_id, $timestamp): array {
+        return ['is_applied' => true, 'code' => null];
     }
-    private function registerSpare($guest_id, $rsv_id, $timestamp): ?string {
-        return null;
+    private function registerSpare($guest_id, $rsv_id, $timestamp): array {
+        return ['is_applied' => true, 'code' => null];
     }
 }
