@@ -108,6 +108,25 @@ class BulkUpdateController extends Controller {
         return ['is_applied' => true, 'code' => null];
     }
     private function checkOut($guest_id, $timestamp): array {
+        ActivityLogEntry::create([
+            'log_type' => 'check-out',
+            'guest_id' => $guest_id,
+            'timestamp' => $timestamp,
+            'verified' => false,
+        ]);
+
+        $guest = Guest::find($guest_id);
+        if (!$guest)
+            return ['is_applied' => false, 'code' => 'GUEST_NOT_FOUND'];
+
+        $guest->update([
+            'revoked_at' => $timestamp
+        ]);
+        $reservation = $guest->reservation;
+        $guests = $reservation->guest;
+        if ($guests->whereNotNull('revoked_at')->count() === $reservation->member_all)
+            $reservation->revokeAllGuests();
+
         return ['is_applied' => true, 'code' => null];
     }
     private function enter($guest_id, $exh_id, $timestamp): array {
