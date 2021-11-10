@@ -15,52 +15,51 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
 class BulkUpdateController extends Controller {
+    private function checkRequest(Request $request, $data): ?string {
+        // Validation
+        if (!is_array($data)) return 'BAD_REQUEST';
+        $validator = Validator::make($data, [
+            'command' => [
+                'required',
+                Rule::in('enter', 'exit', 'check-in', 'check-out', 'register-spare'),
+            ],
+            'guest_id' => ['string', 'required'],
+            'reservation_id' => ['string'],
+            'timestamp' => ['string', 'required'],
+        ]);
+        if ($validator->fails()) return 'BAD_REQUEST';
+
+        // Permission
+        $permission_check = null;
+        switch ($data['command']) {
+            case 'check-in':
+            case 'check-out':
+            case 'register-spare':
+                $permission_check = $request->user()->hasPermission('executive');
+                break;
+            case 'enter':
+            case 'exit':
+                $permission_check = $request->user()->hasPermission('exhibition');
+                break;
+        }
+        if (!$permission_check) return 'FORBIDDEN';
+
+        // Timestamp check
+        $timestamp = strtotime($data['timestamp']);
+        if ($timestamp === -1) return ('INVALID_TIMESTAMP');
+
+        return null;
+    }
+
     public function post(Request $request) {
         $content = $request->getContent();
         $json = json_decode($content, true);
         if (!$json) abort(400, $content);
         $response = [];
         foreach ($json as $item) {
-            // Validation
-            if (!is_array($item)) {
-                $response[] = ['is_applied' => false, 'code' => 'BAD_REQUEST'];
-                continue;
-            }
-            $validator = Validator::make($item, [
-                'command' => [
-                    'required',
-                    Rule::in('enter', 'exit', 'check-in', 'check-out', 'register-spare'),
-                ],
-                'guest_id' => ['string', 'required'],
-                'timestamp' => ['string', 'required'],
-            ]);
-            if ($validator->fails()) {
-                $response[] = ['is_applied' => false, 'code' => 'BAD_REQUEST'];
-                continue;
-            }
-
-            // Permission
-            $permission_check = null;
-            switch ($item['command']) {
-                case 'check-in':
-                case 'check-out':
-                case 'register-spare':
-                    $permission_check = $request->user()->hasPermission('executive');
-                    break;
-                case 'enter':
-                case 'exit':
-                    $permission_check = $request->user()->hasPermission('exhibition');
-                    break;
-            }
-            if (!$permission_check) {
-                $response[] = ['is_applied' => false, 'code' => 'FORBIDDEN'];
-                continue;
-            }
-
-            // Timestamp check
-            $timestamp = strtotime($item['timestamp']);
-            if ($timestamp === -1) {
-                $response[] = ['is_applied' => false, 'code' => 'INVALID_TIMESTAMP'];
+            $check = $this->checkRequest($request, $item);
+            if ($check) {
+                $response[] = ['is_applied' => false, 'code' => $check];
                 continue;
             }
 
