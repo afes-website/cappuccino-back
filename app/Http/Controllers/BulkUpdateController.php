@@ -15,7 +15,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
 class BulkUpdateController extends Controller {
-    private function checkRequest(Request $request, $data): ?string {
+    private function handleRequest(Request $request, $data): ?string {
         // Validation
         if (!is_array($data)) return 'BAD_REQUEST';
         $validator = Validator::make($data, [
@@ -48,7 +48,32 @@ class BulkUpdateController extends Controller {
         $timestamp = strtotime($data['timestamp']);
         if (!$timestamp || $timestamp === -1) return ('INVALID_TIMESTAMP');
 
-        return null;
+        $guest_id = $data['guest_id'];
+        $rsv_id = $data['reservation_id'];
+        $user_id = $request->user()->id;
+        $timestamp = $data['timestamp'];
+
+        switch ($data['command']) {
+            case 'check-in':
+                $response = self::checkIn($guest_id, $rsv_id, $timestamp);
+                break;
+            case 'check-out':
+                $response = self::checkOut($guest_id, $timestamp);
+                break;
+            case 'enter':
+                $response = self::enter($guest_id, $user_id, $timestamp);
+                break;
+            case 'exit':
+                $response = self::exit($guest_id, $user_id, $timestamp);
+                break;
+            case 'register-spare':
+                $response = self::registerSpare($guest_id, $rsv_id, $timestamp);
+                break;
+            default:
+                $response = 'BAD_REQUEST';
+        }
+
+        return $response;
     }
 
     public function post(Request $request) {
@@ -57,14 +82,29 @@ class BulkUpdateController extends Controller {
         if (!$json) abort(400, $content);
         $response = [];
         foreach ($json as $item) {
-            $check = $this->checkRequest($request, $item);
+            $check = $this->handleRequest($request, $item);
             if ($check) {
                 $response[] = ['is_applied' => false, 'code' => $check];
-                continue;
+            } else {
+                $response[] = ['is_applied' => true, 'code' => null];
             }
-
-            $response[] = true;
         }
         return response()->json($response);
+    }
+
+    private function checkIn($guest_id, $rsv_id, $timestamp): ?string {
+        return null;
+    }
+    private function checkOut($guest_id, $timestamp): ?string {
+        return null;
+    }
+    private function enter($guest_id, $exh_id, $timestamp): ?string {
+        return null;
+    }
+    private function exit($guest_id, $exh_id, $timestamp): ?string {
+        return null;
+    }
+    private function registerSpare($guest_id, $rsv_id, $timestamp): ?string {
+        return null;
     }
 }
