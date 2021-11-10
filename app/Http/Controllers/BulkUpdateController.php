@@ -86,6 +86,25 @@ class BulkUpdateController extends Controller {
     }
 
     private function checkIn($guest_id, $rsv_id, $timestamp): array {
+        ActivityLogEntry::create([
+            'log_type' => 'check-in',
+            'guest_id' => $guest_id,
+            'timestamp' => $timestamp,
+            'verified' => false,
+        ]);
+        $reservation = Reservation::find($rsv_id);
+
+        if (!$reservation)
+            return ['is_applied' => false, 'code' => 'RESERVATION_NOT_FOUND'];
+        if (Guest::find($guest_id))
+            return ['is_applied' => false, 'code' => 'ALREADY_USED_WRISTBAND'];
+
+        Guest::create([
+            'id' => $guest_id,
+            'term_id' => $reservation->term->id,
+            'reservation_id' => $reservation->id,
+            'registered_at' => $timestamp,
+        ]);
         return ['is_applied' => true, 'code' => null];
     }
     private function checkOut($guest_id, $timestamp): array {
