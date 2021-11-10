@@ -58,32 +58,20 @@ class BulkUpdateController extends Controller {
         }
         if ($timestamp->isFuture()) return 'INVALID_TIMESTAMP';
 
-        $guest_id = $data['guest_id'];
-        $rsv_id = $data['reservation_id'];
-        $user_id = $request->user()->id;
-        $timestamp = $data['timestamp'];
-
         switch ($data['command']) {
             case 'check-in':
-                $response = self::checkIn($guest_id, $rsv_id, $timestamp);
-                break;
+                return self::checkIn($data['guest_id'], $data['reservation_id'], $data['timestamp']);
             case 'check-out':
-                $response = self::checkOut($guest_id, $timestamp);
-                break;
+                return self::checkOut($data['guest_id'], $data['timestamp']);
             case 'enter':
-                $response = self::enter($guest_id, $user_id, $timestamp);
-                break;
+                return self::enter($data['guest_id'], $request->user()->id, $data['timestamp']);
             case 'exit':
-                $response = self::exit($guest_id, $user_id, $timestamp);
-                break;
+                return self::exit($data['guest_id'], $request->user()->id, $data['timestamp']);
             case 'register-spare':
-                $response = self::registerSpare($guest_id, $rsv_id, $timestamp);
-                break;
+                return self::registerSpare($data['guest_id'], $data['reservation_id'], $data['timestamp']);
             default:
-                $response = 'BAD_REQUEST';
+                return 'BAD_REQUEST';
         }
-
-        return $response;
     }
 
     public function post(Request $request) {
