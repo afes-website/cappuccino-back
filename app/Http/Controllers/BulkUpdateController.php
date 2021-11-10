@@ -56,6 +56,7 @@ class BulkUpdateController extends Controller {
         } catch (\Exception $e) {
             return 'INVALID_TIMESTAMP';
         }
+        if ($timestamp->isFuture()) return 'INVALID_TIMESTAMP';
 
         $guest_id = $data['guest_id'];
         $rsv_id = $data['reservation_id'];
