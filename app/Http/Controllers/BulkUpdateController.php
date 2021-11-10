@@ -29,6 +29,12 @@ class BulkUpdateController extends Controller {
         ]);
         if ($validator->fails()) return 'BAD_REQUEST';
 
+        if (($data['command'] === 'check-in' || $data['command']  ===  'register-spare')
+            && array_key_exists('reservation_id', $data)
+        ) {
+            return 'BAD_REQUEST';
+        }
+
         // Permission
         $permission_check = null;
         switch ($data['command']) {
