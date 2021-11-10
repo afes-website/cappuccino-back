@@ -16,7 +16,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
 class BulkUpdateController extends Controller {
-    private function handleRequest($data, User $user): array {
+    private function processEntry($data, User $user): array {
         // Validation
         if (!is_array($data)) return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
         $validator = Validator::make($data, [
@@ -80,7 +80,7 @@ class BulkUpdateController extends Controller {
         $content = $request->input();
         $response = [];
         foreach ($content as $item) {
-            $response[] = $this->handleRequest($item, $request->user());
+            $response[] = $this->processEntry($item, $request->user());
         }
         return response()->json($response);
     }
