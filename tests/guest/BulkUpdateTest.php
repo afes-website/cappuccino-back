@@ -66,11 +66,11 @@ class BulkUpdateTest extends TestCase {
         ]);
         $this->assertResponseOk();
         $this->seeJsonEquals([
-            ['is_applied' => true, 'code' => null],
-            ['is_applied' => true, 'code' => null],
-            ['is_applied' => true, 'code' => null],
-            ['is_applied' => true, 'code' => null],
-            ['is_applied' => true, 'code' => null],
+            ['is_ok' => true, 'code' => null],
+            ['is_ok' => true, 'code' => null],
+            ['is_ok' => true, 'code' => null],
+            ['is_ok' => true, 'code' => null],
+            ['is_ok' => true, 'code' => null],
         ]);
         $this->assertCount(5, ActivityLogEntry::all()->where('verified', false));
         $this->assertCount(5, Guest::all());
@@ -117,6 +117,6 @@ class BulkUpdateTest extends TestCase {
         $this->assertJson($this->response->getContent());
         $res = json_decode($this->response->getContent());
         $this->assertCount($count, $res);
-        $this->seeJsonStructure(array_fill($count, 0, ['is_applied', 'code']), $res);
+        $this->seeJsonStructure(array_fill($count, 0, ['is_ok', 'code']), $res);
     }
 }

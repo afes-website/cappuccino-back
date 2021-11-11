@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 class BulkUpdateController extends Controller {
     private function processEntry($data, User $user): array {
         // Validation
-        if (!is_array($data)) return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
+        if (!is_array($data)) return ['is_ok' => false, 'code' => 'BAD_REQUEST'];
         $validator = Validator::make($data, [
             'command' => [
                 'required',
@@ -25,12 +25,12 @@ class BulkUpdateController extends Controller {
             'reservation_id' => ['string'],
             'timestamp' => ['string', 'required'],
         ]);
-        if ($validator->fails()) return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
+        if ($validator->fails()) return ['is_ok' => false, 'code' => 'BAD_REQUEST'];
 
         if (($data['command'] === 'check-in' || $data['command']  ===  'register-spare')
             && (!array_key_exists('reservation_id', $data))
         ) {
-            return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
+            return ['is_ok' => false, 'code' => 'BAD_REQUEST'];
         }
 
         // Permission
@@ -46,15 +46,15 @@ class BulkUpdateController extends Controller {
                 $permission_check = $user->hasPermission('exhibition');
                 break;
         }
-        if (!$permission_check) return ['is_applied' => false, 'code' => 'FORBIDDEN'];
+        if (!$permission_check) return ['is_ok' => false, 'code' => 'FORBIDDEN'];
 
         // Timestamp check
         try {
             $timestamp = Carbon::createFromTimeString($data['timestamp']);
         } catch (\Exception $e) {
-            return ['is_applied' => false, 'code' => 'INVALID_TIMESTAMP'];
+            return ['is_ok' => false, 'code' => 'INVALID_TIMESTAMP'];
         }
-        if ($timestamp->isFuture()) return ['is_applied' => false, 'code' => 'INVALID_TIMESTAMP'];
+        if ($timestamp->isFuture()) return ['is_ok' => false, 'code' => 'INVALID_TIMESTAMP'];
 
         switch ($data['command']) {
             case 'check-in':
@@ -68,7 +68,7 @@ class BulkUpdateController extends Controller {
             case 'register-spare':
                 return self::registerSpare($data['guest_id'], $data['reservation_id'], $data['timestamp']);
             default:
-                return ['is_applied' => false, 'code' => 'BAD_REQUEST'];
+                return ['is_ok' => false, 'code' => 'BAD_REQUEST'];
         }
     }
 
@@ -81,7 +81,7 @@ class BulkUpdateController extends Controller {
         foreach ($content as $item) {
             try {
                 $res = $this->processEntry($item, $user);
-                if ($res['is_applied'] === false) {
+                if ($res['is_ok'] === false) {
                     $ng_count++;
                     Log::info(
                         'Bulk-update failed',
@@ -98,7 +98,7 @@ class BulkUpdateController extends Controller {
             } catch (\Exception $e) {
                 report($e);
                 $res = [
-                    'is_applied' => false,
+                    'is_ok' => false,
                     'code' => 'INTERNAL_SERVER_ERROR',
                 ];
             } finally {
@@ -123,9 +123,9 @@ class BulkUpdateController extends Controller {
         $reservation = Reservation::find($rsv_id);
 
         if (!$reservation)
-            return ['is_applied' => false, 'code' => 'RESERVATION_NOT_FOUND'];
+            return ['is_ok' => false, 'code' => 'RESERVATION_NOT_FOUND'];
         if (Guest::find($guest_id))
-            return ['is_applied' => false, 'code' => 'ALREADY_USED_WRISTBAND'];
+            return ['is_ok' => false, 'code' => 'ALREADY_USED_WRISTBAND'];
 
         Guest::create([
             'id' => $guest_id,
@@ -133,7 +133,7 @@ class BulkUpdateController extends Controller {
             'reservation_id' => $reservation->id,
             'registered_at' => $timestamp,
         ]);
-        return ['is_applied' => true, 'code' => null];
+        return ['is_ok' => true, 'code' => null];
     }
     private function checkOut($guest_id, $timestamp): array {
         ActivityLogEntry::create([
@@ -145,7 +145,7 @@ class BulkUpdateController extends Controller {
 
         $guest = Guest::find($guest_id);
         if (!$guest)
-            return ['is_applied' => false, 'code' => 'GUEST_NOT_FOUND'];
+            return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->update([
             'revoked_at' => $timestamp
@@ -155,7 +155,7 @@ class BulkUpdateController extends Controller {
         if ($guests->whereNotNull('revoked_at')->count() === $reservation->member_all)
             $reservation->revokeAllGuests();
 
-        return ['is_applied' => true, 'code' => null];
+        return ['is_ok' => true, 'code' => null];
     }
     private function enter($guest_id, $exh_id, $timestamp): array {
         ActivityLogEntry::create([
@@ -168,10 +168,10 @@ class BulkUpdateController extends Controller {
 
         $guest = Guest::find($guest_id);
         if (!$guest)
-            return ['is_applied' => false, 'code' => 'GUEST_NOT_FOUND'];
+            return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->updateLocation();
-        return ['is_applied' => true, 'code' => null];
+        return ['is_ok' => true, 'code' => null];
     }
     private function exit($guest_id, $exh_id, $timestamp): array {
         ActivityLogEntry::create([
@@ -184,10 +184,10 @@ class BulkUpdateController extends Controller {
 
         $guest = Guest::find($guest_id);
         if (!$guest)
-            return ['is_applied' => false, 'code' => 'GUEST_NOT_FOUND'];
+            return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->updateLocation();
-        return ['is_applied' => true, 'code' => null];
+        return ['is_ok' => true, 'code' => null];
     }
     private function registerSpare($guest_id, $rsv_id, $timestamp): array {
         ActivityLogEntry::create([
@@ -199,9 +199,9 @@ class BulkUpdateController extends Controller {
         $reservation = Reservation::find($rsv_id);
 
         if (!$reservation)
-            return ['is_applied' => false, 'code' => 'RESERVATION_NOT_FOUND'];
+            return ['is_ok' => false, 'code' => 'RESERVATION_NOT_FOUND'];
         if (Guest::find($guest_id))
-            return ['is_applied' => false, 'code' => 'ALREADY_USED_WRISTBAND'];
+            return ['is_ok' => false, 'code' => 'ALREADY_USED_WRISTBAND'];
 
         Guest::create([
             'id' => $guest_id,
@@ -210,6 +210,6 @@ class BulkUpdateController extends Controller {
             'registered_at' => $timestamp,
             'is_spare' => true,
         ]);
-        return ['is_applied' => true, 'code' => null];
+        return ['is_ok' => true, 'code' => null];
     }
 }
