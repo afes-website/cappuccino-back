@@ -50,23 +50,23 @@ class BulkUpdateController extends Controller {
 
         // Timestamp check
         try {
-            $timestamp = Carbon::createFromTimeString($data['timestamp']);
+            $data['timestamp'] = Carbon::createFromTimeString($data['timestamp']);
         } catch (\Exception $e) {
             return ['is_ok' => false, 'code' => 'INVALID_TIMESTAMP'];
         }
-        if ($timestamp->isFuture()) return ['is_ok' => false, 'code' => 'INVALID_TIMESTAMP'];
+        if ($data['timestamp']->isFuture()) return ['is_ok' => false, 'code' => 'INVALID_TIMESTAMP'];
 
         switch ($data['command']) {
             case 'check-in':
-                return self::checkIn($data['guest_id'], $data['reservation_id'], $data['timestamp']);
+                return self::checkIn($data);
             case 'check-out':
-                return self::checkOut($data['guest_id'], $data['timestamp']);
+                return self::checkOut($data);
             case 'enter':
-                return self::enter($data['guest_id'], $user->id, $data['timestamp']);
+                return self::enter($data, $user->id);
             case 'exit':
-                return self::exit($data['guest_id'], $user->id, $data['timestamp']);
+                return self::exit($data, $user->id);
             case 'register-spare':
-                return self::registerSpare($data['guest_id'], $data['reservation_id'], $data['timestamp']);
+                return self::registerSpare($data);
             default:
                 return ['is_ok' => false, 'code' => 'BAD_REQUEST'];
         }
@@ -113,42 +113,42 @@ class BulkUpdateController extends Controller {
         return response()->json($response);
     }
 
-    private function checkIn($guest_id, $rsv_id, $timestamp): array {
+    private function checkIn($data): array {
         ActivityLogEntry::create([
             'log_type' => 'check-in',
-            'guest_id' => $guest_id,
-            'timestamp' => $timestamp,
+            'guest_id' => $data['guest_id'],
+            'timestamp' => $data['timestamp'],
             'verified' => false,
         ]);
-        $reservation = Reservation::find($rsv_id);
+        $reservation = Reservation::find($data['reservation_id']);
 
         if (!$reservation)
             return ['is_ok' => false, 'code' => 'RESERVATION_NOT_FOUND'];
-        if (Guest::find($guest_id))
+        if (Guest::find($data['guest_id']))
             return ['is_ok' => false, 'code' => 'ALREADY_USED_WRISTBAND'];
 
         Guest::create([
-            'id' => $guest_id,
+            'id' => $data['guest_id'],
             'term_id' => $reservation->term->id,
             'reservation_id' => $reservation->id,
-            'registered_at' => $timestamp,
+            'registered_at' => $data['timestamp'],
         ]);
         return ['is_ok' => true, 'code' => null];
     }
-    private function checkOut($guest_id, $timestamp): array {
+    private function checkOut($data): array {
         $log = ActivityLogEntry::create([
             'log_type' => 'check-out',
-            'guest_id' => $guest_id,
-            'timestamp' => $timestamp,
+            'guest_id' => $data['guest_id'],
+            'timestamp' => $data['timestamp'],
             'verified' => false,
         ]);
 
-        $guest = Guest::find($guest_id);
+        $guest = Guest::find($data['guest_id']);
         if (!$guest)
             return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->update([
-            'revoked_at' => $timestamp
+            'revoked_at' => $data['timestamp']
         ]);
         $guest->updateLocation($log);
         $reservation = $guest->reservation;
@@ -158,57 +158,57 @@ class BulkUpdateController extends Controller {
 
         return ['is_ok' => true, 'code' => null];
     }
-    private function enter($guest_id, $exh_id, $timestamp): array {
+    private function enter($data, $exh_id): array {
         $log = ActivityLogEntry::create([
             'log_type' => 'enter',
-            'guest_id' => $guest_id,
+            'guest_id' => $data['guest_id'],
             'exhibition_id' => $exh_id,
-            'timestamp' => $timestamp,
+            'timestamp' => $data['timestamp'],
             'verified' => false,
         ]);
 
-        $guest = Guest::find($guest_id);
+        $guest = Guest::find($data['guest_id']);
         if (!$guest)
             return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->updateLocation($log);
         return ['is_ok' => true, 'code' => null];
     }
-    private function exit($guest_id, $exh_id, $timestamp): array {
+    private function exit($data, $exh_id): array {
         $log = ActivityLogEntry::create([
             'log_type' => 'exit',
-            'guest_id' => $guest_id,
+            'guest_id' => $data['guest_id'],
             'exhibition_id' => $exh_id,
-            'timestamp' => $timestamp,
+            'timestamp' => $data['timestamp'],
             'verified' => false,
         ]);
 
-        $guest = Guest::find($guest_id);
+        $guest = Guest::find($data['guest_id']);
         if (!$guest)
             return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->updateLocation($log);
         return ['is_ok' => true, 'code' => null];
     }
-    private function registerSpare($guest_id, $rsv_id, $timestamp): array {
+    private function registerSpare($data): array {
         ActivityLogEntry::create([
             'log_type' => 'register-spare',
-            'guest_id' => $guest_id,
-            'timestamp' => $timestamp,
+            'guest_id' => $data['guest_id'],
+            'timestamp' => $data['timestamp'],
             'verified' => false,
         ]);
-        $reservation = Reservation::find($rsv_id);
+        $reservation = Reservation::find($data['reservation_id']);
 
         if (!$reservation)
             return ['is_ok' => false, 'code' => 'RESERVATION_NOT_FOUND'];
-        if (Guest::find($guest_id))
+        if (Guest::find($data['guest_id']))
             return ['is_ok' => false, 'code' => 'ALREADY_USED_WRISTBAND'];
 
         Guest::create([
-            'id' => $guest_id,
+            'id' => $data['guest_id'],
             'term_id' => $reservation->term->id,
             'reservation_id' => $reservation->id,
-            'registered_at' => $timestamp,
+            'registered_at' => $data['timestamp'],
             'is_spare' => true,
         ]);
         return ['is_ok' => true, 'code' => null];
