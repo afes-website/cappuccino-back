@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Exhibition;
 use App\Models\User;
-use App\Resources\GuestResource;
 use App\Models\Guest;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\ActivityLogEntry;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
