@@ -77,7 +77,7 @@ class Guest extends Model {
 
         Log::debug(
             "Update guest location",
-            ['guest_id' => $latest_log->guest_id, 'exhibition_id' => $latest_log->exhibition_id]
+            ['guest_id' => $entry->guest_id, 'exhibition_id' => $exh_id]
         );
 
         switch ($log_type) {
