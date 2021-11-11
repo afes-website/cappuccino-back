@@ -80,6 +80,7 @@ class Guest extends Model {
                 $this->update(['exhibition_id' => $exh_id]);
                 break;
             case 'exit':
+            case 'check-out':
                 $this->update(['exhibition_id' => null]);
                 break;
         }

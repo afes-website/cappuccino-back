@@ -136,7 +136,7 @@ class BulkUpdateController extends Controller {
         return ['is_ok' => true, 'code' => null];
     }
     private function checkOut($guest_id, $timestamp): array {
-        ActivityLogEntry::create([
+        $log = ActivityLogEntry::create([
             'log_type' => 'check-out',
             'guest_id' => $guest_id,
             'timestamp' => $timestamp,
@@ -150,6 +150,7 @@ class BulkUpdateController extends Controller {
         $guest->update([
             'revoked_at' => $timestamp
         ]);
+        $guest->updateLocation($log);
         $reservation = $guest->reservation;
         $guests = $reservation->guest;
         if ($guests->whereNotNull('revoked_at')->count() === $reservation->member_all)
