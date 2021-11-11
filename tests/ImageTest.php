@@ -14,7 +14,7 @@ class ImageTest extends TestCase {
 
     public function imageProvider() {
         return [
-            // Upload Size, Medium Size excepted, Small size excepted
+            // Upload Size, Medium Size expected, Small size expected
             '1440x900'  => [[1440, 900], [1440, 900], [400, 400]],
             'small' => [[200, 200], [200, 200], [200, 200]],
             '500x500' => [[500, 500], [500, 500], [400, 400]],
