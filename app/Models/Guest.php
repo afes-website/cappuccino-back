@@ -75,6 +75,11 @@ class Guest extends Model {
         $exh_id = $entry->exhibition_id;
         $log_type = $entry->log_type;
 
+        Log::debug(
+            "Update guest location",
+            ['guest_id' => $latest_log->guest_id, 'exhibition_id' => $latest_log->exhibition_id]
+        );
+
         switch ($log_type) {
             case 'enter':
                 $this->update(['exhibition_id' => $exh_id]);
