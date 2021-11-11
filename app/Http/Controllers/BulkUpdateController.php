@@ -99,7 +99,7 @@ class BulkUpdateController extends Controller {
                 report($e);
                 $res = [
                     'is_applied' => false,
-                    'code' => 'SERVER_ERROR',
+                    'code' => 'INTERNAL_SERVER_ERROR',
                 ];
             } finally {
                 $response[] = $res;
