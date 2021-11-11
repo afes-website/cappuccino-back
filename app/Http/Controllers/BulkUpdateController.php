@@ -158,7 +158,7 @@ class BulkUpdateController extends Controller {
         return ['is_ok' => true, 'code' => null];
     }
     private function enter($guest_id, $exh_id, $timestamp): array {
-        ActivityLogEntry::create([
+        $log = ActivityLogEntry::create([
             'log_type' => 'enter',
             'guest_id' => $guest_id,
             'exhibition_id' => $exh_id,
@@ -170,11 +170,11 @@ class BulkUpdateController extends Controller {
         if (!$guest)
             return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
-        $guest->updateLocation();
+        $guest->updateLocation($log);
         return ['is_ok' => true, 'code' => null];
     }
     private function exit($guest_id, $exh_id, $timestamp): array {
-        ActivityLogEntry::create([
+        $log = ActivityLogEntry::create([
             'log_type' => 'exit',
             'guest_id' => $guest_id,
             'exhibition_id' => $exh_id,
@@ -186,7 +186,7 @@ class BulkUpdateController extends Controller {
         if (!$guest)
             return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
-        $guest->updateLocation();
+        $guest->updateLocation($log);
         return ['is_ok' => true, 'code' => null];
     }
     private function registerSpare($guest_id, $rsv_id, $timestamp): array {

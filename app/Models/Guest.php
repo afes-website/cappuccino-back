@@ -68,11 +68,12 @@ class Guest extends Model {
         }
     }
 
-    public function updateLocation() {
+    public function updateLocation(ActivityLogEntry $entry) {
         $latest_log = $this->logs()->whereNotNull('exhibition_id')->orderByDesc('timestamp')->first();
-        if (!$latest_log) return;
-        $exh_id = $latest_log->exhibition_id;
-        $log_type = $latest_log->log_type;
+
+        if ($latest_log && $latest_log->timestamp > $entry->timestamp) return;
+        $exh_id = $entry->exhibition_id;
+        $log_type = $entry->log_type;
 
         switch ($log_type) {
             case 'enter':
