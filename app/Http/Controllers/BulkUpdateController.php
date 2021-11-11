@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\ActivityLogEntry;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
@@ -79,6 +80,7 @@ class BulkUpdateController extends Controller {
         $response = [];
         $ng_count = 0;
         foreach ($content as $item) {
+            DB::beginTransaction();
             try {
                 $res = $this->processEntry($item, $user);
                 if ($res['is_ok'] === false) {
@@ -95,12 +97,14 @@ class BulkUpdateController extends Controller {
                         ],
                     );
                 }
+                DB::commit();
             } catch (\Exception $e) {
                 report($e);
                 $res = [
                     'is_ok' => false,
                     'code' => 'INTERNAL_SERVER_ERROR',
                 ];
+                DB::rollBack();
             } finally {
                 $response[] = $res;
             }
