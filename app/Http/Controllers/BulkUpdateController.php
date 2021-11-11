@@ -79,22 +79,31 @@ class BulkUpdateController extends Controller {
         $response = [];
         $ng_count = 0;
         foreach ($content as $item) {
-            $res = $this->processEntry($item, $user);
-            if ($res['is_applied'] === false) {
-                $ng_count++;
-                Log::info(
-                    'Bulk-update failed',
-                    [
-                        'code' => $res['code'],
-                        'command' => array_key_exists('command', $item) ? $item['command'] : 'undefined',
-                        'guest_id' => array_key_exists('guest_id', $item) ? $item['guest_id'] : 'undefined',
-                        'reservation_id' =>
-                            array_key_exists('reservation_id', $item) ? $item['reservation_id'] : 'undefined',
-                        'user_id' => $user->id,
-                    ],
-                );
+            try {
+                $res = $this->processEntry($item, $user);
+                if ($res['is_applied'] === false) {
+                    $ng_count++;
+                    Log::info(
+                        'Bulk-update failed',
+                        [
+                            'code' => $res['code'],
+                            'command' => array_key_exists('command', $item) ? $item['command'] : 'undefined',
+                            'guest_id' => array_key_exists('guest_id', $item) ? $item['guest_id'] : 'undefined',
+                            'reservation_id' =>
+                                array_key_exists('reservation_id', $item) ? $item['reservation_id'] : 'undefined',
+                            'user_id' => $user->id,
+                        ],
+                    );
+                }
+            } catch (\Exception $e) {
+                report($e);
+                $res = [
+                    'is_applied' => false,
+                    'code' => 'SERVER_ERROR',
+                ];
+            } finally {
+                $response[] = $res;
             }
-            $response[] = $res;
         }
         if ($ng_count)
             Log::notice(
