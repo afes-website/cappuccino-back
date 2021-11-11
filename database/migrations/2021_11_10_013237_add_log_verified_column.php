@@ -13,7 +13,7 @@ class AddLogVerifiedColumn extends Migration {
      */
     public function up() {
         Schema::table('activity_log', function (Blueprint $table) {
-            $table->string('verified')->default(true);
+            $table->boolean('verified')->default(true);
         });
     }
 
