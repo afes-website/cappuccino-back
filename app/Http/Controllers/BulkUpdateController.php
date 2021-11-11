@@ -34,7 +34,7 @@ class BulkUpdateController extends Controller {
         }
 
         // Permission
-        $permission_check = null;
+        $permission_check = false;
         switch ($data['command']) {
             case 'check-in':
             case 'check-out':
