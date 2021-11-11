@@ -78,10 +78,32 @@ class BulkUpdateController extends Controller {
     public function post(Request $request) {
         if (!$request->isJson()) abort(400);
         $content = $request->input();
+        $user = $request->user();
         $response = [];
+        $ng_count = 0;
         foreach ($content as $item) {
-            $response[] = $this->processEntry($item, $request->user());
+            $res = $this->processEntry($item, $user);
+            if ($res['is_applied'] === false) {
+                $ng_count++;
+                Log::info(
+                    'Bulk-update failed',
+                    [
+                        'code' => $res['code'],
+                        'command' => array_key_exists('command', $item) ? $item['command'] : 'undefined',
+                        'guest_id' => array_key_exists('guest_id', $item) ? $item['guest_id'] : 'undefined',
+                        'reservation_id' =>
+                            array_key_exists('reservation_id', $item) ? $item['reservation_id'] : 'undefined',
+                        'user_id' => $user->id,
+                    ],
+                );
+            }
+            $response[] = $res;
         }
+        if ($ng_count)
+            Log::notice(
+                "{$ng_count} bulk-update entry(s) failed",
+                ['all count' => count($content), 'user_id' => $user->id],
+            );
         return response()->json($response);
     }
 
