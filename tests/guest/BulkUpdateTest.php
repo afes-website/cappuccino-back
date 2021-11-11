@@ -69,4 +69,38 @@ class BulkUpdateTest extends TestCase {
         $this->assertCount(5, ActivityLogEntry::all()->where('verified', false));
         $this->assertCount(5, Guest::all());
     }
+
+    private function caseGenerator() {
+        $factory = Factory::create();
+        $command = $factory->randomElement(['enter', 'exit', 'check-in', 'check-out', 'register-spare', 'dummy']);
+        if ($factory->boolean()) $guest_id = Guest::factory()->create()->id;
+        else $guest_id = GuestFactory::createGuestId();
+
+        if ($factory->boolean()) $reservation_id = Reservation::factory()->create()->id;
+        else $reservation_id = $factory->name();
+
+        if ($factory->boolean) $timestamp = $factory->dateTime();
+        else $timestamp = $factory->dateTimeBetween('+1 day', '+30 years');
+
+        return [
+            'command' => $command,
+            'guest_id' => $guest_id,
+            'reservation_id' => $reservation_id,
+            'timestamp' => $timestamp->format("Y-m-d H:i:s"),
+        ];
+    }
+
+    public function testRandom() {
+        $user = User::factory()->has(Exhibition::factory())->permission('executive', 'exhibition')->create();
+        $count = 8;
+        $requests = [];
+        for ($i = 0; $i < $count; $i++) {
+            $requests[] = $this->caseGenerator();
+        }
+        $this->actingAs($user)->json('post', '/guests/bulk-update', $requests);
+        $this->assertResponseOk();
+        $this->assertJson($this->response->getContent());
+        $res = json_decode($this->response->getContent());
+        $this->assertCount($count, $res);
+    }
 }
