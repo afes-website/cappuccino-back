@@ -63,7 +63,8 @@ class Reservation extends Model {
     public function revokeAllGuests() {
         $modified = self::guest()->whereNull('revoked_at')->update([
             'revoked_at' => Carbon::now(),
-            'is_force_revoked' => true
+            'is_force_revoked' => true,
+            'exhibition_id' => null,
         ]);
         if ($modified) {
             Log::info("{$modified} guest has revoked.");
