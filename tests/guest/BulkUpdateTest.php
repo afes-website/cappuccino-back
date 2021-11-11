@@ -25,6 +25,12 @@ class BulkUpdateTest extends TestCase {
         $this->seeJson([]);
     }
 
+    /**
+     * 成功した時の処理
+     * - response のチェック
+     * - Guest の数のチェック
+     * - ActivityLog の数のチェック
+     */
     public function testApplied() {
         $user = User::factory()->has(Exhibition::factory())->permission('executive', 'exhibition')->create();
         $reservation = Reservation::factory()->create();
@@ -70,6 +76,11 @@ class BulkUpdateTest extends TestCase {
         $this->assertCount(5, Guest::all());
     }
 
+    /**
+     * @return array
+     * ランダムなクエリを生成
+     * Guest, Reservation は 50% の確率で生成される
+     */
     private function caseGenerator() {
         $factory = Factory::create();
         $command = $factory->randomElement(['enter', 'exit', 'check-in', 'check-out', 'register-spare', 'dummy']);
@@ -90,6 +101,10 @@ class BulkUpdateTest extends TestCase {
         ];
     }
 
+    /**
+     * ランダムケース
+     * 成功の可否が正しく受け取れている
+     */
     public function testRandom() {
         $user = User::factory()->has(Exhibition::factory())->permission('executive', 'exhibition')->create();
         $count = 8;
