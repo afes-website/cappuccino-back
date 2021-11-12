@@ -152,7 +152,7 @@ class BulkUpdateController extends Controller {
             return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->update([
-            'revoked_at' => $data['timestamp']
+            'revoked_at' => $data['timestamp'],
         ]);
         $guest->updateLocation($log);
         $reservation = $guest->reservation;
