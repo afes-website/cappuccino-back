@@ -173,7 +173,7 @@ class BulkUpdateController extends Controller {
 
         $guest = Guest::find($data['guest_id']);
         if (!$guest)
-            return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
+            return ['is_ok' => true, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->updateLocation($log);
         return ['is_ok' => true, 'code' => null];
@@ -189,7 +189,7 @@ class BulkUpdateController extends Controller {
 
         $guest = Guest::find($data['guest_id']);
         if (!$guest)
-            return ['is_ok' => false, 'code' => 'GUEST_NOT_FOUND'];
+            return ['is_ok' => true, 'code' => 'GUEST_NOT_FOUND'];
 
         $guest->updateLocation($log);
         return ['is_ok' => true, 'code' => null];
