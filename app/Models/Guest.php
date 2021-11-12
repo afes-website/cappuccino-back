@@ -69,7 +69,7 @@ class Guest extends Model {
     }
 
     public function updateLocation(ActivityLogEntry $entry) {
-        $latest_log = $this->logs()->whereNotNull('exhibition_id')->orderByDesc('timestamp')->first();
+        $latest_log = $this->logs()->orderByDesc('timestamp')->first();
 
         if ($latest_log && $latest_log->timestamp > $entry->timestamp) return;
         $exh_id = $entry->exhibition_id;
@@ -80,15 +80,8 @@ class Guest extends Model {
             ['guest_id' => $entry->guest_id, 'exhibition_id' => $exh_id]
         );
 
-        switch ($log_type) {
-            case 'enter':
-                $this->update(['exhibition_id' => $exh_id]);
-                break;
-            case 'exit':
-            case 'check-out':
-                $this->update(['exhibition_id' => null]);
-                break;
-        }
+        if ($log_type === 'enter') $this->update(['exhibition_id' => $exh_id]);
+        else $this->update(['exhibition_id' => null]);
     }
 
     public function reservation() {
