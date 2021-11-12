@@ -51,11 +51,12 @@ class BulkUpdateController extends Controller {
 
         // Timestamp check
         try {
-            $data['timestamp'] = Carbon::createFromTimeString($data['timestamp']);
+            $data['timestamp'] = new Carbon($data['timestamp']);
         } catch (\Exception $e) {
             return ['is_ok' => false, 'code' => 'INVALID_TIMESTAMP'];
         }
         if ($data['timestamp']->isFuture()) return ['is_ok' => false, 'code' => 'INVALID_TIMESTAMP'];
+        $data['timestamp'] = $data['timestamp']->unix();
 
         switch ($data['command']) {
             case 'check-in':
