@@ -14,12 +14,13 @@ class ImageTest extends TestCase {
 
     public function imageProvider() {
         return [
-            // Upload Size, Medium Size excepted, Small size excepted
-            '1440x900'  => [[1440, 900], [1440, 900], [400, 250]],
+            // Upload Size, Medium Size expected, Small size expected
+            '1440x900'  => [[1440, 900], [1440, 900], [400, 400]],
             'small' => [[200, 200], [200, 200], [200, 200]],
             '500x500' => [[500, 500], [500, 500], [400, 400]],
-            'wide' => [[2880, 900], [1440, 450], [400, 125]],
-            'tall' => [[900, 2880], [450, 1440], [125, 400]]
+            '500x300' => [[500, 300], [500, 300], [300, 300]],
+            'wide' => [[2880, 900], [1440, 450], [400, 400]],
+            'tall' => [[900, 2880], [450, 1440], [400, 400]]
         ];
     }
 

@@ -29,13 +29,11 @@ class Image extends Model {
             $constraint->upsize();
         };
 
-        if ($content_medium->width() >= $content_small->height()) {
-            $content_medium->widen(1440, $upsize_callback);
-            $content_small->widen(400, $upsize_callback);
-        } else {
-            $content_medium->heighten(1440, $upsize_callback);
-            $content_small->heighten(400, $upsize_callback);
-        }
+        $content_small->fit(400, 400, $upsize_callback);
+        $content_medium->resize(1440, 1440, function ($constraint) {
+            $constraint->upsize();
+            $constraint->aspectRatio();
+        });
 
         $id = Str::random(40);
 
