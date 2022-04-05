@@ -35,6 +35,10 @@ $router->group(['prefix' => 'exhibitions'], function () use ($router) {
 
 $router->group(['prefix' => 'guests'], function () use ($router) {
     $router->get('/', ['uses' => 'GuestController@index', 'middleware' => 'auth:executive']);
+    $router->post(
+        'bulk-update',
+        ['uses' => 'BulkUpdateController@post', 'middleware' => 'auth:executive, exhibition']
+    );
     $router->post('check-in', ['uses' => 'GuestController@checkIn', 'middleware' => 'auth:executive']);
     $router->post('register-spare', ['uses' => 'GuestController@registerSpare', 'middleware' => 'auth:executive']);
     $router->get('{id}', ['uses' => 'GuestController@show', 'middleware' => 'auth:executive']);

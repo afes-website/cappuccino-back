@@ -68,6 +68,21 @@ class Guest extends Model {
         }
     }
 
+    public function updateLocation(ActivityLogEntry $entry) {
+        $latest_log = $this->logs()->orderByDesc('timestamp')->first();
+
+        if ($latest_log && $latest_log->timestamp > $entry->timestamp) return;
+        $exh_id = $entry->exhibition_id;
+        $log_type = $entry->log_type;
+
+        Log::debug(
+            "Update guest location",
+            ['guest_id' => $entry->guest_id, 'exhibition_id' => $exh_id]
+        );
+
+        if ($log_type === 'enter') $this->update(['exhibition_id' => $exh_id]);
+        else $this->update(['exhibition_id' => null]);
+    }
 
     public function reservation() {
         return $this->belongsTo(Reservation::class);

@@ -26,7 +26,8 @@ class ActivityLogEntryFactory extends Factory {
             'timestamp'=>$this->faker->dateTime,
             'exhibition_id'=>Exhibition::factory(),
             'guest_id'=>Guest::factory(),
-            'log_type'=>$this->faker->randomElement(['exit','enter'])
+            'log_type'=>$this->faker->randomElement(['exit','enter']),
+            'verified'=>$this->faker->boolean,
         ];
     }
 }
